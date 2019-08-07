@@ -1,6 +1,6 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
-Tags: optimize, image, resize, webp, lazy load, compress
+Tags: optimize, image, resize, webp, lazy load
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.6

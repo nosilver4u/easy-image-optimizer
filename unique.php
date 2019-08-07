@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'EASYIO_VERSION', '100.00' );
 
 // Initialize a couple globals.
-$easyio_debug = '';
+$eio_debug = '';
 
 /*
  * Hooks
@@ -35,7 +35,6 @@ add_action( 'admin_init', 'easyio_admin_init' );
 add_action( 'current_screen', 'easyio_current_screen', 10, 1 );
 // Adds the Easy IO pages to the admin menu.
 add_action( 'admin_menu', 'easyio_admin_menu', 60 );
-// TODO: possibly remove this, as ExactDN should be a per-domain thing.
 // Adds the Easy IO settings to the network admin menu.
 add_action( 'network_admin_menu', 'easyio_network_admin_menu' );
 // Adds scripts for the Easy IO settings page.
@@ -60,11 +59,11 @@ function easyio_parser_init() {
 		/**
 		 * Page Parsing class for working with HTML content.
 		 */
-		require_once( easyio_PLUGIN_PATH . 'classes/class-easyio-page-parser.php' );
+		require_once( easyio_PLUGIN_PATH . 'classes/class-eio-page-parser.php' );
 		/**
 		 * ExactDN class for parsing image urls and rewriting them.
 		 */
-		require_once( easyio_PLUGIN_PATH . 'classes/class-easyio-exactdn.php' );
+		require_once( easyio_PLUGIN_PATH . 'classes/class-eio-exactdn.php' );
 	}
 	// If Lazy Load is enabled.
 	if ( easyio_get_option( 'easyio_lazy_load' ) ) {
@@ -72,11 +71,11 @@ function easyio_parser_init() {
 		/**
 		 * Page Parsing class for working with HTML content.
 		 */
-		require_once( easyio_PLUGIN_PATH . 'classes/class-easyio-page-parser.php' );
+		require_once( easyio_PLUGIN_PATH . 'classes/class-eio-page-parser.php' );
 		/**
-		 * Alt WebP class for parsing image urls and rewriting them for WebP support.
+		 * Lazy Load class for parsing image urls and deferring off-screen images.
 		 */
-		require_once( easyio_PLUGIN_PATH . 'classes/class-easyio-lazy-load.php' );
+		require_once( easyio_PLUGIN_PATH . 'classes/class-eio-lazy-load.php' );
 	}
 	if ( $buffer_start ) {
 		// Start an output buffer before any output starts.
@@ -223,13 +222,33 @@ function easyio_init() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 
 	// Check to see if this is the settings page and enable debugging temporarily if it is.
-	global $easyio_temp_debug;
-	$easyio_temp_debug = false;
+	global $eio_temp_debug;
+	$eio_temp_debug = false;
 	if ( is_admin() && ! wp_doing_ajax() ) {
 		if ( ! easyio_get_option( 'easyio_debug' ) ) {
-			$easyio_temp_debug = true;
+			$eio_temp_debug = true;
 		}
 	}
+}
+
+/**
+ * Set some default option values.
+ */
+function easyio_set_defaults() {
+	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	// Set defaults for all options that need to be autoloaded.
+	add_option( 'easyio_debug', false );
+	add_option( 'easyio_metadata_remove', true );
+	add_option( 'easyio_exactdn', false );
+	add_option( 'exactdn_all_the_things', true );
+	add_option( 'exactdn_lossy', true );
+	add_option( 'easyio_lazy_load', true );
+
+	// Set network defaults.
+	add_site_option( 'easyio_metadata_remove', true );
+	add_site_option( 'exactdn_all_the_things', true );
+	add_site_option( 'exactdn_lossy', true );
+	add_site_option( 'easyio_lazy_load', true );
 }
 
 /**
@@ -250,20 +269,6 @@ function easyio_upgrade() {
 		delete_site_option( 'easyio_exactdn_verify_method' );
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
 			add_option( 'exactdn_never_been_active', true, '', false );
-		}
-		if ( get_option( 'easyio_version' ) < 407 ) {
-			// TODO: remove this, and make sure it is in set defaults.
-			add_option( 'exactdn_all_the_things', true );
-			add_site_option( 'exactdn_all_the_things', true );
-		}
-		if ( get_option( 'easyio_version' ) > 0 && get_option( 'easyio_version' ) < 434 && ! easyio_get_option( 'easyio_jpegtran_copy' ) ) {
-			// TODO: remove this, and make sure it is in set defaults as TRUE.
-			easyio_set_option( 'easyio_metadata_remove', false );
-		}
-		if ( get_option( 'easyio_version' ) > 0 && get_option( 'easyio_version' ) < 440 && ( ! easyio_get_option( 'easyio_cloud_key' ) || easyio_get_option( 'easyio_jpg_level' ) < 30 ) ) {
-			// TODO: remove this, and make sure it is in set defaults.
-			add_option( 'exactdn_lossy', true );
-			add_site_option( 'exactdn_lossy', true );
 		}
 		update_option( 'easyio_version', EASYIO_VERSION );
 		easyio_debug_log();
@@ -367,11 +372,11 @@ function easyio_privacy_policy_content() {
  * @param object $screen Information about the page/screen currently being loaded.
  */
 function easyio_current_screen( $screen ) {
-	global $easyio_temp_debug;
-	global $easyio_debug;
+	global $eio_temp_debug;
+	global $eio_debug;
 	if ( false === strpos( $screen->id, 'settings_page_easy-image-optimizer' ) ) {
-		$easyio_temp_debug = false;
-		$easyio_debug      = '';
+		$eio_temp_debug = false;
+		$eio_debug      = '';
 	}
 }
 
@@ -679,6 +684,28 @@ function easyio_quick_mimetype( $path ) {
 }
 
 /**
+ * Check for GD support of both PNG and JPG.
+ *
+ * @return bool True if full GD support is detected.
+ */
+function easyio_gd_support() {
+	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	if ( function_exists( 'gd_info' ) ) {
+		$gd_support = gd_info();
+		easyio_debug_message( 'GD found, supports:' );
+		if ( easyio_iterable( $gd_support ) ) {
+			foreach ( $gd_support as $supports => $supported ) {
+				easyio_debug_message( "$supports: $supported" );
+			}
+			if ( ( ! empty( $gd_support['JPEG Support'] ) || ! empty( $gd_support['JPG Support'] ) ) && ! empty( $gd_support['PNG Support'] ) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
  * Retrieve option: use 'site' setting if plugin is network activated, otherwise use 'blog' setting.
  *
  * Retrieves multi-site and single-site options as appropriate as well as allowing overrides with
@@ -753,12 +780,12 @@ function easyio_settings_script( $hook ) {
 /**
  * Displays the Easy IO options along with status information, and debugging information.
  *
- * @global string $easyio_debug In memory debug log.
+ * @global string $eio_debug In memory debug log.
  *
  * @param string $network Indicates which options should be shown in multisite installations.
  */
 function easyio_options( $network = 'singlesite' ) {
-	global $easyio_temp_debug;
+	global $eio_temp_debug;
 	global $content_width;
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 	easyio_debug_version_info();
@@ -1482,7 +1509,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = "<tr class='$network_class'><th scope='row'><label for='easyio_debug'>" . esc_html__( 'Debugging', 'easy-image-optimizer' ) . '</label>' .
 		easyio_help_link( 'https://docs.ewww.io/article/7-basic-configuration', '585373d5c697912ffd6c0bb2' ) . '</th>' .
 		"<td><input type='checkbox' id='easyio_debug' name='easyio_debug' value='true' " .
-		( ! $easyio_temp_debug && easyio_get_option( 'easyio_debug' ) ? "checked='true'" : '' ) . ' /> ' .
+		( ! $eio_temp_debug && easyio_get_option( 'easyio_debug' ) ? "checked='true'" : '' ) . ' /> ' .
 		esc_html__( 'Use this to provide information for support purposes, or if you feel comfortable digging around in the code to fix a problem you are experiencing.', 'easy-image-optimizer' ) .
 		"</td></tr>\n";
 	$output[] = "</table>\n";
@@ -1558,14 +1585,14 @@ function easyio_options( $network = 'singlesite' ) {
 	$help_instructions = esc_html__( 'Enable the Debugging option and refresh this page to include debugging information with your question.', 'easy-image-optimizer' ) . ' ' .
 		esc_html__( 'This will allow us to assist you more quickly.', 'easy-image-optimizer' );
 
-	global $easyio_debug;
-	if ( ! empty( $easyio_debug ) ) {
+	global $eio_debug;
+	if ( ! empty( $eio_debug ) ) {
 		$debug_output = '<p style="clear:both"><b>' . esc_html__( 'Debugging Information', 'easy-image-optimizer' ) . ':</b> <button id="ewww-copy-debug" class="button button-secondary" type="button">' . esc_html__( 'Copy', 'easy-image-optimizer' ) . '</button>';
 		if ( is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
 			$debug_output .= "&emsp;<a href='admin.php?action=easyio_view_debug_log'>" . esc_html( 'View Debug Log', 'easy-image-optimizer' ) . "</a> - <a href='admin.php?action=easyio_delete_debug_log'>" . esc_html( 'Remove Debug Log', 'easy-image-optimizer' ) . '</a>';
 		}
 		$debug_output .= '</p>';
-		$debug_output .= '<div id="ewww-debug-info" style="border:1px solid #e5e5e5;background:#fff;overflow:auto;height:300px;width:800px;" contenteditable="true">' . $easyio_debug . '</div>';
+		$debug_output .= '<div id="ewww-debug-info" style="border:1px solid #e5e5e5;background:#fff;overflow:auto;height:300px;width:800px;" contenteditable="true">' . $eio_debug . '</div>';
 
 		$help_instructions = esc_html__( 'Debugging information will be included with your message automatically.', 'easy-image-optimizer' ) . ' ' .
 			esc_html__( 'This will allow us to assist you more quickly.', 'easy-image-optimizer' );
@@ -1592,17 +1619,17 @@ function easyio_options( $network = 'singlesite' ) {
 		$hs_identify  = array(
 			'email' => utf8_encode( $help_email ),
 		);
-		if ( ! empty( $easyio_debug ) ) {
-			$easyio_debug_array = explode( '<br>', $easyio_debug );
-			$easyio_debug_i     = 0;
-			foreach ( $easyio_debug_array as $easyio_debug_line ) {
-				$hs_identify[ 'debug_info_' . $easyio_debug_i ] = $easyio_debug_line;
-				$easyio_debug_i++;
+		if ( ! empty( $eio_debug ) ) {
+			$eio_debug_array = explode( '<br>', $eio_debug );
+			$eio_debug_i     = 0;
+			foreach ( $eio_debug_array as $eio_debug_line ) {
+				$hs_identify[ 'debug_info_' . $eio_debug_i ] = $eio_debug_line;
+				$eio_debug_i++;
 			}
 		}
 		?>
 <script type='text/javascript'>
-	!function(e,o,n){window.HSCW=o,window.HS=n,n.beacon=n.beacon||{};var t=n.beacon;t.userConfig={},t.readyQueue=[],t.config=function(e){this.userConfig=e},t.ready=function(e){this.readyQueue.push(e)},o.config={docs:{enabled:!0,baseUrl:"//easyio.helpscoutdocs.com/"},contact:{enabled:!0,formId:"af75cf17-310a-11e7-9841-0ab63ef01522"}};var r=e.getElementsByTagName("script")[0],c=e.createElement("script");c.type="text/javascript",c.async=!0,c.src="https://djtflbt20bdde.cloudfront.net/",r.parentNode.insertBefore(c,r)}(document,window.HSCW||{},window.HS||{});
+	!function(e,o,n){window.HSCW=o,window.HS=n,n.beacon=n.beacon||{};var t=n.beacon;t.userConfig={},t.readyQueue=[],t.config=function(e){this.userConfig=e},t.ready=function(e){this.readyQueue.push(e)},o.config={docs:{enabled:!0,baseUrl:"//ewwwio.helpscoutdocs.com/"},contact:{enabled:!0,formId:"af75cf17-310a-11e7-9841-0ab63ef01522"}};var r=e.getElementsByTagName("script")[0],c=e.createElement("script");c.type="text/javascript",c.async=!0,c.src="https://djtflbt20bdde.cloudfront.net/",r.parentNode.insertBefore(c,r)}(document,window.HSCW||{},window.HS||{});
 	HS.beacon.config(<?php echo json_encode( $hs_config ); ?>);
 	HS.beacon.ready(function() {
 		HS.beacon.identify(
@@ -1656,7 +1683,7 @@ function easyio_is_amp() {
 /**
  * Adds information to the in-memory debug log.
  *
- * @global string $easyio_debug The in-memory debug log.
+ * @global string $eio_debug The in-memory debug log.
  *
  * @param string $message Debug information to add to the log.
  */
@@ -1665,18 +1692,18 @@ function easyio_debug_message( $message ) {
 		WP_CLI::debug( $message );
 		return;
 	}
-	global $easyio_temp_debug;
-	if ( $easyio_temp_debug || easyio_get_option( 'easyio_debug' ) ) {
+	global $eio_temp_debug;
+	if ( $eio_temp_debug || easyio_get_option( 'easyio_debug' ) ) {
 		$memory_limit = easyio_memory_limit();
 		if ( strlen( $message ) + 4000000 + memory_get_usage( true ) <= $memory_limit ) {
-			global $easyio_debug;
-			$message       = str_replace( "\n\n\n", '<br>', $message );
-			$message       = str_replace( "\n\n", '<br>', $message );
-			$message       = str_replace( "\n", '<br>', $message );
-			$easyio_debug .= "$message<br>";
+			global $eio_debug;
+			$message    = str_replace( "\n\n\n", '<br>', $message );
+			$message    = str_replace( "\n\n", '<br>', $message );
+			$message    = str_replace( "\n", '<br>', $message );
+			$eio_debug .= "$message<br>";
 		} else {
-			global $easyio_debug;
-			$easyio_debug = "not logging message, memory limit is $memory_limit";
+			global $eio_debug;
+			$eio_debug = "not logging message, memory limit is $memory_limit";
 		}
 	}
 }
@@ -1684,16 +1711,16 @@ function easyio_debug_message( $message ) {
 /**
  * Saves the in-memory debug log to a logfile in the plugin folder.
  *
- * @global string $easyio_debug The in-memory debug log.
+ * @global string $eio_debug The in-memory debug log.
  */
 function easyio_debug_log() {
-	global $easyio_debug;
-	global $easyio_temp_debug;
+	global $eio_debug;
+	global $eio_temp_debug;
 	$debug_log = WP_CONTENT_DIR . '/easyio/debug.log';
 	if ( is_writable( WP_CONTENT_DIR ) && ! is_dir( WP_CONTENT_DIR . '/easyio\/' ) ) {
 		mkdir( WP_CONTENT_DIR . '/easyio\/' );
 	}
-	if ( ! empty( $easyio_debug ) && empty( $easyio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio\/' ) ) {
+	if ( ! empty( $eio_debug ) && empty( $eio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio\/' ) ) {
 		$memory_limit = easyio_memory_limit();
 		clearstatcache();
 		$timestamp = date( 'Y-m-d H:i:s' ) . "\n";
@@ -1705,12 +1732,12 @@ function easyio_debug_log() {
 				touch( $debug_log );
 			}
 		}
-		if ( filesize( $debug_log ) + strlen( $easyio_debug ) + 4000000 + memory_get_usage( true ) <= $memory_limit && is_writable( $debug_log ) ) {
-			$easyio_debug = str_replace( '<br>', "\n", $easyio_debug );
-			file_put_contents( $debug_log, $timestamp . $easyio_debug, FILE_APPEND );
+		if ( filesize( $debug_log ) + strlen( $eio_debug ) + 4000000 + memory_get_usage( true ) <= $memory_limit && is_writable( $debug_log ) ) {
+			$eio_debug = str_replace( '<br>', "\n", $eio_debug );
+			file_put_contents( $debug_log, $timestamp . $eio_debug, FILE_APPEND );
 		}
 	}
-	$easyio_debug = '';
+	$eio_debug = '';
 }
 
 /**
@@ -1749,21 +1776,21 @@ function easyio_delete_debug_log() {
 /**
  * Adds version information to the in-memory debug log.
  *
- * @global string $easyio_debug The in-memory debug log.
+ * @global string $eio_debug The in-memory debug log.
  * @global int $wp_version
  */
 function easyio_debug_version_info() {
-	global $easyio_debug;
+	global $eio_debug;
 
-	$easyio_debug .= 'Easy IO version: ' . EASYIO_VERSION . '<br>';
+	$eio_debug .= 'Easy IO version: ' . EASYIO_VERSION . '<br>';
 
 	// Check the WP version.
 	global $wp_version;
-	$my_version    = substr( $wp_version, 0, 3 );
-	$easyio_debug .= "WP version: $wp_version<br>";
+	$my_version = substr( $wp_version, 0, 3 );
+	$eio_debug .= "WP version: $wp_version<br>";
 
 	if ( defined( 'PHP_VERSION_ID' ) ) {
-		$easyio_debug .= 'PHP version: ' . PHP_VERSION_ID . '<br>';
+		$eio_debug .= 'PHP version: ' . PHP_VERSION_ID . '<br>';
 	}
 }
 
@@ -1771,12 +1798,12 @@ function easyio_debug_version_info() {
  * Make sure to clear temp debug option on shutdown.
  */
 function easyio_temp_debug_clear() {
-	global $easyio_temp_debug;
-	global $easyio_debug;
-	if ( $easyio_temp_debug ) {
-		$easyio_debug = '';
+	global $eio_temp_debug;
+	global $eio_debug;
+	if ( $eio_temp_debug ) {
+		$eio_debug = '';
 	}
-	$easyio_temp_debug = false;
+	$eio_temp_debug = false;
 }
 
 /**

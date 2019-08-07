@@ -11,7 +11,7 @@
 /*
 Plugin Name: Easy Image Optimizer
 Plugin URI: https://wordpress.org/plugins/easy-image-optimizer/
-Description: CHANGE ME!!!Reduce file sizes for images within WordPress including NextGEN Gallery and GRAND FlAGallery. Uses jpegtran, optipng/pngout, and gifsicle.
+Description: Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
 Author: Exactly WWW
 Version: 1.0.0
 Author URI: https://ewww.io/
@@ -22,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! defined( 'EASY_IMAGE_OPTIMIZER_CONTENT_PATH' ) ) {
+if ( ! defined( 'EASYIO_CONTENT_PATH' ) ) {
 	/**
 	 * The folder where we generate PNG placeholder images. MUST have a trailing slash.
 	 *
-	 * @var string EASY_IMAGE_OPTIMIZER_CONTENT_PATH
+	 * @var string EASYIO_CONTENT_PATH
 	 */
-	define( 'EASY_IMAGE_OPTIMIZER_CONTENT_PATH', WP_CONTENT_DIR . '/easyio/' );
+	define( 'EASYIO_CONTENT_PATH', WP_CONTENT_DIR . '/easyio/' );
 }
 
 // Check the PHP version.
@@ -68,6 +68,10 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 50600 ) {
 	 */
 	require_once( EASYIO_PLUGIN_PATH . 'unique.php' );
 	/**
+	 * All the base functions for our plugins.
+	 */
+	require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-base.php' );
+	/**
 	 * EWWWIO_HS_Beacon class for embedding the HelpScout Beacon.
 	 */
 	require_once( EASYIO_PLUGIN_PATH . 'classes/class-ewwwio-hs-beacon.php' );
@@ -78,14 +82,6 @@ if ( ! function_exists( 'easyio_unsupported_php' ) ) {
 	 * Display a notice that the PHP version is too old.
 	 */
 	function easyio_unsupported_php() {
-		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 5.6 or greater. Newer versions of PHP, like 7.1 and 7.2, are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'ewww-image-optimizer' ) . '</a></p></div>';
-	}
-
-	/**
-	 * Runs on 'plugins_loaded' to load the language files when Easy is not loading.
-	 */
-	function easyio_false_init() {
-		load_plugin_textdomain( 'ewww-image-optimizer', false, plugin_dir_path( __FILE__ ) . 'languages/' );
+		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 5.6 or greater. Newer versions of PHP, like 7.1 and 7.2, are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) . '</a></p></div>';
 	}
 }
-
