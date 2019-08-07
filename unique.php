@@ -413,6 +413,29 @@ function easyio_notice_inactive() {
 }
 
 /**
+ * Display a notice that we could not activate an ExactDN domain.
+ */
+function easyio_notice_exactdn_activation_error() {
+	global $exactdn_activate_error;
+	if ( empty( $exactdn_activate_error ) ) {
+		$exactdn_activate_error = 'error unknown';
+	}
+	echo '<div id="easyio-notice-exactdn-error" class="notice notice-error"><p>' .
+		esc_html__( 'Could not activate Easy Image Optimizer, please try again in a few minutes. If this error continues, please contact support and provide this complete error message.', 'ewww-image-optimizer' ) .
+		'<br><code>' . $exactdn_activate_error . '</code>' .
+		'</p></div>';
+}
+
+/**
+ * Let the user know ExactDN setup was successful.
+ */
+function easyio_notice_exactdn_activation_success() {
+	echo '<div id="easyio-notice-exactdn-success" class="notice notice-success"><p>' .
+		esc_html__( 'Easy Image Optimizer setup and verification is complete.', 'ewww-image-optimizer' ) .
+		'</p></div>';
+}
+
+/**
  * Display a notice that PHP version 5.5 support is going away.
  */
 function easyio_php55_warning() {
