@@ -55,6 +55,9 @@ jQuery(document).ready(function($) {
 		$('#easyio-general-settings').show();
 		$('#easyio-support-settings').hide();
 		$('#easyio-contribute-settings').hide();
+		if($('#easyio-activate').length){
+			$('#easyio-hidden-submit').hide();
+		}
 	});
 	$('.easyio-support-nav').click(function() {
 		$('.easyio-tab-nav li').removeClass('easyio-selected');
@@ -62,6 +65,7 @@ jQuery(document).ready(function($) {
 		$('.easyio-tab a').blur();
 		$('#easyio-general-settings').hide();
 		$('#easyio-support-settings').show();
+		$('#easyio-hidden-submit').show();
 		$('#easyio-contribute-settings').hide();
 	});
 	$('.easyio-contribute-nav').click(function() {

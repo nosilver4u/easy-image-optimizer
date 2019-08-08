@@ -19,6 +19,10 @@ $eio_debug = '';
  * Hooks
  */
 
+// Activation routine for Easy IO/ExactDN.
+add_action( 'admin_action_easyio_activate', 'easyio_activate' );
+// De-activation routine for Easy IO/ExactDN.
+add_action( 'admin_action_easyio_deactivate', 'easyio_deactivate' );
 // Filters to set default permissions, admins can override these if they wish.
 add_filter( 'easyio_admin_permissions', 'easyio_admin_permissions', 8 );
 add_filter( 'easyio_superadmin_permissions', 'easyio_superadmin_permissions', 8 );
@@ -49,6 +53,51 @@ register_deactivation_hook( EASYIO_PLUGIN_FILE, 'easyio_network_deactivate' );
 add_action( 'shutdown', 'easyio_debug_log' );
 
 /**
+ * Attempt to activate the site with ExactDN/Easy I.O.
+ */
+function easyio_activate() {
+	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	$permissions = apply_filters( 'easyio_admin_permissions', '' );
+	if ( false === current_user_can( $permissions ) ) {
+		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
+	}
+	update_option( 'easyio_exactdn', true );
+	update_option( 'exactdn_all_the_things', true );
+	update_option( 'exactdn_lossy', true );
+	update_option( 'easyio_lazy_load', true );
+	if ( easyio_get_option( 'ewww_image_optimizer_exactdn' ) ) {
+		update_option( 'ewww_image_optimizer_exactdn', false );
+	}
+	if ( easyio_get_option( 'ewww_image_optimizer_lazy_load' ) ) {
+		update_option( 'ewww_image_optimizer_lazy_load', false );
+	}
+	if ( easyio_get_option( 'ewww_image_optimizer_webp_for_cdn' ) ) {
+		update_option( 'ewww_image_optimizer_webp_for_cdn', false );
+	}
+	$sendback = wp_get_referer();
+	wp_redirect( esc_url_raw( $sendback ) );
+	exit( 0 );
+}
+
+/**
+ * De-activate the site with ExactDN/Easy I.O.
+ */
+function easyio_deactivate() {
+	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	$permissions = apply_filters( 'easyio_admin_permissions', '' );
+	if ( false === current_user_can( $permissions ) ) {
+		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
+	}
+	update_option( 'easyio_exactdn', false );
+	update_option( 'exactdn_all_the_things', false );
+	update_option( 'exactdn_lossy', false );
+	update_option( 'easyio_lazy_load', false );
+	$sendback = wp_get_referer();
+	wp_redirect( esc_url_raw( $sendback ) );
+	exit( 0 );
+}
+
+/**
  * Setup page parsing classes after theme functions.php is loaded and plugins have run init routines.
  */
 function easyio_parser_init() {
@@ -63,7 +112,7 @@ function easyio_parser_init() {
 		/**
 		 * ExactDN class for parsing image urls and rewriting them.
 		 */
-		require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-exactdn.php' );
+		require_once( EASYIO_PLUGIN_PATH . 'classes/class-exactdn.php' );
 	}
 	// If Lazy Load is enabled.
 	if ( easyio_get_option( 'easyio_lazy_load' ) ) {
@@ -220,13 +269,12 @@ function easyio_function_exists( $function, $debug = false ) {
  */
 function easyio_init() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-
 	// Check to see if this is the settings page and enable debugging temporarily if it is.
-	global $eio_temp_debug;
-	$eio_temp_debug = false;
+	global $easyio_temp_debug;
+	$easyio_temp_debug = false;
 	if ( is_admin() && ! wp_doing_ajax() ) {
 		if ( ! easyio_get_option( 'easyio_debug' ) ) {
-			$eio_temp_debug = true;
+			$easyio_temp_debug = true;
 		}
 	}
 }
@@ -240,15 +288,12 @@ function easyio_set_defaults() {
 	add_option( 'easyio_debug', false );
 	add_option( 'easyio_metadata_remove', true );
 	add_option( 'easyio_exactdn', false );
-	add_option( 'exactdn_all_the_things', true );
-	add_option( 'exactdn_lossy', true );
-	add_option( 'easyio_lazy_load', true );
+	add_option( 'exactdn_all_the_things', false );
+	add_option( 'exactdn_lossy', false );
+	add_option( 'easyio_lazy_load', false );
 
 	// Set network defaults.
 	add_site_option( 'easyio_metadata_remove', true );
-	add_site_option( 'exactdn_all_the_things', true );
-	add_site_option( 'exactdn_lossy', true );
-	add_site_option( 'easyio_lazy_load', true );
 }
 
 /**
@@ -361,7 +406,8 @@ function easyio_privacy_policy_content() {
 		return;
 	}
 	$content  = '<p class="privacy-policy-tutorial">';
-	$content .= wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).' ) ) . '</p>';
+	$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'ewww-image-optimizer' ) ) . '</p>';
+	$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).' ) ) . '</p>';
 	wp_add_privacy_policy_content( 'Easy Image Optimizer', $content );
 }
 
@@ -371,11 +417,12 @@ function easyio_privacy_policy_content() {
  * @param object $screen Information about the page/screen currently being loaded.
  */
 function easyio_current_screen( $screen ) {
-	global $eio_temp_debug;
+	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	global $easyio_temp_debug;
 	global $eio_debug;
-	if ( false === strpos( $screen->id, 'settings_page_easy-image-optimizer' ) ) {
-		$eio_temp_debug = false;
-		$eio_debug      = '';
+	if ( false === strpos( $screen->id, 'settings_page_ewww-image-optimizer' ) && false === strpos( $screen->id, 'settings_page_easy-image-optimizer' ) ) {
+		$easyio_temp_debug = false;
+		$eio_debug         = '';
 	}
 }
 
@@ -832,7 +879,7 @@ function easyio_settings_script( $hook ) {
  * @param string $network Indicates which options should be shown in multisite installations.
  */
 function easyio_options( $network = 'singlesite' ) {
-	global $eio_temp_debug;
+	global $easyio_temp_debug;
 	global $content_width;
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 	easyio_debug_version_info();
@@ -849,7 +896,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$eio_hs_beacon->admin_notice( 'singlesite' );
 
 	$output = array();
-	/* $output[] = "<script type='text/javascript'>\n" . 'jQuery(document).ready(function($) {$(".fade").fadeTo(5000,1).fadeOut(3000);});' . "\n" . "</script>\n"; */
+
 	$output[] = "<style>\n" .
 		".easyio-tab span { font-size: 15px; font-weight: 700; color: #555; text-decoration: none; line-height: 36px; padding: 0 10px; }\n" .
 		".easyio-tab span:hover { color: #464646; }\n" .
@@ -861,8 +908,11 @@ function easyio_options( $network = 'singlesite' ) {
 		".easyio-tab-nav { list-style: none; margin: 10px 0 0; padding-left: 5px; border-bottom: 1px solid #ccc; }\n" .
 		"#easyio-inactive { display: none; }\n" .
 	"</style>\n";
-	$output[] = "<div class='wrap'>\n";
-	$output[] = "<h1>Easy Image Optimizer</h1>\n";
+
+	$output[]  = "<div class='wrap'>\n";
+	$icon_link = plugins_url( '/images/easyio-toon-car.png', __FILE__ );
+	$output[]  = "<img style='float:right;' src='$icon_link' />";
+	$output[]  = "<h1>Easy Image Optimizer</h1>\n";
 
 	$status_notices = array();
 	$status_output  = '<h2>' . esc_html__( 'Status:', 'easy-image-optimizer' ) . ' ';
@@ -901,7 +951,9 @@ function easyio_options( $network = 'singlesite' ) {
 	$status_output .= '</p>';
 
 	// End status section.
-	$output[] = $status_output;
+	if ( easyio_get_option( 'easyio_exactdn' ) ) {
+		$output[] = $status_output;
+	}
 
 	$output[] = "<ul class='easyio-tab-nav'>\n" .
 		"<li class='easyio-tab easyio-general-nav'><span class='easyio-tab-hidden'>" . esc_html__( 'Configure', 'easy-image-optimizer' ) . "</span></li>\n" .
@@ -911,54 +963,36 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = "<input type='hidden' name='option_page' value='easyio_options' />\n";
 	$output[] = "<input type='hidden' name='action' value='update' />\n";
 	$output[] = wp_nonce_field( 'easyio_options-options', '_wpnonce', true, false ) . "\n";
-	// TODO: move this to the network options page.
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) && ! get_site_option( 'easyio_allow_multisite_override' ) ) {
-		$output[] = '<i class="network-singlesite"><strong>' . esc_html__( 'Configure network-wide settings in the Network Admin.', 'easy-image-optimizer' ) . "</strong></i>\n";
-	}
+
 	$output[] = "<div id='easyio-general-settings'>\n";
 	$output[] = '<noscript><h2>' . esc_html__( 'Configure', 'easy-image-optimizer' ) . '</h2></noscript>';
 	$output[] = "<table class='form-table'>\n";
-	// TODO: also move this to the network options page.
-	if ( is_multisite() ) {
-		if ( is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-			$output[] = "<tr class='network-only'><th scope='row'><label for='easyio_allow_multisite_override'>" . esc_html__( 'Allow Single-site Override', 'easy-image-optimizer' ) . "</label></th><td><input type='checkbox' id='easyio_allow_multisite_override' name='easyio_allow_multisite_override' value='true' " . ( get_site_option( 'easyio_allow_multisite_override' ) ? "checked='true'" : '' ) . ' /> ' . esc_html__( 'Allow individual sites to configure their own settings and override all network options.', 'easy-image-optimizer' ) . "</td></tr>\n";
-		}
-		if ( 'network-multisite' === $network && get_site_option( 'easyio_allow_multisite_override' ) ) {
-			$output[] = "<input type='hidden' id='easyio_allow_multisite_override_active' name='easyio_allow_multisite_override_active' value='0'>";
-			foreach ( $output as $line ) {
-				echo $line;
-			}
-			echo '</table></div><!-- end container general settings -->';
-			echo "<p class='submit'><input type='submit' class='button-primary' value='" . esc_attr__( 'Save Changes', 'easy-image-optimizer' ) . "' /></p>\n";
-			echo '</form></div><!-- end container left --></div><!-- end container wrap -->';
-			easyio_temp_debug_clear();
-			return;
-		}
-	}
-	easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) );
 	if ( ! easyio_get_option( 'easyio_exactdn' ) ) {
-		$output[] = "<tr><th scope='row'>&nbsp;</th><td>" .
-			'<strong>' . esc_html__( 'To complete activation:', 'easy-image-optimizer' ) . '</strong>' .
+		$output[] = '<tr><td>' .
 			'<ol><li><a href="https://ewww.io/easy/" target="_blank">' . esc_html__( 'Purchase a subscription for your site.', 'easy-image-optimizer' ) . '</a></li>' .
-			'<li><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Link your site url to your account:', 'easy-image-optimizer' ) . '</a> ' . get_site_url() . '</li>' .
-			'<li><a style="top:0px;" href="https://replace.me" class="page-title-action">' . esc_html__( 'Activate', 'easy-image-optimizer' ) . '</a></li>' .
+			'<li><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Add your site url to your account:', 'easy-image-optimizer' ) . '</a> ' . get_site_url() . '</li>' .
+			'<li><a id="easyio-activate" href="admin.php?action=easyio_activate" class="button-primary">' . esc_html__( 'Activate', 'easy-image-optimizer' ) . '</a></li>' .
+			'<li>' . esc_html__( 'Done!', 'easy-image-optimizer' ) . '</li>' .
 			"</ol></td></tr>\n";
 	} else {
 		$output[] = "<tr><th scope='row'>&nbsp;</th><td>" .
-			'<a href="https://replace.me" class="page-title-action">' . esc_html__( 'De-activate', 'easy-image-optimizer' ) . '</a>' .
+			'<a href="https://ewww.io/my-account/#subscriptions" class="page-title-action">' . esc_html__( 'Manage Subscription', 'easy-image-optimizer' ) . '</a>' . '&nbsp;&nbsp;' .
+			'<a href="admin.php?action=easyio_deactivate" class="page-title-action">' . esc_html__( 'Disable Optimizer', 'easy-image-optimizer' ) . '</a>' .
+			"<input type='hidden' id='easyio_exactdn' name='easyio_exactdn' value='true' />" .
 			"</td></tr>\n";
+		easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) );
+		$output[] = "<tr><th scope='row'><label for='easyio_backup_files'>" . esc_html__( 'Include All Resources', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
+			"<td><input type='checkbox' id='exactdn_all_the_things' name='exactdn_all_the_things' value='true' " .
+			( easyio_get_option( 'exactdn_all_the_things' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ) . "</td></tr>\n";
+		easyio_debug_message( 'ExactDN all the things: ' . ( easyio_get_option( 'exactdn_all_the_things' ) ? 'on' : 'off' ) );
+		$output[] = "<tr><th scope='row'><label for='exactdn_lossy'>" . esc_html__( 'Premium Compression', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
+			"<td><input type='checkbox' id='exactdn_lossy' name='exactdn_lossy' value='true' " .
+			( easyio_get_option( 'exactdn_lossy' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Enable high quality premium compression for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ) . "</td></tr>\n";
+		$output[] = "<tr><th scope='row'><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
+			"</th><td><input type='checkbox' id='easyio_lazy_load' name='easyio_lazy_load' value='true' " . ( easyio_get_option( 'easyio_lazy_load' ) ? "checked='true'" : '' ) . ' /> ' .
+			esc_html__( 'Improves actual and perceived loading time by deferring off-screen images.', 'easy-image-optimizer' ) . "</td></tr>\n";
 	}
-	easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) );
-	$output[] = "<tr><th scope='row'><label for='easyio_backup_files'>" . esc_html__( 'Include All Resources', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
-		"<td><input type='checkbox' id='exactdn_all_the_things' name='exactdn_all_the_things' value='true' " .
-		( easyio_get_option( 'exactdn_all_the_things' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ) . "</td></tr>\n";
-	easyio_debug_message( 'ExactDN all the things: ' . ( easyio_get_option( 'exactdn_all_the_things' ) ? 'on' : 'off' ) );
-	$output[] = "<tr><th scope='row'><label for='exactdn_lossy'>" . esc_html__( 'Premium Compression', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
-		"<td><input type='checkbox' id='exactdn_lossy' name='exactdn_lossy' value='true' " .
-		( easyio_get_option( 'exactdn_lossy' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Enable high quality premium compression for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ) . "</td></tr>\n";
-	$output[] = "<tr><th scope='row'><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
-		"</th><td><input type='checkbox' id='easyio_lazy_load' name='easyio_lazy_load' value='true' " . ( easyio_get_option( 'easyio_lazy_load' ) ? "checked='true'" : '' ) . ' /> ' .
-		esc_html__( 'Improves actual and perceived loading time by deferring off-screen images.', 'easy-image-optimizer' ) . "</td></tr>\n";
+	easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) );
 	easyio_debug_message( 'ExactDN lossy: ' . intval( easyio_get_option( 'exactdn_lossy' ) ) );
 	easyio_debug_message( 'ExactDN resize existing: ' . ( easyio_get_option( 'exactdn_resize_existing' ) ? 'on' : 'off' ) );
 	easyio_debug_message( 'ExactDN attachment queries: ' . ( easyio_get_option( 'exactdn_prevent_db_queries' ) ? 'off' : 'on' ) );
@@ -979,7 +1013,9 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = '<noscript><h2>' . esc_html__( 'Support', 'easy-image-optimizer' ) . '</h2></noscript>';
 	$output[] = "<p><a class='easyio-docs-root' href='https://docs.ewww.io/'>" . esc_html__( 'Documentation', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'Plugin Support', 'easy-image-optimizer' ) . '</a> | ' .
-		"<a href='https://ewww.io/status/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a>' .
+		"<a href='https://ewww.io/status/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a> | ' .
+		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
+		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . '</a>';
 		"</p>\n";
 	$output[] = "<table class='form-table'>\n";
 	$output[] = "<tr><th scope='row'><label for='easyio_enable_help'>" . esc_html__( 'Enable Embedded Help', 'easy-image-optimizer' ) .
@@ -991,7 +1027,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = "<tr><th scope='row'><label for='easyio_debug'>" . esc_html__( 'Debugging', 'easy-image-optimizer' ) . '</label>' .
 		easyio_help_link( 'https://docs.ewww.io/article/7-basic-configuration', '585373d5c697912ffd6c0bb2' ) . '</th>' .
 		"<td><input type='checkbox' id='easyio_debug' name='easyio_debug' value='true' " .
-		( ! $eio_temp_debug && easyio_get_option( 'easyio_debug' ) ? "checked='true'" : '' ) . ' /> ' .
+		( ! $easyio_temp_debug && easyio_get_option( 'easyio_debug' ) ? "checked='true'" : '' ) . ' /> ' .
 		esc_html__( 'Use this to provide information for support purposes, or if you feel comfortable digging around in the code to fix a problem you are experiencing.', 'easy-image-optimizer' ) .
 		"</td></tr>\n";
 	$output[] = "</table>\n";
@@ -1000,14 +1036,11 @@ function easyio_options( $network = 'singlesite' ) {
 
 	$output[] = "</div>\n";
 
-	$output[] = "<div id='easyio-contribute-settings'>\n";
-	$output[] = '<noscript><h2>' . esc_html__( 'Contribute', 'easy-image-optimizer' ) . '</h2></noscript>';
-	$output[] = '<p><strong>' . esc_html__( 'Here are some ways you can contribute to the development of this plugin:', 'easy-image-optimizer' ) . "</strong></p>\n";
-	$output[] = "<p><a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
-		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . "</a></p>\n";
-	$output[] = "</div>\n";
-
-	$output[] = "<p class='submit'><input type='submit' class='button-primary' value='" . esc_attr__( 'Save Changes', 'easy-image-optimizer' ) . "' /></p>\n";
+	if ( easyio_get_option( 'easyio_exactdn' ) ) {
+		$output[] = "<p class='submit'><input type='submit' class='button-primary' value='" . esc_attr__( 'Save Changes', 'easy-image-optimizer' ) . "' /></p>\n";
+	} else {
+		$output[] = "<p id='easyio-hidden-submit' style='display:none;' class='submit'><input type='submit' class='button-primary' value='" . esc_attr__( 'Save Changes', 'easy-image-optimizer' ) . "' /></p>\n";
+	}
 	$output[] = "</form>\n";
 	$output[] = "</div><!-- end of wrap -->\n";
 
@@ -1020,7 +1053,7 @@ function easyio_options( $network = 'singlesite' ) {
 	global $eio_debug;
 	if ( ! empty( $eio_debug ) ) {
 		$debug_output = '<p style="clear:both"><b>' . esc_html__( 'Debugging Information', 'easy-image-optimizer' ) . ':</b> <button id="easyio-copy-debug" class="button button-secondary" type="button">' . esc_html__( 'Copy', 'easy-image-optimizer' ) . '</button>';
-		if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) ) {
+		if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) || is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
 			$debug_output .= "&emsp;<a href='admin.php?action=easyio_view_debug_log'>" . esc_html( 'View Debug Log', 'easy-image-optimizer' ) . "</a> - <a href='admin.php?action=easyio_delete_debug_log'>" . esc_html( 'Remove Debug Log', 'easy-image-optimizer' ) . '</a>';
 		}
 		$debug_output .= '</p>';
@@ -1124,8 +1157,8 @@ function easyio_debug_message( $message ) {
 		WP_CLI::debug( $message );
 		return;
 	}
-	global $eio_temp_debug;
-	if ( $eio_temp_debug || easyio_get_option( 'easyio_debug' ) ) {
+	global $easyio_temp_debug;
+	if ( $easyio_temp_debug || easyio_get_option( 'easyio_debug' ) ) {
 		$memory_limit = easyio_memory_limit();
 		if ( strlen( $message ) + 4000000 + memory_get_usage( true ) <= $memory_limit ) {
 			global $eio_debug;
@@ -1150,12 +1183,16 @@ function easyio_debug_log() {
 		return;
 	}
 	global $eio_debug;
-	global $eio_temp_debug;
+	global $easyio_temp_debug;
 	$debug_log = WP_CONTENT_DIR . '/easyio/debug.log';
-	if ( is_writable( WP_CONTENT_DIR ) && ! is_dir( WP_CONTENT_DIR . '/easyio\/' ) ) {
-		mkdir( WP_CONTENT_DIR . '/easyio\/' );
+	if ( is_writable( WP_CONTENT_DIR ) && ! is_dir( WP_CONTENT_DIR . '/easyio/' ) ) {
+		mkdir( WP_CONTENT_DIR . '/easyio/' );
 	}
-	if ( ! empty( $eio_debug ) && empty( $eio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio\/' ) ) {
+	if ( ! is_dir( WP_CONTENT_DIR . '/easyio/' ) ) {
+		$eio_debug = '';
+		return;
+	}
+	if ( ! empty( $eio_debug ) && empty( $easyio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio/' ) ) {
 		$memory_limit = easyio_memory_limit();
 		clearstatcache();
 		$timestamp = date( 'Y-m-d H:i:s' ) . "\n";
@@ -1189,6 +1226,12 @@ function easyio_view_debug_log() {
 		readfile( WP_CONTENT_DIR . '/easyio/debug.log' );
 		exit;
 	}
+	if ( is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
+		easyio_ob_clean();
+		header( 'Content-Type: text/plain;charset=UTF-8' );
+		readfile( WP_CONTENT_DIR . '/ewww/debug.log' );
+		exit;
+	}
 	wp_die( esc_html__( 'The Debug Log is empty.', 'easy-image-optimizer' ) );
 }
 
@@ -1202,6 +1245,9 @@ function easyio_delete_debug_log() {
 	}
 	if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) ) {
 		unlink( WP_CONTENT_DIR . '/easyio/debug.log' );
+	}
+	if ( is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
+		unlink( WP_CONTENT_DIR . '/ewww/debug.log' );
 	}
 	$sendback = wp_get_referer();
 	wp_redirect( esc_url_raw( $sendback ) );
@@ -1233,12 +1279,12 @@ function easyio_debug_version_info() {
  * Make sure to clear temp debug option on shutdown.
  */
 function easyio_temp_debug_clear() {
-	global $eio_temp_debug;
+	global $easyio_temp_debug;
 	global $eio_debug;
-	if ( $eio_temp_debug ) {
+	if ( $easyio_temp_debug ) {
 		$eio_debug = '';
 	}
-	$eio_temp_debug = false;
+	$easyio_temp_debug = false;
 }
 
 /**

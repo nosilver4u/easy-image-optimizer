@@ -22,15 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! defined( 'EASYIO_CONTENT_PATH' ) ) {
-	/**
-	 * The folder where we generate PNG placeholder images. MUST have a trailing slash.
-	 *
-	 * @var string EASYIO_CONTENT_PATH
-	 */
-	define( 'EASYIO_CONTENT_PATH', WP_CONTENT_DIR . '/easyio/' );
-}
-
 // Check the PHP version.
 if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 50600 ) {
 	add_action( 'network_admin_notices', 'easyio_unsupported_php' );
@@ -56,12 +47,6 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 50600 ) {
 	 * @var string EASYIO_PLUGIN_PATH
 	 */
 	define( 'EASYIO_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
-	/**
-	 * This is the full system path to the plugin images for testing.
-	 *
-	 * @var string EASYIO_IMAGES_PATH
-	 */
-	define( 'EASYIO_IMAGES_PATH', plugin_dir_path( __FILE__ ) . 'images/' );
 
 	/**
 	 * All the 'unique' functions for the core Easy I.O. plugin.
