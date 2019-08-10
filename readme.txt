@@ -48,7 +48,8 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 == Screenshots ==
 
-1. Plugin settings page.
+1. Plugin settings page before activation.
+2. Plugin settings when active.
 
 == Changelog ==
 

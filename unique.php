@@ -445,15 +445,7 @@ if ( ! function_exists( 'wp_doing_ajax' ) ) {
  * Let the user know they need to take action!
  */
 function easyio_notice_inactive() {
-	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
-		// Need to include the plugin library for the is_plugin_active function.
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	}
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-		$options_page = 'network/settings.php';
-	} else {
-		$options_page = 'options-general.php';
-	}
+	$options_page = 'options-general.php';
 	$settings_url = admin_url( "$options_page?page=" . plugin_basename( EASYIO_PLUGIN_FILE ) );
 	echo "<div id='easyio-inactive' class='notice notice-warning'><p>" .
 		"<a href='$settings_url'>" . esc_html__( 'Please visit the settings page to complete activation of the Easy Image Optimizer.', 'easy-image-optimizer' ) . '</a></p></div>';
@@ -546,8 +538,6 @@ function easyio_network_deactivate( $network_wide ) {
  * Adds a global settings page to the network admin settings menu.
  */
 function easyio_network_admin_menu() {
-	// TODO: implement a separate network options page (if it even makes sense).
-	return;
 	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
 		// Need to include the plugin library for the is_plugin_active function.
 		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -869,6 +859,22 @@ function easyio_settings_script( $hook ) {
 	wp_enqueue_script( 'easyio-settings-script', plugins_url( '/includes/eio.js', __FILE__ ), array( 'jquery' ), EASYIO_VERSION );
 	wp_localize_script( 'easyio-settings-script', 'easyio_vars', array( '_wpnonce' => wp_create_nonce( 'easy-image-optimizer-settings' ) ) );
 	return;
+}
+
+/**
+ * Displays the Easy IO network settings page.
+ */
+function easyio_network_options() {
+	$output  = '';
+	$output .= "<div class='wrap'>\n";
+
+	$icon_link = plugins_url( '/images/easyio-toon-car.png', __FILE__ );
+	$output   .= "<img style='float:right;' src='$icon_link' />";
+
+	$output .= "<h1>Easy Image Optimizer</h1>\n";
+	$output .= '<p>' . esc_html__( 'The Easy Image Optimizer must be configured and activated on each individual site.', 'easy-image-optimizer' ) . '</p>';
+	$output .= '</div>';
+	echo $output;
 }
 
 /**
