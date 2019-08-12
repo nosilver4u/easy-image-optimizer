@@ -1,6 +1,6 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
-Tags: optimize, image, resize, webp, lazy load
+Tags: optimize, image, resize, webp, lazy load, convert, compress
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.6
@@ -63,4 +63,4 @@ Please refer to the separate changelog.txt file.
 
 == Contact and Credits ==
 
-Written by [Shane Bishop](https://ewww.io). ExactDN and HTML parsing classes based upon the Photon module from Jetpack.
+Written by Shane Bishop of [Exactly WWWW](https://ewww.io). ExactDN and HTML parsing classes based upon the Photon module from Jetpack.

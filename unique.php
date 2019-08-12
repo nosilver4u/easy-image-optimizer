@@ -1023,6 +1023,7 @@ function easyio_options( $network = 'singlesite' ) {
 		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . '</a>';
 		"</p>\n";
+	$output[] = "<p><strong><a class='easyio-docs-root' href='https://docs.ewww.io/'>" . esc_html__( 'If Easy I.O. is not working like you think it should, we want to know!', 'easy-image-optimizer' ) . '</a></strong></p>';
 	$output[] = "<table class='form-table'>\n";
 	$output[] = "<tr><th scope='row'><label for='easyio_enable_help'>" . esc_html__( 'Enable Embedded Help', 'easy-image-optimizer' ) .
 		"</label></th><td><input type='checkbox' id='easyio_enable_help' name='easyio_enable_help' value='true' " .
