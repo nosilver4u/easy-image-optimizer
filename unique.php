@@ -520,17 +520,24 @@ function easyio_network_settings_saved() {
  * @param bool $network_wide True if plugin was network-activated.
  */
 function easyio_network_deactivate( $network_wide ) {
-	return;
 	global $wpdb;
 	if ( $network_wide ) {
 		$blogs = $wpdb->get_results( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE site_id = %d", $wpdb->siteid ), ARRAY_A );
 		if ( easyio_iterable( $blogs ) ) {
 			foreach ( $blogs as $blog ) {
 				switch_to_blog( $blog['blog_id'] );
-				// TODO: clean out/reset ExactDN options.
+				update_option( 'easyio_exactdn', false );
+				update_option( 'exactdn_all_the_things', false );
+				update_option( 'exactdn_lossy', false );
+				update_option( 'easyio_lazy_load', false );
 				restore_current_blog();
 			}
 		}
+	} else {
+		update_option( 'easyio_exactdn', false );
+		update_option( 'exactdn_all_the_things', false );
+		update_option( 'exactdn_lossy', false );
+		update_option( 'easyio_lazy_load', false );
 	}
 }
 
@@ -1023,7 +1030,7 @@ function easyio_options( $network = 'singlesite' ) {
 		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . '</a>';
 		"</p>\n";
-	$output[] = "<p><strong><a class='easyio-docs-root' href='https://docs.ewww.io/'>" . esc_html__( 'If Easy I.O. is not working like you think it should, we want to know!', 'easy-image-optimizer' ) . '</a></strong></p>';
+	$output[] = "<p><strong><a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'If Easy I.O. is not working like you think it should, we want to know!', 'easy-image-optimizer' ) . '</a></strong></p>';
 	$output[] = "<table class='form-table'>\n";
 	$output[] = "<tr><th scope='row'><label for='easyio_enable_help'>" . esc_html__( 'Enable Embedded Help', 'easy-image-optimizer' ) .
 		"</label></th><td><input type='checkbox' id='easyio_enable_help' name='easyio_enable_help' value='true' " .
