@@ -951,9 +951,6 @@ function easyio_options( $network = 'singlesite' ) {
 		delete_option( 'easyio_exactdn_domain' );
 		delete_option( 'easyio_exactdn_verified' );
 		delete_option( 'easyio_exactdn_validation' );
-		delete_site_option( 'easyio_exactdn_domain' );
-		delete_site_option( 'easyio_exactdn_verified' );
-		delete_site_option( 'easyio_exactdn_validation' );
 	}
 	$status_output .= '</h2>';
 
