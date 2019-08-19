@@ -1021,7 +1021,7 @@ function easyio_options( $network = 'singlesite' ) {
 
 	$output[] = "<div id='easyio-support-settings'>\n";
 	$output[] = '<noscript><h2>' . esc_html__( 'Support', 'easy-image-optimizer' ) . '</h2></noscript>';
-	$output[] = "<p><a class='easyio-docs-root' href='https://docs.ewww.io/'>" . esc_html__( 'Documentation', 'easy-image-optimizer' ) . '</a> | ' .
+	$output[] = "<p><a class='easyio-docs-root' href='https://docs.ewww.io/category/76-easy-io'>" . esc_html__( 'Documentation', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'Plugin Support', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://ewww.io/status/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
@@ -1111,6 +1111,7 @@ function easyio_options( $network = 'singlesite' ) {
 		HS.beacon.identify(
 			<?php echo json_encode( $hs_identify ); ?>
 		);
+		HS.beacon.suggest(['5d5ad95e0428634552d85dd6','5d56e71c0428634552d84bd1','5d5ac7480428634552d85cef','5beee9932c7d3a31944e0d33','5d5ac8aa2c7d3a7920be3713','5c478cec042863543ccc1c55']);
 	});
 </script>
 		<?php

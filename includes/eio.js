@@ -13,12 +13,6 @@ jQuery(document).ready(function($) {
 	});
 	function HSregister() {
 		if (typeof(HS) !== 'undefined' ) {
-			$('.easyio-overrides-nav').click(function() {
-				HS.beacon.ready(function() {
-					event.preventDefault();
-					HS.beacon.show('59710ce4042863033a1b45a6');
-				});
-			});
 			$('.easyio-docs-root').click(function() {
 				HS.beacon.ready(function() {
 					event.preventDefault();
@@ -47,14 +41,12 @@ jQuery(document).ready(function($) {
 	$('#easyio-general-settings').show();
 	$('li.easyio-general-nav').addClass('easyio-selected');
 	$('#easyio-support-settings').hide();
-	$('#easyio-contribute-settings').hide();
 	$('.easyio-general-nav').click(function() {
 		$('.easyio-tab-nav li').removeClass('easyio-selected');
 		$('li.easyio-general-nav').addClass('easyio-selected');
 		$('.easyio-tab a').blur();
 		$('#easyio-general-settings').show();
 		$('#easyio-support-settings').hide();
-		$('#easyio-contribute-settings').hide();
 		if($('#easyio-activate').length){
 			$('#easyio-hidden-submit').hide();
 		}
@@ -66,15 +58,6 @@ jQuery(document).ready(function($) {
 		$('#easyio-general-settings').hide();
 		$('#easyio-support-settings').show();
 		$('#easyio-hidden-submit').show();
-		$('#easyio-contribute-settings').hide();
-	});
-	$('.easyio-contribute-nav').click(function() {
-		$('.easyio-tab-nav li').removeClass('easyio-selected');
-		$('li.easyio-contribute-nav').addClass('easyio-selected');
-		$('.easyio-tab a').blur();
-		$('#easyio-general-settings').hide();
-		$('#easyio-support-settings').hide();
-		$('#easyio-contribute-settings').show();
 	});
 	return false;
 });

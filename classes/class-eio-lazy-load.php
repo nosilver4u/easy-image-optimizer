@@ -153,7 +153,8 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				is_preview() ||
 				( defined( 'REST_REQUEST' ) && REST_REQUEST ) ||
 				wp_script_is( 'twentytwenty-twentytwenty', 'enqueued' ) ||
-				preg_match( '/^<\?xml/', $buffer )
+				preg_match( '/^<\?xml/', $buffer ) ||
+				strpos( $buffer, 'amp-boilerplate' )
 			) {
 				if ( empty( $buffer ) ) {
 					$this->debug_message( 'empty buffer' );
@@ -523,6 +524,8 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				$width  = 1920;
 				$height = round( 1920 * $ratio );
 			}
+			$height = min( $height, 1920 );
+
 			$piip_path = $this->piip_folder . 'placeholder-' . $width . 'x' . $height . '.png';
 			if ( $this->parsing_exactdn ) {
 				global $exactdn;
