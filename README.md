@@ -2,8 +2,6 @@
 **Minimum WordPress:** 5.0
 **Minimum PHP:** 5.6
 
-Some buttons will be busted until wp.org approves the plugin.
-
 [![Build Status](https://travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://travis-ci.com/nosilver4u/easy-image-optimizer)
 [![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![WordPress Plugin Rating](https://img.shields.io/wordpress/plugin/r/easy-image-optimizer.svg)](https://wordpress.org/support/plugin/easy-image-optimizer/reviews/)
