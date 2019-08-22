@@ -979,7 +979,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = "<table class='form-table'>\n";
 	if ( ! easyio_get_option( 'easyio_exactdn' ) ) {
 		$output[] = '<tr><td>' .
-			'<ol><li><a href="https://ewww.io/easy/" target="_blank">' . esc_html__( 'Purchase a subscription for your site.', 'easy-image-optimizer' ) . '</a></li>' .
+			'<ol><li><a href="https://ewww.io/easy/" target="_blank">' . esc_html__( 'Start a free trial subscription for your site.', 'easy-image-optimizer' ) . '</a></li>' .
 			'<li><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Add your site url to your account:', 'easy-image-optimizer' ) . '</a> ' . get_site_url() . '</li>' .
 			'<li><a id="easyio-activate" href="admin.php?action=easyio_activate" class="button-primary">' . esc_html__( 'Activate', 'easy-image-optimizer' ) . '</a></li>' .
 			'<li>' . esc_html__( 'Done!', 'easy-image-optimizer' ) . '</li>' .

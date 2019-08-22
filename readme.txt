@@ -31,7 +31,7 @@ To receive updates when new strings are available for translation, you can signu
 
 1. Install the plugin through the built-in WordPress plugin installer, or upload the "easy-image-optimizer" plugin to your /wp-content/plugins/ directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Signup for an Easy Image Optimizer subscription at https://ewww.io/easy/
+1. Start a free trial subscription for Easy Image Optimizer at https://ewww.io/easy/
 1. Link your site at https://ewww.io/manage-sites/
 1. Visit the settings page to complete activation.
 1. Done!
