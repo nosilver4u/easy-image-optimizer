@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '100.1' );
+define( 'EASYIO_VERSION', '100.4' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -314,6 +314,15 @@ function easyio_upgrade() {
 		delete_site_option( 'easyio_exactdn_verify_method' );
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
 			add_option( 'exactdn_never_been_active', true, '', false );
+		}
+		if ( easyio_get_option( 'easyio_exactdn' ) ) {
+			if ( 'external' === get_option( 'elementor_css_print_method' ) ) {
+				update_option( 'elementor_css_print_method', 'internal' );
+			}
+			if ( function_exists( 'et_get_option' ) && function_exists( 'et_update_option' ) && 'on' === et_get_option( 'et_pb_static_css_file', 'on' ) ) {
+				et_update_option( 'et_pb_static_css_file', 'off' );
+				et_update_option( 'et_pb_css_in_footer', 'off' );
+			}
 		}
 		update_option( 'easyio_version', EASYIO_VERSION );
 		easyio_debug_log();
