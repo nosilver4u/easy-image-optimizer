@@ -1,2 +1,9 @@
+= 1.1.0 =
+* added: use native loading="lazy" for even better performance
+* updated: lazysizes core library
+* fixed: ExactDN incorrectly scales Elementor background images rather than cropping
+* fixed: ExactDN cannot work with Divi/Elementor background images due to use of external CSS files
+* fixed: Lazy Load auto-scaling breaks if background image is enclosed in encoded quotes
+
 = 1.0.0 =
 * First release (ported from EWWW Image Optimizer)
