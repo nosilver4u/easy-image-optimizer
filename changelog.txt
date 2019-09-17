@@ -1,3 +1,7 @@
+= 1.2.0 =
+* changed: better URL detection with WP Offload Media activated
+* changed: lazy placeholders limited to 1920px wide
+
 = 1.1.0 =
 * added: use native loading="lazy" for even better performance
 * updated: lazysizes core library
