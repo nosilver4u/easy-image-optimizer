@@ -55,6 +55,9 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.3.0 =
+* added: GCS sub-folder rewriting with ExactDN for cleaner URLs
+
 = 1.2.0 =
 * changed: better URL detection with WP Offload Media activated
 * changed: lazy placeholders limited to 1920px wide
