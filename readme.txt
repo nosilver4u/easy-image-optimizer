@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.4.0 =
+* changed: turn off WebP conversion when premium optimization is disabled
+* fixed: incorrect debug function in ExactDN class
+* fixed: wrong translation slug for some strings
+
 = 1.3.0 =
 * added: GCS sub-folder rewriting with ExactDN for cleaner URLs
 

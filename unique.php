@@ -415,7 +415,7 @@ function easyio_privacy_policy_content() {
 		return;
 	}
 	$content  = '<p class="privacy-policy-tutorial">';
-	$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'ewww-image-optimizer' ) ) . '</p>';
+	$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'easy-image-optimizer' ) ) . '</p>';
 	$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).' ) ) . '</p>';
 	wp_add_privacy_policy_content( 'Easy Image Optimizer', $content );
 }
@@ -469,7 +469,7 @@ function easyio_notice_exactdn_activation_error() {
 		$exactdn_activate_error = 'error unknown';
 	}
 	echo '<div id="easyio-notice-exactdn-error" class="notice notice-error"><p>' .
-		esc_html__( 'Could not activate Easy Image Optimizer, please try again in a few minutes. If this error continues, please contact support and provide this complete error message.', 'ewww-image-optimizer' ) .
+		esc_html__( 'Could not activate Easy Image Optimizer, please try again in a few minutes. If this error continues, please contact support and provide this complete error message.', 'easy-image-optimizer' ) .
 		'<br><code>' . $exactdn_activate_error . '</code>' .
 		'</p></div>';
 }
@@ -479,7 +479,7 @@ function easyio_notice_exactdn_activation_error() {
  */
 function easyio_notice_exactdn_activation_success() {
 	echo '<div id="easyio-notice-exactdn-success" class="notice notice-success"><p>' .
-		esc_html__( 'Easy Image Optimizer setup and verification is complete.', 'ewww-image-optimizer' ) .
+		esc_html__( 'Easy Image Optimizer setup and verification is complete.', 'easy-image-optimizer' ) .
 		'</p></div>';
 }
 
