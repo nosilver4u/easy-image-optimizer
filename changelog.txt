@@ -1,3 +1,8 @@
+= 1.4.0 =
+* changed: turn off WebP conversion when premium optimization is disabled
+* fixed: incorrect debug function in ExactDN class
+* fixed: wrong translation slug for some strings
+
 = 1.3.0 =
 * added: GCS sub-folder rewriting with ExactDN for cleaner URLs
 
