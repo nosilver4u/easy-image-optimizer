@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 5.6
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,16 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.5.0 =
+* added: disable native lazy-load attributes with EASYIO_DISABLE_NATIVE_LAZY
+* added: ability to choose LQIP or blank placeholders for lazy load
+* added: better compatibility with Divi filterable grid images and parallax backgrounds
+* changed: default to blank placeholders with Easy IO
+* fixed: Divi builder will not load with Easy IO and Include All Resources active
+* fixed: image cover block with fixed width scaled too much
+* fixed: low-quality placeholders sometimes had larger dimensions than necessary
+* fixed: Slider Revolution dummy.png not properly handled by Easy IO
+
 = 1.4.0 =
 * changed: turn off WebP conversion when premium optimization is disabled
 * fixed: incorrect debug function in ExactDN class
@@ -82,4 +92,4 @@ Please refer to the separate changelog.txt file.
 
 == Contact and Credits ==
 
-Written by Shane Bishop of [Exactly WWWW](https://ewww.io). ExactDN and HTML parsing classes based upon the Photon module from Jetpack.
+Written by Shane Bishop of [Exactly WWW](https://ewww.io). Special thanks to my [Lord and Savior](https://www.iamsecond.com/). Easy IO and HTML parsing classes based upon the Photon module from Jetpack.

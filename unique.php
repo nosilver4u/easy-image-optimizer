@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '140.0' );
+define( 'EASYIO_VERSION', '150.0' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -92,6 +92,7 @@ function easyio_deactivate() {
 	update_option( 'exactdn_all_the_things', false );
 	update_option( 'exactdn_lossy', false );
 	update_option( 'easyio_lazy_load', false );
+	update_option( 'easyio_use_lqip', false );
 	$sendback = wp_get_referer();
 	wp_redirect( esc_url_raw( $sendback ) );
 	exit( 0 );
@@ -360,6 +361,8 @@ function easyio_admin_init() {
 			update_site_option( 'exactdn_lossy', $_POST['exactdn_lossy'] );
 			$_POST['easyio_lazy_load'] = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
 			update_site_option( 'easyio_lazy_load', $_POST['easyio_lazy_load'] );
+			$_POST['easyio_use_lqip'] = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
+			update_site_option( 'easyio_use_lqip', $_POST['easyio_use_lqip'] );
 			$_POST['easyio_allow_multisite_override'] = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
 			update_site_option( 'easyio_allow_multisite_override', $_POST['easyio_allow_multisite_override'] );
 			$_POST['easyio_enable_help'] = empty( $_POST['easyio_enable_help'] ) ? false : true;
@@ -379,6 +382,7 @@ function easyio_admin_init() {
 	register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
 	register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
+	register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 	if ( ! class_exists( 'ExactDN' ) || ! easyio_get_option( 'easyio_exactdn' ) ) {
 		add_action( 'network_admin_notices', 'easyio_notice_inactive' );
 		add_action( 'admin_notices', 'easyio_notice_inactive' );
@@ -539,6 +543,7 @@ function easyio_network_deactivate( $network_wide ) {
 				update_option( 'exactdn_all_the_things', false );
 				update_option( 'exactdn_lossy', false );
 				update_option( 'easyio_lazy_load', false );
+				update_option( 'easyio_use_lqip', false );
 				restore_current_blog();
 			}
 		}
@@ -547,6 +552,7 @@ function easyio_network_deactivate( $network_wide ) {
 		update_option( 'exactdn_all_the_things', false );
 		update_option( 'exactdn_lossy', false );
 		update_option( 'easyio_lazy_load', false );
+		update_option( 'easyio_use_lqip', false );
 	}
 }
 
@@ -1028,15 +1034,26 @@ function easyio_options( $network = 'singlesite' ) {
 		$output[] = "<tr><th scope='row'><label for='exactdn_lossy'>" . esc_html__( 'Premium Compression', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
 			"<td><input type='checkbox' id='exactdn_lossy' name='exactdn_lossy' value='true' " .
 			( easyio_get_option( 'exactdn_lossy' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Enable high quality premium compression for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ) . "</td></tr>\n";
-		$output[] = "<tr><th scope='row'><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
-			"</th><td><input type='checkbox' id='easyio_lazy_load' name='easyio_lazy_load' value='true' " . ( easyio_get_option( 'easyio_lazy_load' ) ? "checked='true'" : '' ) . ' /> ' .
-			esc_html__( 'Improves actual and perceived loading time by deferring off-screen images.', 'easy-image-optimizer' ) . "</td></tr>\n";
+		$output[] = "<tr><th scope='row'><p><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' .
+			easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
+			"</th><td><input type='checkbox' id='easyio_lazy_load' name='easyio_lazy_load' value='true' " .
+			( easyio_get_option( 'easyio_lazy_load' ) ? "checked='true'" : '' ) . ' /> ' .
+			esc_html__( 'Improves actual and perceived loading time by deferring off-screen images.', 'easy-image-optimizer' ) . "</p>\n" .
+			"<p class='description'>" . esc_html__( 'If you have any problems, try disabling Lazy Load and contact support for further assistance.', 'easy-image-optimizer' ) . "</p>\n" .
+			"</td></tr>\n";
+		$output[] = '<tr><td>&nbsp;</td><td>' .
+			"<p><input type='checkbox' id='easyio_use_lqip' name='easyio_use_lqip' value='true' " .
+			( easyio_get_option( 'easyio_use_lqip' ) ? "checked='true'" : '' ) . ' /> ' .
+			"<label for='easyio_use_lqip'><strong>LQIP:</strong></label> " . esc_html__( 'Use low-quality versions of your images as placeholders. Can improve user experience, but may be slower than blank placeholders.', 'easy-image-optimizer' ) .
+			easyio_help_link( 'https://docs.ewww.io/article/75-lazy-load-placeholders', '5c9a7a302c7d3a1544615e47' ) . "</p>\n" .
+			"</td></tr>\n";
 	}
 	easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) );
 	easyio_debug_message( 'ExactDN lossy: ' . intval( easyio_get_option( 'exactdn_lossy' ) ) );
 	easyio_debug_message( 'ExactDN resize existing: ' . ( easyio_get_option( 'exactdn_resize_existing' ) ? 'on' : 'off' ) );
 	easyio_debug_message( 'ExactDN attachment queries: ' . ( easyio_get_option( 'exactdn_prevent_db_queries' ) ? 'off' : 'on' ) );
 	easyio_debug_message( 'lazy load: ' . ( easyio_get_option( 'easyio_lazy_load' ) ? 'on' : 'off' ) );
+	easyio_debug_message( 'LQIP: ' . ( easyio_get_option( 'easyio_use_lqip' ) ? 'on' : 'off' ) );
 	if ( defined( 'EXACTDN_EXCLUDE' ) && EXACTDN_EXCLUDE ) {
 		$exactdn_user_exclusions = EXACTDN_EXCLUDE;
 		if ( is_array( $exactdn_user_exclusions ) ) {
