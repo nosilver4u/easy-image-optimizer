@@ -1254,7 +1254,7 @@ function easyio_debug_log() {
 	if ( ! empty( $eio_debug ) && empty( $easyio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio/' ) ) {
 		$memory_limit = easyio_memory_limit();
 		clearstatcache();
-		$timestamp = date( 'Y-m-d H:i:s' ) . "\n";
+		$timestamp = gmdate( 'Y-m-d H:i:s' ) . "\n";
 		if ( ! file_exists( $debug_log ) ) {
 			touch( $debug_log );
 		} else {
