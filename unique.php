@@ -339,6 +339,10 @@ function easyio_upgrade() {
  */
 function easyio_admin_init() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	/**
+	 * EWWWIO_HS_Beacon class for embedding the HelpScout Beacon.
+	 */
+	require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-hs-beacon.php' );
 	easyio_upgrade();
 	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
 		// Need to include the plugin library for the is_plugin_active function.

@@ -56,10 +56,6 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 50600 ) {
 	 * All the base functions for our plugins.
 	 */
 	require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-base.php' );
-	/**
-	 * EWWWIO_HS_Beacon class for embedding the HelpScout Beacon.
-	 */
-	require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-hs-beacon.php' );
 } // End if().
 
 if ( ! function_exists( 'easyio_unsupported_php' ) ) {
