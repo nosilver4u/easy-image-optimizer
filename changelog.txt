@@ -1,3 +1,19 @@
+= 1.6.0 =
+* added: support background images on a/link elements
+* fixed: partial wp-content URLs being rewritten for some plugins
+* fixed: inconsistent settings page links
+* updated: new version of lazysizes JS
+
+= 1.5.0 =
+* added: disable native lazy-load attributes with EASYIO_DISABLE_NATIVE_LAZY
+* added: ability to choose LQIP or blank placeholders for lazy load
+* added: better compatibility with Divi filterable grid images and parallax backgrounds
+* changed: default to blank placeholders with Easy IO
+* fixed: Divi builder will not load with Easy IO and Include All Resources active
+* fixed: image cover block with fixed width scaled too much
+* fixed: low-quality placeholders sometimes had larger dimensions than necessary
+* fixed: Slider Revolution dummy.png not properly handled by Easy IO
+
 = 1.4.0 =
 * changed: turn off WebP conversion when premium optimization is disabled
 * fixed: incorrect debug function in ExactDN class
