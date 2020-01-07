@@ -55,6 +55,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.6.0 =
+* added: support background images on a/link elements
+* fixed: partial wp-content URLs being rewritten for some plugins
+* fixed: inconsistent settings page links
+* updated: new version of lazysizes JS
+
 = 1.5.0 =
 * added: disable native lazy-load attributes with EASYIO_DISABLE_NATIVE_LAZY
 * added: ability to choose LQIP or blank placeholders for lazy load
@@ -90,6 +96,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 = Earlier versions =
 Please refer to the separate changelog.txt file.
 
-== Contact and Credits ==
+== Credits ==
 
 Written by Shane Bishop of [Exactly WWW](https://ewww.io). Special thanks to my [Lord and Savior](https://www.iamsecond.com/). Easy IO and HTML parsing classes based upon the Photon module from Jetpack.

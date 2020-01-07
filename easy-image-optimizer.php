@@ -40,7 +40,7 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 50600 ) {
 	 *
 	 * @var string EASYIO_PLUGIN_FILE_REL
 	 */
-	define( 'EASYIO_PLUGIN_FILE_REL', basename( plugin_dir_path( __FILE__ ) ) . '/' . basename( __FILE__ ) );
+	define( 'EASYIO_PLUGIN_FILE_REL', plugin_basename( __FILE__ ) );
 	/**
 	 * This is the full system path to the plugin folder.
 	 *

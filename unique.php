@@ -591,7 +591,7 @@ function easyio_admin_menu() {
 		'Easy Image Optimizer',                                        // Page title.
 		'Easy Image Optimizer',                                        // Menu title.
 		apply_filters( 'easyio_admin_permissions', 'manage_options' ), // Capability.
-		EASYIO_PLUGIN_FILE,                                            // Slug.
+		EASYIO_PLUGIN_FILE_REL,                                        // Slug.
 		'easyio_options'                                               // Function to call.
 	);
 }
@@ -609,9 +609,9 @@ function easyio_settings_link( $links ) {
 	}
 	// Load the html for the settings link.
 	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-		$settings_link = '<a href="network/settings.php?page=' . plugin_basename( EASYIO_PLUGIN_FILE ) . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
+		$settings_link = '<a href="network/settings.php?page=' . EASYIO_PLUGIN_FILE_REL . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
 	} else {
-		$settings_link = '<a href="options-general.php?page=' . plugin_basename( EASYIO_PLUGIN_FILE ) . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
+		$settings_link = '<a href="options-general.php?page=' . EASYIO_PLUGIN_FILE_REL . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
 	}
 	// Load the settings link into the plugin links array.
 	array_unshift( $links, $settings_link );
