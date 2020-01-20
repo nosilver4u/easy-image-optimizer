@@ -55,6 +55,14 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.7.0 =
+* added: support for background images on link (a) elements
+* added: exclude images from Easy IO in settings
+* added: exclude images from Lazy Load by string or class name
+* added: prevent auto-scaling with skip-autoscale
+* added: exclusions can be defined as overrides (single value as string, multiple values as an array)
+* fixed: errors due to duplicate ssl= arguments in URLs
+
 = 1.6.0 =
 * added: support background images on a/link elements
 * fixed: partial wp-content URLs being rewritten for some plugins
