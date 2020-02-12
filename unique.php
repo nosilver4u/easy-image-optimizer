@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '170.0' );
+define( 'EASYIO_VERSION', '180.0' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -1051,30 +1051,11 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = '<noscript><h2>' . esc_html__( 'Configure', 'easy-image-optimizer' ) . '</h2></noscript>';
 	$output[] = "<table class='form-table'>\n";
 	if ( ! easyio_get_option( 'easyio_exactdn' ) ) {
-		$s3_active = false;
-		if ( class_exists( 'Amazon_S3_And_CloudFront' ) ) {
-			global $as3cf;
-			$s3_scheme = $as3cf->get_url_scheme();
-			$s3_region = $as3cf->get_setting( 'region' );
-			$s3_bucket = $as3cf->get_setting( 'bucket' );
-			if ( is_wp_error( $s3_region ) ) {
-				$s3_region = '';
-			}
-			$s3_domain = $as3cf->get_provider()->get_url_domain( $s3_bucket, $s3_region, null, array(), true );
-			easyio_debug_message( "found S3 domain of $s3_domain with bucket $s3_bucket and region $s3_region" );
-			if ( ! empty( $s3_domain ) && $as3cf->get_setting( 'serve-from-s3' ) ) {
-				$s3_active = true;
-			}
-		}
-
-		if ( $s3_active ) {
-			$site_url = defined( 'EXACTDN_LOCAL_DOMAIN' ) && EXACTDN_LOCAL_DOMAIN ? EXACTDN_LOCAL_DOMAIN : $s3_scheme . '://' . $s3_domain;
-		} else {
-			$site_url = defined( 'EXACTDN_LOCAL_DOMAIN' ) && EXACTDN_LOCAL_DOMAIN ? EXACTDN_LOCAL_DOMAIN : get_home_url();
-		}
+		$eio_base = new EIO_Base();
+		$site_url = $eio_base->content_url();
 		$output[] = '<tr><td>' .
 			'<ol><li><a href="https://ewww.io/easy/" target="_blank">' . esc_html__( 'Start a free trial subscription for your site.', 'easy-image-optimizer' ) . '</a></li>' .
-			'<li><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Add your site url to your account:', 'easy-image-optimizer' ) . "</a> $site_url</li>" .
+			'<li><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Add your Site URL to your account:', 'easy-image-optimizer' ) . "</a> $site_url</li>" .
 			'<li><a id="easyio-activate" href="admin.php?action=easyio_activate" class="button-primary">' . esc_html__( 'Activate', 'easy-image-optimizer' ) . '</a></li>' .
 			'<li>' . esc_html__( 'Done!', 'easy-image-optimizer' ) . '</li>' .
 			"</ol></td></tr>\n";
