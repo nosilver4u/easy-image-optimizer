@@ -12,28 +12,28 @@ jQuery(document).ready(function($) {
 		}
 	});
 	function HSregister() {
-		if (typeof(HS) !== 'undefined' ) {
+		if (typeof(Beacon) !== 'undefined' ) {
+			$('.easyio-overrides-nav').click(function() {
+				event.preventDefault();
+				Beacon('article', '59710ce4042863033a1b45a6', { type: 'modal' });
+			});
 			$('.easyio-docs-root').click(function() {
-				HS.beacon.ready(function() {
-					event.preventDefault();
-					HS.beacon.open();
-				});
+				event.preventDefault();
+				Beacon('navigate', '/answers/')
+				Beacon('open');
 			});
 			$('.easyio-help-beacon-multi').click(function() {
 				var hsids = $(this).attr('data-beacon-articles');
 				hsids = hsids.split(',');
-				HS.beacon.ready(function() {
-					event.preventDefault();
-					HS.beacon.suggest(hsids);
-					HS.beacon.open();
-				});
+				event.preventDefault();
+				Beacon('suggest', hsids);
+				Beacon('navigate', '/answers/');
+				Beacon('open');
 			});
 			$('.easyio-help-beacon-single').click(function() {
 				var hsid = $(this).attr('data-beacon-article');
-				HS.beacon.ready(function() {
-					event.preventDefault();
-					HS.beacon.show(hsid);
-				});
+				event.preventDefault();
+				Beacon('article', hsid, { type: 'modal' });
 			});
 		}
 	}

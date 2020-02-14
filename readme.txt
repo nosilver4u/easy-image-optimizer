@@ -55,6 +55,10 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 1.9.0 =
+* added: automatic plan upgrade detection
+* updated: embedded help beacon code
+
 = 1.8.0 =
 * changed: better compatibility with other implementations of "native lazy load"
 * fixed: Easy IO detects wrong domain when using separate domains for site and content
