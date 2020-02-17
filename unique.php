@@ -1085,6 +1085,7 @@ function easyio_options( $network = 'singlesite' ) {
 		if ( 1 === $exactdn->get_plan_id() ) {
 			$output[] = "<input type='hidden' id='exactdn_all_the_things' name='exactdn_all_the_things' value='0'>\n";
 			$output[] = "<input type='hidden' id='exactdn_lossy' name='exactdn_lossy' value='1'>\n";
+			$output[] = "<input type='hidden' id='easyio_use_lqip' name='easyio_use_lqip' value='0'>\n";
 		}
 		$eio_exclude_paths = easyio_get_option( 'exactdn_exclude' ) ? esc_html( implode( "\n", easyio_get_option( 'exactdn_exclude' ) ) ) : '';
 		$output[]          = "<tr><th scope='row'>" .
@@ -1104,8 +1105,9 @@ function easyio_options( $network = 'singlesite' ) {
 			"</td></tr>\n";
 		easyio_debug_message( 'lazy load: ' . ( easyio_get_option( 'easyio_lazy_load' ) ? 'on' : 'off' ) );
 		$output[] = '<tr><td>&nbsp;</td><td>' .
-			"<p><input type='checkbox' id='easyio_use_lqip' name='easyio_use_lqip' value='true' " .
-			( easyio_get_option( 'easyio_use_lqip' ) ? "checked='true'" : '' ) . ' /> ' .
+			"<p><input type='checkbox' name='easyio_use_lqip' value='true' " .
+			( 1 === $exactdn->get_plan_id() ? " id='easyio_use_lqip_disabled' disabled " : " id='easyio_use_lqip' " ) .
+			( 1 < $exactdn->get_plan_id() && easyio_get_option( 'easyio_use_lqip' ) ? "checked='true'" : '' ) . ' /> ' .
 			"<label for='easyio_use_lqip'><strong>LQIP:</strong></label> " . esc_html__( 'Use low-quality versions of your images as placeholders. Can improve user experience, but may be slower than blank placeholders.', 'easy-image-optimizer' ) .
 			easyio_help_link( 'https://docs.ewww.io/article/75-lazy-load-placeholders', '5c9a7a302c7d3a1544615e47' ) . "</p>\n" .
 			"</td></tr>\n";
