@@ -58,6 +58,7 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 = 1.9.0 =
 * added: automatic plan upgrade detection
 * updated: embedded help beacon code
+* updated: lazysizes.js to version 5.2
 
 = 1.8.0 =
 * changed: better compatibility with other implementations of "native lazy load"
