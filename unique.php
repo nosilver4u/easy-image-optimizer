@@ -316,7 +316,7 @@ function easyio_upgrade() {
 		}
 		easyio_set_defaults();
 		// This will get re-enabled if things are too slow.
-		easyio_set_option( 'exactdn_prevent_db_queries', false );
+		update_option( 'exactdn_prevent_db_queries', false );
 		delete_option( 'easyio_exactdn_verify_method' );
 		delete_site_option( 'easyio_exactdn_verify_method' );
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
@@ -864,24 +864,19 @@ function easyio_exclude_paths_sanitize( $input ) {
 }
 
 /**
- * Retrieve option: use 'site' setting if plugin is network activated, otherwise use 'blog' setting.
+ * Retrieve option: use single-site setting or override from constant.
  *
- * Retrieves multi-site and single-site options as appropriate as well as allowing overrides with
- * same-named constant. Overrides are only available for integer and boolean options.
+ * Retrieves single-site options as appropriate as well as allowing overrides with
+ * same-named constant.
  *
  * @param string $option_name The name of the option to retrieve.
  * @param mixed  $default The default to use if not found/set, defaults to false, but not currently used.
- * @param bool   $single Use single-site setting regardless of multisite activation. Default is off/false.
  * @return mixed The value of the option.
  */
-function easyio_get_option( $option_name, $default = false, $single = false ) {
+function easyio_get_option( $option_name, $default = false ) {
 	$constant_name = strtoupper( $option_name );
 	if ( defined( $constant_name ) && ( is_int( constant( $constant_name ) ) || is_bool( constant( $constant_name ) ) ) ) {
 		return constant( $constant_name );
-	}
-	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
-		// Need to include the plugin library for the is_plugin_active function.
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 	}
 	if (
 		(
@@ -890,34 +885,9 @@ function easyio_get_option( $option_name, $default = false, $single = false ) {
 		)
 		&& defined( $constant_name )
 	) {
-		return ewww_image_optimizer_exclude_paths_sanitize( constant( $constant_name ) );
+		return easyio_exclude_paths_sanitize( constant( $constant_name ) );
 	}
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) && ! get_site_option( 'easyio_allow_multisite_override' ) ) {
-		$option_value = get_site_option( $option_name );
-	} else {
-		$option_value = get_option( $option_name );
-	}
-	return $option_value;
-}
-
-/**
- * Set an option: use 'site' setting if plugin is network activated, otherwise use 'blog' setting.
- *
- * @param string $option_name The name of the option to save.
- * @param mixed  $option_value The value to save for the option.
- * @return bool True if the operation was successful.
- */
-function easyio_set_option( $option_name, $option_value ) {
-	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
-		// Need to include the plugin library for the is_plugin_active function.
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	}
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) && ! get_site_option( 'easyio_allow_multisite_override' ) ) {
-		$success = update_site_option( $option_name, $option_value );
-	} else {
-		$success = update_option( $option_name, $option_value );
-	}
-	return $success;
+	return get_option( $option_name );
 }
 
 /**

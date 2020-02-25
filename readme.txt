@@ -57,8 +57,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 = 1.9.0 =
 * added: automatic plan upgrade detection
+* changed: plugin can be activated network-wide, though configuration is still per-site
 * updated: embedded help beacon code
 * updated: lazysizes.js to version 5.2
+* fixed: custom domain for Easy IO prevents auto-scaling
+* fixed: full-width background images auto-scaled due to scroll bars
 
 = 1.8.0 =
 * changed: better compatibility with other implementations of "native lazy load"
