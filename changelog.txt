@@ -1,3 +1,15 @@
+= 1.9.0 =
+* added: automatic plan upgrade detection
+* changed: plugin can be activated network-wide, though configuration is still per-site
+* updated: embedded help beacon code
+* updated: lazysizes.js to version 5.2
+* fixed: custom domain for Easy IO prevents auto-scaling
+* fixed: full-width background images auto-scaled due to scroll bars
+
+= 1.8.0 =
+* changed: better compatibility with other implementations of "native lazy load"
+* fixed: Easy IO detects wrong domain when using separate domains for site and content
+
 = 1.7.0 =
 * added: exclude images from Easy IO in settings
 * added: exclude images from Lazy Load by string or class name

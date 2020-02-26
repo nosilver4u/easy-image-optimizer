@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '181.32' );
+define( 'EASYIO_VERSION', '190.0' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -62,10 +62,7 @@ function easyio_activate() {
 		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
 	}
 	update_option( 'easyio_exactdn', true );
-	global $exactdn;
-	if ( is_object( $exactdn ) && $exactdn->get_plan_id() > 1 ) {
-		update_option( 'exactdn_all_the_things', true );
-	}
+	update_option( 'exactdn_all_the_things', true );
 	update_option( 'exactdn_lossy', true );
 	update_option( 'easyio_lazy_load', true );
 	if ( easyio_get_option( 'ewww_image_optimizer_exactdn' ) ) {

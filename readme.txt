@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 5.6
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -74,44 +74,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * added: prevent auto-scaling with skip-autoscale
 * added: exclusions can be defined as overrides (single value as string, multiple values as an array)
 * fixed: errors due to duplicate ssl= arguments in URLs
-
-= 1.6.0 =
-* added: support background images on a/link elements
-* fixed: partial wp-content URLs being rewritten for some plugins
-* fixed: inconsistent settings page links
-* updated: new version of lazysizes JS
-
-= 1.5.0 =
-* added: disable native lazy-load attributes with EASYIO_DISABLE_NATIVE_LAZY
-* added: ability to choose LQIP or blank placeholders for lazy load
-* added: better compatibility with Divi filterable grid images and parallax backgrounds
-* changed: default to blank placeholders with Easy IO
-* fixed: Divi builder will not load with Easy IO and Include All Resources active
-* fixed: image cover block with fixed width scaled too much
-* fixed: low-quality placeholders sometimes had larger dimensions than necessary
-* fixed: Slider Revolution dummy.png not properly handled by Easy IO
-
-= 1.4.0 =
-* changed: turn off WebP conversion when premium optimization is disabled
-* fixed: incorrect debug function in ExactDN class
-* fixed: wrong translation slug for some strings
-
-= 1.3.0 =
-* added: GCS sub-folder rewriting with ExactDN for cleaner URLs
-
-= 1.2.0 =
-* changed: better URL detection with WP Offload Media activated
-* changed: lazy placeholders limited to 1920px wide
-
-= 1.1.0 =
-* added: use native loading="lazy" for even better performance
-* updated: lazysizes core library
-* fixed: ExactDN incorrectly scales Elementor background images rather than cropping
-* fixed: ExactDN cannot work with Divi/Elementor background images due to use of external CSS files
-* fixed: Lazy Load auto-scaling breaks if background image is enclosed in encoded quotes
-
-= 1.0.0 =
-* First release
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
