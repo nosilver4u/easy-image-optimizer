@@ -1,3 +1,11 @@
+= 2.0.0 =
+* added: Easy IO sets pre-scaled image in data-pin-media for Pinterest
+* added: Envira Pro cache cleared when activating Easy IO
+* fixed: background image lazy-loading could be interrupted by other plugins copying elements
+* fixed: Easy IO misses some images with Envira Gallery Pro layouts
+* fixed: missing www in domain prevents rewrites for Easy IO
+* fixed: Lazy Load parsing X/Pro theme admin pages
+
 = 1.9.0 =
 * added: automatic plan upgrade detection
 * changed: plugin can be activated network-wide, though configuration is still per-site

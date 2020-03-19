@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 5.6
-Stable tag: 1.9.0
+Stable tag: 2.0.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,14 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.0.0 =
+* added: Easy IO sets pre-scaled image in data-pin-media for Pinterest
+* added: Envira Pro cache cleared when activating Easy IO
+* fixed: background image lazy-loading could be interrupted by other plugins copying elements
+* fixed: Easy IO misses some images with Envira Gallery Pro layouts
+* fixed: missing www in domain prevents rewrites for Easy IO
+* fixed: Lazy Load parsing X/Pro theme admin pages
+
 = 1.9.0 =
 * added: automatic plan upgrade detection
 * changed: plugin can be activated network-wide, though configuration is still per-site
@@ -66,14 +74,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 = 1.8.0 =
 * changed: better compatibility with other implementations of "native lazy load"
 * fixed: Easy IO detects wrong domain when using separate domains for site and content
-
-= 1.7.0 =
-* added: support for background images on link (a) elements
-* added: exclude images from Easy IO in settings
-* added: exclude images from Lazy Load by string or class name
-* added: prevent auto-scaling with skip-autoscale
-* added: exclusions can be defined as overrides (single value as string, multiple values as an array)
-* fixed: errors due to duplicate ssl= arguments in URLs
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
