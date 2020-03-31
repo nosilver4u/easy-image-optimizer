@@ -1,3 +1,6 @@
+= 2.0.1 =
+* fixed: data-pin-media attribute added to linked images incorrectly
+
 = 2.0.0 =
 * added: Easy IO sets pre-scaled image in data-pin-media for Pinterest
 * added: Envira Pro cache cleared when activating Easy IO
