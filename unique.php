@@ -1220,6 +1220,9 @@ function easyio_is_amp() {
  * @param string $message Debug information to add to the log.
  */
 function easyio_debug_message( $message ) {
+	if ( ! is_string( $message ) ) {
+		return;
+	}
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::debug( $message );
 		return;
