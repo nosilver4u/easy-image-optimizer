@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.0.3 =
+* fixed: debug_message() throws a warning with non-string values
+* fixed: notices when parsing JSON data from Envira
+* fixed: fatal error when a WP_Error is passed from Envira to Easy IO
 
 = 2.0.2 =
 * removed: data-pin-media attribute, as Pinterest is handling WebP images properly now

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '202.0' );
+define( 'EASYIO_VERSION', '203.0' );
 
 // Initialize a couple globals.
 $eio_debug = '';
