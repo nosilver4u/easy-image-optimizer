@@ -55,6 +55,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.0.4 =
+* fixed: verification fails if server is blocking test.png with a 403
+* fixed: <picture> tags do not follow Lazy Load exclusions
+* fixed: <picture> tags broken when exluding images from Lazy Load
+* changed: potentially expensive db queries disabled by default
+
 = 2.0.3 =
 * fixed: debug_message() throws a warning with non-string values
 * fixed: notices when parsing JSON data from Envira

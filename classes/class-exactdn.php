@@ -180,6 +180,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				add_filter( 'style_loader_src', array( $this, 'parse_enqueue' ), 20 );
 				add_filter( 'script_loader_src', array( $this, 'parse_enqueue' ), 20 );
 			}
+			$this->set_option( 'exactdn_prevent_db_queries', true );
 
 			// Improve the default content_width for Twenty Nineteen.
 			global $content_width;
@@ -387,6 +388,10 @@ if ( ! class_exists( 'ExactDN' ) ) {
 					$exactdn_activate_error = $error_message;
 					add_action( 'admin_notices', $this->prefix . 'notice_exactdn_activation_error' );
 					return false;
+				} elseif ( ! empty( $test_result['response']['code'] ) && ( 403 === (int) $test_result['response']['code'] || 404 === (int) $test_result['response']['code'] ) ) {
+					// If we get a 403 or 404, we should use secondary verification.
+					$this->debug_message( 'received response code: ' . $test_result['response']['code'] );
+					$this->set_exactdn_option( 'verify_method', -1, false );
 				} elseif ( ! empty( $test_result['body'] ) && strlen( $test_result['body'] ) > 300 ) {
 					if ( 200 === (int) $test_result['response']['code'] &&
 						( '89504e470d0a1a0a' === bin2hex( substr( $test_result['body'], 0, 8 ) ) || '52494646' === bin2hex( substr( $test_result['body'], 0, 4 ) ) ) ) {

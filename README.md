@@ -3,6 +3,7 @@
 **Minimum PHP:** 5.6
 
 [![Build Status](https://travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://travis-ci.com/nosilver4u/easy-image-optimizer)
+[![RIPS CodeRisk](https://coderisk.com/wp/plugin/easy-image-optimizer/badge "RIPS CodeRisk")](https://coderisk.com/wp/plugin/easy-image-optimizer)
 [![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![WordPress Tested Up To](https://img.shields.io/wordpress/v/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
