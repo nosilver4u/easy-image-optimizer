@@ -1249,20 +1249,22 @@ function easyio_debug_message( $message ) {
  * @global string $eio_debug The in-memory debug log.
  */
 function easyio_debug_log() {
-	if ( function_exists( 'ewww_image_optimizer_debug_log' ) ) {
+	if ( function_exists( 'ewww_image_optimizer_debug_log' ) && ewww_image_optimizer_get_option( 'ewww_image_optimizer_debug' ) ) {
 		return;
 	}
 	global $eio_debug;
 	global $easyio_temp_debug;
 	$debug_log = WP_CONTENT_DIR . '/easyio/debug.log';
-	if ( is_writable( WP_CONTENT_DIR ) && ! is_dir( WP_CONTENT_DIR . '/easyio/' ) ) {
-		mkdir( WP_CONTENT_DIR . '/easyio/' );
+	if ( ! is_dir( dirname( $debug_log ) ) && is_writable( WP_CONTENT_DIR ) ) {
+		wp_mkdir_p( dirname( $debug_log ) );
 	}
-	if ( ! is_dir( WP_CONTENT_DIR . '/easyio/' ) ) {
-		$eio_debug = '';
-		return;
-	}
-	if ( ! empty( $eio_debug ) && empty( $easyio_temp_debug ) && easyio_get_option( 'easyio_debug' ) && is_writable( WP_CONTENT_DIR . '/easyio/' ) ) {
+	if (
+		! empty( $eio_debug ) &&
+		empty( $easyio_temp_debug ) &&
+		easyio_get_option( 'easyio_debug' ) &&
+		is_dir( dirname( $debug_log ) ) &&
+		is_writable( dirname( $debug_log ) )
+	) {
 		$memory_limit = easyio_memory_limit();
 		clearstatcache();
 		$timestamp = gmdate( 'Y-m-d H:i:s' ) . "\n";
