@@ -1,3 +1,11 @@
+= 2.1.0 =
+* added: Easy IO replaces image URLs within style elements for page builders like Elementor and Divi
+* changed: potentially expensive db queries disabled by default
+* fixed: verification fails if server is blocking test.png with a 403
+* fixed: Include All Resources rewrites wrong URLs when quotes are html-encoded
+* fixed: <picture> tags do not follow Lazy Load exclusions
+* fixed: <picture> tags broken when excluding images from Lazy Load
+
 = 2.0.3 =
 * fixed: debug_message() throws a warning with non-string values
 * fixed: notices when parsing JSON data from Envira

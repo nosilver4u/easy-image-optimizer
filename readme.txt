@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.0.3
+Stable tag: 2.1.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,11 +55,13 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
-= 2.0.4 =
-* fixed: verification fails if server is blocking test.png with a 403
-* fixed: <picture> tags do not follow Lazy Load exclusions
-* fixed: <picture> tags broken when exluding images from Lazy Load
+= 2.1.0 =
+* added: Easy IO replaces image URLs within style elements for page builders like Elementor and Divi
 * changed: potentially expensive db queries disabled by default
+* fixed: verification fails if server is blocking test.png with a 403
+* fixed: Include All Resources rewrites wrong URLs when quotes are html-encoded
+* fixed: <picture> tags do not follow Lazy Load exclusions
+* fixed: <picture> tags broken when excluding images from Lazy Load
 
 = 2.0.3 =
 * fixed: debug_message() throws a warning with non-string values
@@ -79,14 +81,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: Easy IO misses some images with Envira Gallery Pro layouts
 * fixed: missing www in domain prevents rewrites for Easy IO
 * fixed: Lazy Load parsing X/Pro theme admin pages
-
-= 1.9.0 =
-* added: automatic plan upgrade detection
-* changed: plugin can be activated network-wide, though configuration is still per-site
-* updated: embedded help beacon code
-* updated: lazysizes.js to version 5.2
-* fixed: custom domain for Easy IO prevents auto-scaling
-* fixed: full-width background images auto-scaled due to scroll bars
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
