@@ -270,6 +270,10 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			$site_url = $this->content_url();
 			$home_url = home_url();
+			$originip = '';
+			if ( ! empty( $_SERVER['SERVER_ADDR'] ) ) {
+				$originip = $_SERVER['SERVER_ADDR'];
+			}
 
 			$url = 'http://optimize.exactlywww.com/exactdn/activate.php';
 			$ssl = wp_http_supports( array( 'ssl' ) );
@@ -284,6 +288,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 					'body'    => array(
 						'site_url' => $site_url,
 						'home_url' => $home_url,
+						'originip' => $originip,
 					),
 				)
 			);
@@ -632,6 +637,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				}
 			}
 			$this->user_exclusions[] = 'plugins/anti-captcha/';
+			$this->user_exclusions[] = 'fusion-app';
+			$this->user_exclusions[] = 'themes/Avada/';
+			$this->user_exclusions[] = 'plugins/fusion-builder/';
 		}
 
 		/**
