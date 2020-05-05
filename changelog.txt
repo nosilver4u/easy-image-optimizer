@@ -1,3 +1,8 @@
+= 2.1.1 =
+* added: defer JS with Easy IO via EXACTDN_DEFER_SCRIPTS override
+* fixed: AMP compatiblity for Lazy Load was broken
+* fixed: images not loading on WPURP/WPRM print recipe pages
+
 = 2.1.0 =
 * added: Easy IO replaces image URLs within style elements for page builders like Elementor and Divi
 * changed: potentially expensive db queries disabled by default
