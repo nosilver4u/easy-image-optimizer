@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.1.1
+Stable tag: 2.2.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,14 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.2.0 =
+* added: defer jQuery also with EXACTDN_DEFER_JQUERY override
+* added: Lazy Load supports VC grid layouts retrieved via AJAX
+* fixed: Lazy Load prevents loading of images in oEmbed endpoint
+* fixed: jQuery exclusion was preventing deferral of jQuery extensions also
+* fixed: Lazy Load parsing Owl Lazy images
+* fixed: Easy IO adds srcset/sizes to feeds
 
 = 2.1.1 =
 * added: defer JS with Easy IO via EXACTDN_DEFER_SCRIPTS override
