@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.0
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.2.1 =
+* added: EXACTDN_DEFER_JQUERY_SAFE override for when inline scripts depend on jQuery
+* changed: Easy IO uses better query-string fall-back for plugins
+* changed: Easy IO enforces https if available rather than protocol-relative URLs
+
 = 2.2.0 =
 * added: defer jQuery also with EXACTDN_DEFER_JQUERY override
 * added: Lazy Load supports VC grid layouts retrieved via AJAX
@@ -62,38 +67,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: jQuery exclusion was preventing deferral of jQuery extensions also
 * fixed: Lazy Load parsing Owl Lazy images
 * fixed: Easy IO adds srcset/sizes to feeds
-
-= 2.1.1 =
-* added: defer JS with Easy IO via EXACTDN_DEFER_SCRIPTS override
-* fixed: AMP compatiblity for Lazy Load was broken
-* fixed: images not loading on WPURP/WPRM print recipe pages
-
-= 2.1.0 =
-* added: Easy IO replaces image URLs within style elements for page builders like Elementor and Divi
-* changed: potentially expensive db queries disabled by default
-* fixed: verification fails if server is blocking test.png with a 403
-* fixed: Include All Resources rewrites wrong URLs when quotes are html-encoded
-* fixed: <picture> tags do not follow Lazy Load exclusions
-* fixed: <picture> tags broken when excluding images from Lazy Load
-
-= 2.0.3 =
-* fixed: debug_message() throws a warning with non-string values
-* fixed: notices when parsing JSON data from Envira
-* fixed: fatal error when a WP_Error is passed from Envira to Easy IO
-
-= 2.0.2 =
-* removed: data-pin-media attribute, as Pinterest is handling WebP images properly now
-
-= 2.0.1 =
-* fixed: data-pin-media attribute added to linked images incorrectly
-
-= 2.0.0 =
-* added: Easy IO sets pre-scaled image in data-pin-media for Pinterest
-* added: Envira Pro cache cleared when activating Easy IO
-* fixed: background image lazy-loading could be interrupted by other plugins copying elements
-* fixed: Easy IO misses some images with Envira Gallery Pro layouts
-* fixed: missing www in domain prevents rewrites for Easy IO
-* fixed: Lazy Load parsing X/Pro theme admin pages
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
