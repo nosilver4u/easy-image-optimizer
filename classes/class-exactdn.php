@@ -129,7 +129,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				$this->scheme = $scheme;
 			}
 
-			$uri = $_SERVER['REQUEST_URI'];
+			$uri = add_query_arg( null, null );
+			$this->debug_message( "request uri is $uri" );
+
 			/**
 			 * Allow pre-empting the parsers by page.
 			 *
@@ -286,7 +288,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			$home_url = home_url();
 			$originip = '';
 			if ( ! empty( $_SERVER['SERVER_ADDR'] ) ) {
-				$originip = $_SERVER['SERVER_ADDR'];
+				$originip = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ) );
 			}
 
 			$url = 'http://optimize.exactlywww.com/exactdn/activate.php';
@@ -862,6 +864,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 						$this->debug_message( 'handling lazy image' );
 					}
 
+					$is_relative = false;
 					// Check for relative urls that start with a slash. Unlikely that we'll attempt relative urls beyond that.
 					if (
 						'/' === substr( $src, 0, 1 ) &&
@@ -870,7 +873,8 @@ if ( ! class_exists( 'ExactDN' ) ) {
 						false === strpos( $this->upload_domain, 'digitaloceanspaces.com' ) &&
 						false === strpos( $this->upload_domain, 'storage.googleapis.com' )
 					) {
-						$src = '//' . $this->upload_domain . $src;
+						$src         = '//' . $this->upload_domain . $src;
+						$is_relative = true;
 					}
 
 					// Check if image URL should be used with ExactDN.
@@ -1097,7 +1101,11 @@ if ( ! class_exists( 'ExactDN' ) ) {
 							$exactdn_url = str_replace( '&#038;', '&', esc_url( $exactdn_url ) );
 							// Supplant the original source value with our ExactDN URL.
 							$this->debug_message( "replacing $src_orig with $exactdn_url" );
-							$new_tag = str_replace( $src_orig, $exactdn_url, $new_tag );
+							if ( $is_relative ) {
+								$this->set_attribute( $new_tag, 'src', $exactdn_url, true );
+							} else {
+								$new_tag = str_replace( $src_orig, $exactdn_url, $new_tag );
+							}
 
 							// If Lazy Load is in use, pass placeholder image through ExactDN.
 							if ( isset( $placeholder_src ) && $this->validate_image_url( $placeholder_src ) ) {
@@ -1428,16 +1436,19 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			if ( ! wp_doing_ajax() ) {
 				return $allow;
 			}
-			if ( ! empty( $_POST['action'] ) && 'eddvbugm_viewport_downloads' === $_POST['action'] ) {
+			if ( ! empty( $_POST['action'] ) && 'eddvbugm_viewport_downloads' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return true;
 			}
-			if ( ! empty( $_POST['action'] ) && 'vc_get_vc_grid_data' === $_POST['action'] ) {
+			if ( ! empty( $_POST['action'] ) && 'vc_get_vc_grid_data' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return true;
 			}
-			if ( ! empty( $_POST['action'] ) && 'Essential_Grid_Front_request_ajax' === $_POST['action'] ) {
+			if ( ! empty( $_POST['action'] ) && 'filter_listing' === $_POST['action'] && ! empty( $_POST['layout'] ) && ! empty( $_POST['paged'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return true;
 			}
-			if ( ! empty( $_POST['action'] ) && 'mabel-rpn-getnew-purchased-products' === $_POST['action'] ) {
+			if ( ! empty( $_POST['action'] ) && 'Essential_Grid_Front_request_ajax' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+				return true;
+			}
+			if ( ! empty( $_POST['action'] ) && 'mabel-rpn-getnew-purchased-products' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return true;
 			}
 			return $allow;
@@ -2189,6 +2200,12 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 			if ( is_string( $route ) && false !== strpos( $route, 'wp/v2/media/' ) && ! empty( $request['context'] ) && 'edit' === $request['context'] ) {
 				$this->debug_message( 'REST API media endpoint from post editor' );
+				// We don't want ExactDN urls anywhere near the editor, so disable everything we can.
+				add_filter( 'exactdn_override_image_downsize', '__return_true', PHP_INT_MAX );
+				add_filter( 'exactdn_skip_image', '__return_true', PHP_INT_MAX ); // This skips existing srcset indices.
+				add_filter( 'exactdn_srcset_multipliers', '__return_false', PHP_INT_MAX ); // This one skips the additional multipliers.
+			} elseif ( is_string( $route ) && false !== strpos( $route, 'wp/v2/media' ) && ! empty( $request['post'] ) && ! empty( $request->get_file_params() ) ) {
+				$this->debug_message( 'REST API media endpoint (new upload)' );
 				// We don't want ExactDN urls anywhere near the editor, so disable everything we can.
 				add_filter( 'exactdn_override_image_downsize', '__return_true', PHP_INT_MAX );
 				add_filter( 'exactdn_skip_image', '__return_true', PHP_INT_MAX ); // This skips existing srcset indices.
