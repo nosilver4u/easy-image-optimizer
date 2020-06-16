@@ -1,3 +1,7 @@
+= 2.2.3 =
+* fixed: lazy load skips img elements with unquoted src attributes
+* fixed: sites using S3 fail verification after upgrade
+
 = 2.2.2 =
 * fixed: Lazy Load has nested fall-back img elements if an image is found multiple times in a page
 * fixed: Easy IO mangles srcset URLs when src URL is relative instead of absolute

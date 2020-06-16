@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '222' );
+define( 'EASYIO_VERSION', '223' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -29,6 +29,8 @@ add_filter( 'easyio_superadmin_permissions', 'easyio_superadmin_permissions', 8 
 // Add a link to the plugins page so the user can go straight to the settings page.
 $easyio_plugin_slug = plugin_basename( EASYIO_PLUGIN_FILE );
 add_filter( "plugin_action_links_$easyio_plugin_slug", 'easyio_settings_link' );
+// Loads the plugin translations.
+add_action( 'plugins_loaded', 'easyio_load' );
 // Runs any checks that need to run everywhere and early.
 add_action( 'init', 'easyio_init', 9 );
 // Load our front-end parsers for ExactDN and/or Alt WebP.
@@ -266,6 +268,13 @@ function easyio_function_exists( $function, $debug = false ) {
 }
 
 /**
+ * Runs on 'plugins_loaded' to make make sure the language files are loaded early.
+ */
+function easyio_load() {
+	load_plugin_textdomain( 'easy-image-optimizer', false, EASYIO_PLUGIN_PATH . 'languages/' );
+}
+
+/**
  * Runs early for checks that need to happen on init before anything else.
  */
 function easyio_init() {
@@ -313,9 +322,11 @@ function easyio_upgrade() {
 		}
 		easyio_set_defaults();
 		// This will get re-enabled if things are too slow.
-		update_option( 'exactdn_prevent_db_queries', false );
-		delete_option( 'easyio_exactdn_verify_method' );
-		delete_site_option( 'easyio_exactdn_verify_method' );
+		update_option( 'exactdn_prevent_db_queries', true );
+		if ( easyio_get_option( 'easyio_exactdn_verify_method' ) > 0 ) {
+			delete_option( 'easyio_exactdn_verify_method' );
+			delete_site_option( 'easyio_exactdn_verify_method' );
+		}
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
 			add_option( 'exactdn_never_been_active', true, '', false );
 		}
@@ -471,8 +482,7 @@ if ( ! function_exists( 'wp_doing_ajax' ) ) {
  * Let the user know they need to take action!
  */
 function easyio_notice_inactive() {
-	$options_page = 'options-general.php';
-	$settings_url = admin_url( "$options_page?page=" . plugin_basename( EASYIO_PLUGIN_FILE ) );
+	$settings_url = esc_url( admin_url( 'options-general.php?page=easy-image-optimizer-options' ) );
 	echo "<div id='easyio-inactive' class='notice notice-warning'><p>" .
 		"<a href='$settings_url'>" . esc_html__( 'Please visit the settings page to complete activation of the Easy Image Optimizer.', 'easy-image-optimizer' ) . '</a></p></div>';
 }
@@ -585,12 +595,12 @@ function easyio_network_admin_menu() {
 		$permissions = apply_filters( 'easyio_superadmin_permissions', '' );
 		// Add options page to the settings menu.
 		$easyio_network_options_page = add_submenu_page(
-			'settings.php',                        // Slug of parent.
-			'Easy Image Optimizer',                // Page Title.
-			'Easy Image Optimizer',                // Menu title.
-			$permissions,                          // Capability.
-			EASYIO_PLUGIN_FILE,      // Slug.
-			'easyio_network_options' // Function to call.
+			'settings.php',                 // Slug of parent.
+			'Easy Image Optimizer',         // Page Title.
+			'Easy Image Optimizer',         // Menu title.
+			$permissions,                   // Capability.
+			'easy-image-optimizer-options', // Slug.
+			'easyio_network_options'        // Function to call.
 		);
 	}
 }
@@ -604,7 +614,7 @@ function easyio_admin_menu() {
 		'Easy Image Optimizer',                                        // Page title.
 		'Easy Image Optimizer',                                        // Menu title.
 		apply_filters( 'easyio_admin_permissions', 'manage_options' ), // Capability.
-		EASYIO_PLUGIN_FILE_REL,                                        // Slug.
+		'easy-image-optimizer-options',                                // Slug.
 		'easyio_options'                                               // Function to call.
 	);
 }
@@ -622,9 +632,9 @@ function easyio_settings_link( $links ) {
 	}
 	// Load the html for the settings link.
 	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-		$settings_link = '<a href="network/settings.php?page=' . EASYIO_PLUGIN_FILE_REL . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
+		$settings_link = '<a href="network/settings.php?page=easy-image-optimizer-options">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
 	} else {
-		$settings_link = '<a href="options-general.php?page=' . EASYIO_PLUGIN_FILE_REL . '">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
+		$settings_link = '<a href="options-general.php?page=easy-image-optimizer-options">' . esc_html__( 'Settings', 'easy-image-optimizer' ) . '</a>';
 	}
 	// Load the settings link into the plugin links array.
 	array_unshift( $links, $settings_link );
