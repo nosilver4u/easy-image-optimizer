@@ -1,3 +1,8 @@
+= 2.2.5 =
+* fixed: errors with WP Offload Media 2.4
+* fixed: Easy IO hard crops images when requested height/width is 9999
+* fixed: Lazy Load parser running on customizer preview pane
+
 = 2.2.4 =
 * added: GIF to WebP conversion with API and Easy IO
 * added: disable Lazy Load auto-scale by defining EIO_LL_AUTOSCALE as false

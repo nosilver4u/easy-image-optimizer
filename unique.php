@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '224' );
+define( 'EASYIO_VERSION', '225' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -1230,7 +1230,7 @@ function easyio_is_amp() {
  * @param string $message Debug information to add to the log.
  */
 function easyio_debug_message( $message ) {
-	if ( ! is_string( $message ) ) {
+	if ( ! is_string( $message ) && ! is_int( $message ) && ! is_float( $message ) ) {
 		return;
 	}
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {

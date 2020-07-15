@@ -115,6 +115,10 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return 'you are doing it wrong';
 			}
 
+			// Bail out on customizer.
+			if ( is_customize_preview() ) {
+				return;
+			}
 			// Make sure we have an ExactDN domain to use.
 			if ( ! $this->setup() ) {
 				return;
@@ -132,6 +136,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			$uri = add_query_arg( null, null );
 			$this->debug_message( "request uri is $uri" );
 
+			if ( '/robots.txt' === $uri ) {
+				return;
+			}
 			/**
 			 * Allow pre-empting the parsers by page.
 			 *
@@ -1701,8 +1708,8 @@ if ( ! class_exists( 'ExactDN' ) ) {
 					);
 				} elseif ( is_array( $size ) ) {
 					// Pull width and height values from the provided array, if possible.
-					$width  = isset( $size[0] ) ? (int) $size[0] : false;
-					$height = isset( $size[1] ) ? (int) $size[1] : false;
+					$width  = isset( $size[0] ) && $size[0] < 9999 ? (int) $size[0] : false;
+					$height = isset( $size[1] ) && $size[1] < 9999 ? (int) $size[1] : false;
 
 					// Don't bother if necessary parameters aren't passed.
 					if ( ! $width || ! $height ) {
@@ -1907,8 +1914,8 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				$constrained_size = wp_constrain_dimensions( $fullwidth, $fullheight, $reqwidth );
 				$expected_size    = array( $reqwidth, $reqheight );
 
-				$this->debug_message( $constrained_size[0] );
-				$this->debug_message( $constrained_size[1] );
+				$this->debug_message( 'constrained w: ' . $constrained_size[0] );
+				$this->debug_message( 'constrained h: ' . $constrained_size[1] );
 				if ( abs( $constrained_size[0] - $expected_size[0] ) <= 1 && abs( $constrained_size[1] - $expected_size[1] ) <= 1 ) {
 					$this->debug_message( 'soft cropping' );
 					$crop = 'soft';

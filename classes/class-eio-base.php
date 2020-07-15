@@ -154,7 +154,7 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 		 * @param string $message Debug information to add to the log.
 		 */
 		function debug_message( $message ) {
-			if ( ! is_string( $message ) ) {
+			if ( ! is_string( $message ) && ! is_int( $message ) && ! is_float( $message ) ) {
 				return;
 			}
 			if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -433,7 +433,9 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 		 */
 		function url_to_path_exists( $url, $extension = '' ) {
 			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
-			if ( 0 === strpos( $url, $this->relative_home_url ) ) {
+			if ( 0 === strpos( $url, WP_CONTENT_URL ) ) {
+				$path = str_replace( WP_CONTENT_URL, WP_CONTENT_DIR, $url );
+			} elseif ( 0 === strpos( $url, $this->relative_home_url ) ) {
 				$path = str_replace( $this->relative_home_url, ABSPATH, $url );
 			} elseif ( 0 === strpos( $url, $this->home_url ) ) {
 				$path = str_replace( $this->home_url, ABSPATH, $url );
@@ -445,10 +447,6 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 			if ( $this->is_file( $path_parts[0] . $extension ) ) {
 				$this->debug_message( 'local file found' );
 				return $path_parts[0];
-			}
-			if ( $this->is_file( $path . $extension ) ) {
-				$this->debug_message( 'local file found' );
-				return $path;
 			}
 			return false;
 		}
@@ -493,8 +491,10 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 					$s3_region = '';
 				}
 				$s3_domain = '';
-				if ( ! empty( $s3_bucket ) && ! is_wp_error( $s3_bucket ) ) {
+				if ( ! empty( $s3_bucket ) && ! is_wp_error( $s3_bucket ) && method_exists( $as3cf, 'get_provider' ) ) {
 					$s3_domain = $as3cf->get_provider()->get_url_domain( $s3_bucket, $s3_region, null, array(), true );
+				} elseif ( ! empty( $s3_bucket ) && ! is_wp_error( $s3_bucket ) && method_exists( $as3cf, 'get_storage_provider' ) ) {
+					$s3_domain = $as3cf->get_storage_provider()->get_url_domain( $s3_bucket, $s3_region );
 				}
 				if ( ! empty( $s3_domain ) && $as3cf->get_setting( 'serve-from-s3' ) ) {
 					$this->s3_active = true;
