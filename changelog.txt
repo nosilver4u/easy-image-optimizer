@@ -1,3 +1,9 @@
+= 2.2.6 =
+* changed: The browser-native portion of the Lazy Load feature obeys the wp_lazy_loading_enabled filter
+* changed: prevent parsing of sitemap.xml
+* fixed: Lazy Load placeholders not rewritten for CDN usage by Autoptimize and WP Offload Media Assets Add-on
+* fixed: ensure video files do not have extra query parameters added
+
 = 2.2.5 =
 * fixed: errors with WP Offload Media 2.4
 * fixed: Easy IO hard crops images when requested height/width is 9999

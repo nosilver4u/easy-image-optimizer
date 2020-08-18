@@ -136,7 +136,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			$uri = add_query_arg( null, null );
 			$this->debug_message( "request uri is $uri" );
 
-			if ( '/robots.txt' === $uri ) {
+			if ( '/robots.txt' === $uri || '/sitemap.xml' === $uri ) {
 				return;
 			}
 			/**
@@ -2880,6 +2880,11 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			// This is disabled, as I don't think we really need it.
 			if ( false && ! empty( $image_url_parts['query'] ) && false !== strpos( $image_url_parts['query'], 'theia_smart' ) ) {
 				$args = wp_parse_args( $image_url_parts['query'], $args );
+			}
+
+			// Clear out args for some files (like videos) that might go through image_downsize.
+			if ( ! empty( $extension ) && in_array( $extension, array( 'mp4', 'm4p', 'm4v', 'mov', 'wvm', 'qt', 'webp', 'ogv', 'mpg', 'mpeg', 'mpv' ), true ) ) {
+				$args = array();
 			}
 
 			if ( $args ) {

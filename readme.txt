@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 5.0
+Requires at least: 5.4
 Tested up to: 5.4
-Requires PHP: 5.6
-Stable tag: 2.2.5
+Requires PHP: 7.1
+Stable tag: 2.2.6
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.2.6 =
+* changed: The browser-native portion of the Lazy Load feature obeys the wp_lazy_loading_enabled filter
+* changed: prevent parsing of sitemap.xml
+* fixed: Lazy Load placeholders not rewritten for CDN usage by Autoptimize and WP Offload Media Assets Add-on
+* fixed: ensure video files do not have extra query parameters added
 
 = 2.2.5 =
 * fixed: errors with WP Offload Media 2.4
