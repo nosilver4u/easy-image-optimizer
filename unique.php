@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '226' );
+define( 'EASYIO_VERSION', '227' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -1032,7 +1032,7 @@ function easyio_options( $network = 'singlesite' ) {
 		$status_output .= '<span style="color: red">' . esc_html__( 'Inactive, please disable the Image Performance option on the Jetpack Dashboard.', 'easy-image-optimizer' ) . '</span>';
 	} elseif ( class_exists( 'ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) {
-			$status_output .= '<span style="color: #3eadc9; font-weight: bolder">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
+			$status_output .= '<span style="color: #3eadc9;">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
 			if ( defined( 'WP_ROCKET_VERSION' ) ) {
 				$status_notices[] = esc_html__( 'If you use the File Optimization options within WP Rocket, you should also enter your Easy I.O. domain in the WP Rocket CDN settings (reserved for CSS and Javascript):', 'easy-image-optimizer' ) . ' ' . $exactdn->get_exactdn_domain();
 			}

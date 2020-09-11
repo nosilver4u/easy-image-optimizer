@@ -1,3 +1,8 @@
+= 2.2.7 =
+* added: alert on domain change for Easy IO, like if you clone from a production environment to staging
+* changed: Easy IO domain and plan_id refresh automatically when visiting settings page
+* fixed: error with Lazy Load and AMP
+
 = 2.2.6 =
 * changed: The browser-native portion of the Lazy Load feature obeys the wp_lazy_loading_enabled filter
 * changed: prevent parsing of sitemap.xml
