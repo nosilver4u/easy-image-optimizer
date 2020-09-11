@@ -1,3 +1,6 @@
+= 2.2.8 =
+* fixed: lazy loader not loading
+
 = 2.2.7 =
 * added: alert on domain change for Easy IO, like if you clone from a production environment to staging
 * changed: Easy IO domain and plan_id refresh automatically when visiting settings page

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '227' );
+define( 'EASYIO_VERSION', '228' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -128,6 +128,9 @@ function easyio_parser_init() {
 		 * Lazy Load class for parsing image urls and deferring off-screen images.
 		 */
 		require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-lazy-load.php' );
+
+		global $eio_lazy_load;
+		$eio_lazy_load = new EIO_Lazy_Load();
 	}
 	if ( $buffer_start ) {
 		// Start an output buffer before any output starts.
