@@ -515,12 +515,35 @@ function easyio_notice_exactdn_activation_success() {
 }
 
 /**
- * Display a notice that PHP version 5.5 support is going away.
+ * Let the user know the local domain appears to have changed from what Easy IO has recorded in the db.
  */
-function easyio_php55_warning() {
-	echo '<div id="easyio-notice-php55" class="notice notice-info"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' .
-		esc_html__( 'The next major release of Easy Image Optimizer will require PHP 7.0 or greater. Newer versions of PHP, like 7.1 and 7.2, are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) .
-		'</a></p></div>';
+function easyio_notice_exactdn_domain_mismatch() {
+	global $exactdn;
+	if ( ! isset( $exactdn->upload_domain ) ) {
+		return;
+	}
+	?>
+	<div id="easyio-notice-exactdn-domain-mismatch" class="notice notice-warning">
+		<p>
+	<?php
+			printf(
+				/* translators: 1: old domain name, 2: current domain name */
+				esc_html__( 'Easy IO detected that the Site URL has changed since the initial activation (previously %1$s, currently %2$s).', 'easy-image-optimizer' ),
+				'<strong>' . esc_html( easyio_get_option( 'easyio_exactdn_local_domain' ) ) . '</strong>',
+				'<strong>' . esc_html( $exactdn->upload_domain ) . '</strong>'
+			);
+	?>
+			<br>
+		<?php
+		printf(
+			/* translators: %s: settings page */
+			esc_html__( 'Please visit the %s to refresh the Easy IO settings and verify activation status.', 'easy-image-optimizer' ),
+			'<a href="' . esc_url( admin_url( 'options-general.php?page=easy-image-optimizer-options' ) ) . '">' . esc_html__( 'settings page', 'easy-image-optimizer' ) . '</a>'
+		);
+		?>
+		</p>
+	</div>
+	<?php
 }
 
 /**
@@ -530,6 +553,15 @@ function easyio_notice_sp_conflict() {
 	echo "<div id='easyio-sp-conflict' class='notice notice-warning'><p>" .
 		esc_html__( 'ShortPixel/Autoptimize image optimization has been disabled to prevent conflicts with Easy Image Optimizer).', 'easy-image-optimizer' ) .
 		'</p></div>';
+}
+
+/**
+ * Display a notice that PHP version 5.5 support is going away.
+ */
+function easyio_php55_warning() {
+	echo '<div id="easyio-notice-php55" class="notice notice-info"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' .
+		esc_html__( 'The next major release of Easy Image Optimizer will require PHP 7.0 or greater. Newer versions of PHP, like 7.1 and 7.2, are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) .
+		'</a></p></div>';
 }
 
 /**
@@ -916,6 +948,17 @@ function easyio_settings_script( $hook ) {
 	// Make sure we are being called from the settings page.
 	if ( strpos( $hook, 'settings_page_easy-image-optimizer' ) !== 0 ) {
 		return;
+	}
+	delete_option( 'easyio_exactdn_checkin' );
+	global $exactdn;
+	if ( has_action( 'admin_notices', 'easyio_notice_exactdn_domain_mismatch' ) ) {
+		delete_option( 'easyio_exactdn_domain' );
+		delete_option( 'easyio_exactdn_local_domain' );
+		delete_option( 'easyio_exactdn_plan_id' );
+		delete_option( 'easyio_exactdn_failures' );
+		delete_option( 'easyio_exactdn_verified' );
+		remove_action( 'admin_notices', 'easyio_notice_exactdn_domain_mismatch' );
+		$exactdn->setup();
 	}
 	wp_enqueue_script( 'easyio-settings-script', plugins_url( '/includes/eio.js', __FILE__ ), array( 'jquery' ), EASYIO_VERSION );
 	wp_localize_script( 'easyio-settings-script', 'easyio_vars', array( '_wpnonce' => wp_create_nonce( 'easy-image-optimizer-settings' ) ) );
