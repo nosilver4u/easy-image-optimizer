@@ -1,6 +1,6 @@
 <?php
 /**
- * Functions unique to Easy I.O. ported from EWWW I.O.
+ * Functions unique to Easy IO ported from EWWW IO
  *
  * @link https://ewww.io/resize/
  * @package Easy_Image_Optimizer
@@ -55,7 +55,7 @@ register_deactivation_hook( EASYIO_PLUGIN_FILE, 'easyio_network_deactivate' );
 add_action( 'shutdown', 'easyio_debug_log' );
 
 /**
- * Attempt to activate the site with ExactDN/Easy I.O.
+ * Attempt to activate the site with ExactDN/Easy IO.
  */
 function easyio_activate() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
@@ -82,7 +82,7 @@ function easyio_activate() {
 }
 
 /**
- * De-activate the site with ExactDN/Easy I.O.
+ * De-activate the site with ExactDN/Easy IO.
  */
 function easyio_deactivate() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
@@ -574,7 +574,7 @@ function easyio_notice_beacon() {
 	$optin_url  = 'admin.php?action=eio_opt_into_hs_beacon';
 	$optout_url = 'admin.php?action=eio_opt_out_of_hs_beacon';
 	echo '<div id="easyio-hs-beacon" class="notice notice-info"><p>' .
-		esc_html__( 'Enable the Easy I.O. support beacon, which gives you access to documentation and our support team right from your WordPress dashboard. To assist you more efficiently, we collect the current url, IP address, browser/device information, and debugging information.', 'easy-image-optimizer' ) .
+		esc_html__( 'Enable the Easy IO support beacon, which gives you access to documentation and our support team right from your WordPress dashboard. To assist you more efficiently, we collect the current url, IP address, browser/device information, and debugging information.', 'easy-image-optimizer' ) .
 		'<br><a href="' . esc_url( $optin_url ) . '" class="button-secondary">' . esc_html__( 'Allow', 'easy-image-optimizer' ) . '</a>' .
 		'&nbsp;<a href="' . esc_url( $optout_url ) . '" class="button-secondary">' . esc_html__( 'Do not allow', 'easy-image-optimizer' ) . '</a>' .
 		'</p></div>';
@@ -1036,15 +1036,16 @@ function easyio_options( $network = 'singlesite' ) {
 	} elseif ( class_exists( 'ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) {
 			$status_output .= '<span style="color: #3eadc9;">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
+			$status_output .= '<br><span style="font-weight:normal;line-height:1.8em;">' . esc_html( $exactdn->get_exactdn_domain() ) . '</span>';
 			if ( defined( 'WP_ROCKET_VERSION' ) ) {
-				$status_notices[] = esc_html__( 'If you use the File Optimization options within WP Rocket, you should also enter your Easy I.O. domain in the WP Rocket CDN settings (reserved for CSS and Javascript):', 'easy-image-optimizer' ) . ' ' . $exactdn->get_exactdn_domain();
+				$status_notices[] = esc_html__( 'If you use the File Optimization options within WP Rocket, you should also enter your Easy IO domain in the WP Rocket CDN settings (reserved for CSS and Javascript):', 'easy-image-optimizer' ) . ' ' . $exactdn->get_exactdn_domain();
 			}
 		} else {
 			easyio_debug_message( 'could not verify: ' . $exactdn->get_exactdn_domain() );
 			$status_output .= '<span style="color: red; font-weight: bolder"><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Not Verified', 'easy-image-optimizer' ) . '</a></span>';
 		}
 		if ( function_exists( 'remove_query_strings_link' ) || function_exists( 'rmqrst_loader_src' ) || function_exists( 'qsr_remove_query_strings_1' ) ) {
-			$status_notices[] = esc_html__( 'Plugins that remove query strings are unnecessary with Easy I.O. You may remove them at your convenience.', 'easy-image-optimizer' ) . ' ' . easyio_help_link( 'https://docs.ewww.io/article/50-exactdn-and-query-strings', '5a3d278a2c7d3a1943677b52' );
+			$status_notices[] = esc_html__( 'Plugins that remove query strings are unnecessary with Easy IO You may remove them at your convenience.', 'easy-image-optimizer' ) . ' ' . easyio_help_link( 'https://docs.ewww.io/article/50-exactdn-and-query-strings', '5a3d278a2c7d3a1943677b52' );
 		}
 	} elseif ( ! easyio_get_option( 'easyio_exactdn' ) ) {
 		$status_output .= esc_html__( 'Complete activation below to enable automatic resizing and more', 'easy-image-optimizer' );
@@ -1154,10 +1155,10 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = "<p><a class='easyio-docs-root' href='https://docs.ewww.io/category/76-easy-io'>" . esc_html__( 'Documentation', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'Plugin Support', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://ewww.io/status/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a> | ' .
-		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy I.O.', 'easy-image-optimizer' ) . '</a> | ' .
+		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy IO', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . '</a>';
 		"</p>\n";
-	$output[] = "<p><strong><a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'If Easy I.O. is not working like you think it should, we want to know!', 'easy-image-optimizer' ) . '</a></strong></p>';
+	$output[] = "<p><strong><a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'If Easy IO is not working like you think it should, we want to know!', 'easy-image-optimizer' ) . '</a></strong></p>';
 	$output[] = "<table class='form-table'>\n";
 	$output[] = "<tr><th scope='row'><label for='easyio_enable_help'>" . esc_html__( 'Enable Embedded Help', 'easy-image-optimizer' ) .
 		"</label></th><td><input type='checkbox' id='easyio_enable_help' name='easyio_enable_help' value='true' " .
