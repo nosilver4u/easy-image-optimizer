@@ -1,3 +1,10 @@
+= 2.2.9 =
+* added: display total savings on settings page
+* fixed: Lazy Load breaks JSON-encoded img elements
+* fixed: Easy IO adds excess markup for images with height and/or width set to 'auto'
+* fixed: memory_limit check should be case-insensitive: g vs. G
+* fixed: Easy IO skips images in AJAX Load More requests
+
 = 2.2.8 =
 * fixed: lazy loader not loading
 

@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.4
 Tested up to: 5.5
 Requires PHP: 7.1
-Stable tag: 2.2.8
+Stable tag: 2.2.9
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,13 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.2.9 =
+* added: display total savings on settings page
+* fixed: Lazy Load breaks JSON-encoded img elements
+* fixed: Easy IO adds excess markup for images with height and/or width set to 'auto'
+* fixed: memory_limit check should be case-insensitive: g vs. G
+* fixed: Easy IO skips images in AJAX Load More requests
 
 = 2.2.8 =
 * fixed: lazy loader not loading

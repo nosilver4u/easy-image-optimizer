@@ -172,6 +172,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			// Overrides for admin-ajax images.
 			add_filter( 'exactdn_admin_allow_image_downsize', array( $this, 'allow_admin_image_downsize' ), 10, 2 );
+			add_filter( 'exactdn_admin_allow_image_srcset', array( $this, 'allow_admin_image_downsize' ), 10, 2 );
 			// Overrides for "pass through" images.
 			add_filter( 'exactdn_pre_args', array( $this, 'exactdn_remove_args' ), 10, 3 );
 			// Overrides for user exclusions.
@@ -300,10 +301,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			$site_url = $this->content_url();
 			$home_url = home_url();
-			$originip = '';
-			if ( ! empty( $_SERVER['SERVER_ADDR'] ) ) {
-				$originip = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ) );
-			}
 
 			$url = 'http://optimize.exactlywww.com/exactdn/activate.php';
 			$ssl = wp_http_supports( array( 'ssl' ) );
@@ -318,7 +315,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 					'body'    => array(
 						'site_url' => $site_url,
 						'home_url' => $home_url,
-						'originip' => $originip,
 					),
 				)
 			);
@@ -404,7 +400,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 
 			$this->check_verify_method();
-			$this->set_exactdn_option( 'checkin', time() + 3600 );
+			$this->set_exactdn_option( 'checkin', time() + DAY_IN_SECONDS );
 
 			// Set a default error.
 			global $exactdn_activate_error;
@@ -902,15 +898,16 @@ if ( ! class_exists( 'ExactDN' ) ) {
 						// Find the width and height attributes.
 						$width  = $this->get_img_width( $images['img_tag'][ $index ] );
 						$height = $this->get_img_height( $images['img_tag'][ $index ] );
-						// Falsify them if empty.
-						$width  = $width ? $width : false;
-						$height = $height ? $height : false;
 
 						// Can't pass both a relative width and height, so unset the dimensions in favor of not breaking the horizontal layout.
 						if ( false !== strpos( $width, '%' ) && false !== strpos( $height, '%' ) ) {
 							$width  = false;
 							$height = false;
 						}
+
+						// Falsify them if empty.
+						$width  = $width && is_numeric( $width ) ? $width : false;
+						$height = $height && is_numeric( $height ) ? $height : false;
 
 						// Detect WP registered image size from HTML class.
 						if ( preg_match( '#class=["|\']?[^"\']*size-([^"\'\s]+)[^"\']*["|\']?#i', $images['img_tag'][ $index ], $size ) ) {
@@ -1467,6 +1464,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return true;
 			}
 			if ( ! empty( $_POST['action'] ) && 'mabel-rpn-getnew-purchased-products' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+				return true;
+			}
+			if ( ! empty( $_REQUEST['action'] ) && 'alm_get_posts' === $_REQUEST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return true;
 			}
 			return $allow;
@@ -2775,7 +2775,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 
 			$jpg_quality  = apply_filters( 'jpeg_quality', null, 'image_resize' );
-			$webp_quality = apply_filters( 'jpeg_quality', $jpg_quality, 'image/webp' );
+			$webp_quality = apply_filters( 'webp_quality', 75, 'image/webp' );
 
 			$more_args = array();
 			if ( false === strpos( $image_url, 'strip=all' ) && $this->get_option( $this->prefix . 'metadata_remove' ) ) {
@@ -2795,6 +2795,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 			if ( $this->plan_id > 1 && false === strpos( $image_url, 'quality=' ) && ! is_null( $jpg_quality ) && 82 !== (int) $jpg_quality ) {
 				$more_args['quality'] = $jpg_quality;
+			}
+			if ( $this->plan_id > 1 && false === strpos( $image_url, 'quality=' ) && 75 !== (int) $webp_quality && $webp_quality < $jpg_quality ) {
+				$more_args['quality'] = $webp_quality;
 			}
 			// Merge given args with the automatic (option-based) args, and also makes sure args is an array if it was previously a string.
 			$args = wp_parse_args( $args, $more_args );
@@ -2984,6 +2987,41 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				$domains[] = $this->exactdn_domain;
 			}
 			return $domains;
+		}
+
+		/**
+		 * Checks the configured alias for savings information.
+		 *
+		 * @return array The original size of all images that have been compressed by Easy IO along with how much was saved.
+		 */
+		function savings() {
+			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+			$url = 'http://optimize.exactlywww.com/exactdn/savings.php';
+			$ssl = wp_http_supports( array( 'ssl' ) );
+			if ( $ssl ) {
+				$url = set_url_scheme( $url, 'https' );
+			}
+			add_filter( 'http_headers_useragent', $this->prefix . 'cloud_useragent', PHP_INT_MAX );
+			$result = wp_remote_post(
+				$url,
+				array(
+					'timeout' => 10,
+					'body'    => array(
+						'alias' => $this->exactdn_domain,
+					),
+				)
+			);
+			if ( is_wp_error( $result ) ) {
+				$error_message = $result->get_error_message();
+				$this->debug_message( "savings request failed: $error_message" );
+			} elseif ( ! empty( $result['body'] ) ) {
+				$this->debug_message( "savings data retrieved: {$result['body']}" );
+				$response = json_decode( $result['body'], true );
+				if ( is_array( $response ) && ! empty( $response['original'] ) && ! empty( $response['savings'] ) ) {
+					return $response;
+				}
+			}
+			return false;
 		}
 	}
 

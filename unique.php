@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '228' );
+define( 'EASYIO_VERSION', '229' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -1035,8 +1035,13 @@ function easyio_options( $network = 'singlesite' ) {
 		$status_output .= '<span style="color: red">' . esc_html__( 'Inactive, please disable the Image Performance option on the Jetpack Dashboard.', 'easy-image-optimizer' ) . '</span>';
 	} elseif ( class_exists( 'ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) {
-			$status_output .= '<span style="color: #3eadc9;">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
-			$status_output .= '<br><span style="font-weight:normal;line-height:1.8em;">' . esc_html( $exactdn->get_exactdn_domain() ) . '</span>';
+			$exactdn_savings = $exactdn->savings();
+			$status_output  .= '<span style="color: #3eadc9;">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
+			$status_output  .= '<br><span style="font-weight:normal;line-height:1.8em;">' . esc_html( $exactdn->get_exactdn_domain() ) . '</span>';
+			if ( ! empty( $exactdn_savings ) && ! empty( $exactdn_savings['original'] ) && ! empty( $exactdn_savings['savings'] ) ) {
+				$exactdn_percent = round( $exactdn_savings['savings'] / $exactdn_savings['original'], 3 ) * 100;
+				$status_output  .= '<br>' . esc_html__( 'Image Savings:', 'easy-image-optimizer' ) . ' <span style="font-weight:normal;">' . $exactdn_percent . '% (' . esc_html( easyio_size_format( $exactdn_savings['savings'], 1 ) ) . ')</span>';
+			}
 			if ( defined( 'WP_ROCKET_VERSION' ) ) {
 				$status_notices[] = esc_html__( 'If you use the File Optimization options within WP Rocket, you should also enter your Easy IO domain in the WP Rocket CDN settings (reserved for CSS and Javascript):', 'easy-image-optimizer' ) . ' ' . $exactdn->get_exactdn_domain();
 			}
@@ -1441,7 +1446,7 @@ function easyio_memory_limit() {
 		// Unlimited, set to 32GB.
 		$memory_limit = '32000M';
 	}
-	if ( strpos( $memory_limit, 'G' ) ) {
+	if ( stripos( $memory_limit, 'g' ) ) {
 		$memory_limit = intval( $memory_limit ) * 1024 * 1024 * 1024;
 	} else {
 		$memory_limit = intval( $memory_limit ) * 1024 * 1024;

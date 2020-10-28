@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 			});
 			$('.easyio-docs-root').click(function() {
 				event.preventDefault();
-				Beacon('navigate', '/answers/')
+				Beacon('suggest', ['59bc5ad6042863033a1ce370','59de6631042863379ddc953c','5beee9932c7d3a31944e0d33','5d56e71c0428634552d84bd1','59c44349042863033a1d06d3']);
 				Beacon('open');
 			});
 			$('.easyio-help-beacon-multi').click(function() {
