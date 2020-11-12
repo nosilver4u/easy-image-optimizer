@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '230' );
+define( 'EASYIO_VERSION', '231' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -544,6 +544,19 @@ function easyio_notice_exactdn_domain_mismatch() {
 			'<a href="' . esc_url( admin_url( 'options-general.php?page=easy-image-optimizer-options' ) ) . '">' . esc_html__( 'settings page', 'easy-image-optimizer' ) . '</a>'
 		);
 		?>
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Let the user know they need to disable the WP Offload Media CNAME.
+ */
+function easyio_notice_exactdn_as3cf_cname_active() {
+	?>
+	<div id="easyio-notice-exactdn-as3cf-cname-active" class="notice notice-error">
+		<p>
+			<?php esc_html_e( 'Easy IO cannot optimize your images while using a custom domain (CNAME) in WP Offload Media. Please disable the custom domain in the WP Offload Media settings.', 'easy-image-optimizer' ); ?>
 		</p>
 	</div>
 	<?php

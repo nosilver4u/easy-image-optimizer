@@ -1,3 +1,10 @@
+= 2.3.1 =
+* changed: Easy IO verification performed via API for better reliability
+* fixed: Easy IO missing https availability for admin-ajax.php requests when home_url is using plain http
+* fixed: Easy IO silently fails to rewrite URLs when using CNAME with WP Offload Media
+* fixed: wp_lazy_loading_enabled filter should have 3 parameters
+* fixed: Easy IO shows alert for domain change when a non-default WPML language is active
+
 = 2.3.0 =
 * fixed: Easy IO missing https availability for admin-ajax.php requests when home_url is using plain http
 * fixed: wp_lazy_loading_enabled filter should have 3 parameters
