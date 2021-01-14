@@ -173,6 +173,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				'/print/' === substr( $uri, -7 ) ||
 				strpos( $uri, 'elementor-preview=' ) !== false ||
 				strpos( $uri, 'et_fb=' ) !== false ||
+				strpos( $uri, '?fl_builder' ) !== false ||
 				strpos( $uri, 'tatsu=' ) !== false ||
 				( ! empty( $_POST['action'] ) && 'tatsu_get_concepts' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) || // phpcs:ignore WordPress.Security.NonceVerification
 				! apply_filters( 'eio_do_lazyload', true ) ||
@@ -206,6 +207,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				}
 				if ( strpos( $uri, 'et_fb=' ) !== false ) {
 					$this->debug_message( 'et_fb' );
+				}
+				if ( strpos( $uri, '?fl_builder' ) !== false ) {
+					$this->debug_message( 'beaver builder' );
 				}
 				if ( strpos( $uri, 'tatsu=' ) !== false || ( ! empty( $_POST['action'] ) && 'tatsu_get_concepts' === $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 					$this->debug_message( 'tatsu' );
@@ -268,16 +272,11 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 					}
 				} // End foreach().
 			} // End if().
-			// Process background images on div elements.
-			$buffer = $this->parse_background_images( $buffer, 'div' );
-			// Process background images on li elements.
-			$buffer = $this->parse_background_images( $buffer, 'li' );
-			// Process background images on span elements.
-			$buffer = $this->parse_background_images( $buffer, 'span' );
-			// Process background images on section elements.
-			$buffer = $this->parse_background_images( $buffer, 'section' );
-			// Process background images on a/link elements.
-			$buffer = $this->parse_background_images( $buffer, 'a' );
+			$element_types = apply_filters( 'eio_allowed_background_image_elements', array( 'div', 'li', 'span', 'section', 'a' ) );
+			foreach ( $element_types as $element_type ) {
+				// Process background images on HTML elements.
+				$buffer = $this->parse_background_images( $buffer, $element_type );
+			}
 			if ( in_array( 'picture', $this->user_element_exclusions, true ) ) {
 				$pictures = '';
 			} else {
@@ -503,6 +502,13 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				foreach ( $elements as $index => $element ) {
 					$this->debug_message( "parsing a $tag_type" );
 					if ( false === strpos( $element, 'background:' ) && false === strpos( $element, 'background-image:' ) ) {
+						if ( 'div' === $tag_type ) {
+							$element = $this->lazify_element( $element );
+						}
+						if ( $element !== $elements[ $index ] ) {
+							$this->debug_message( "$tag_type lazified, replacing in html source" );
+							$buffer = str_replace( $elements[ $index ], $element, $buffer );
+						}
 						continue;
 					}
 					$this->debug_message( 'element contains background/background-image:' );
@@ -533,6 +539,26 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				}
 			}
 			return $buffer;
+		}
+
+		/**
+		 * Add lazyload class to any element that doesn't have a direct-attached background image.
+		 *
+		 * @param string $element The HTML element/tag to parse.
+		 * @return string The (maybe) modified element.
+		 */
+		function lazify_element( $element ) {
+			if ( defined( 'EIO_EXTERNAL_CSS_LAZY_LOAD' ) && ! EIO_EXTERNAL_CSS_LAZY_LOAD ) {
+				return $element;
+			}
+			if ( false === strpos( $element, 'background:' ) && false === strpos( $element, 'background-image:' ) && false === strpos( $element, 'style=' ) ) {
+				if ( false !== strpos( $element, 'id=' ) || false !== strpos( $element, 'class=' ) ) {
+					if ( $this->validate_bgimage_tag( $element ) ) {
+						$this->set_attribute( $element, 'class', $this->get_attribute( $element, 'class' ) . ' lazyload', true );
+					}
+				}
+			}
+			return $element;
 		}
 
 		/**
@@ -794,6 +820,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 		 */
 		function no_js_css() {
 			echo '<noscript><style>.lazyload[data-src]{display:none !important;}</style></noscript>';
+			echo '<style>.lazyload{background-image:none !important;}</style>';
 		}
 
 		/**

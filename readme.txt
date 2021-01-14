@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.4
 Tested up to: 5.6
 Requires PHP: 7.1
-Stable tag: 2.3.1
+Stable tag: 2.4.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,19 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.4.0 =
+* added: Lazy Load for external CSS and separate style blocks (div elements only for now)
+* added: Easy IO/CDN rewriting for Ultimate Member AJAX-powered activity wall
+* changed: better compatibility with Theia Smart Thumbnails
+* changed: Lazy Load auto-sizing will no longer decrease the image size, only increasing is allowed
+* changed: filter to include additional HTML element types via eio_allowed_background_image_elements filter for Lazy Load and Easy IO
+* fixed: compatibility between Easy IO and Autoptimize
+* fixed: Easy IO uses hard crop when constraining an image via a width/height found in the style attribute
+* fixed: Easy IO uses hard-coded wp-content/ and wp-includes/ paths in some cases
+* fixed: Easy IO doubles part of image URL when there are no thumbnails, but one is requested by a plugin or theme
+* fixed: Easy IO minifier breaks Beaver Builder
+* fixed: Lazy Load breaks Beaver Builder text editor
 
 = 2.3.1 =
 * changed: Easy IO verification performed via API for better reliability
