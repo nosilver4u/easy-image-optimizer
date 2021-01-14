@@ -417,11 +417,11 @@ function easyio_admin_init() {
 	// Prevent ShortPixel AIO messiness.
 	remove_action( 'admin_notices', 'autoptimizeMain::notice_plug_imgopt' );
 	if ( class_exists( 'autoptimizeExtra' ) ) {
-		$ao_extra = get_option( 'autoptimize_extra_settings' );
-		if ( easyio_get_option( 'easyio_exactdn' ) && ! empty( $ao_extra['autoptimize_extra_checkbox_field_5'] ) ) {
+		$ao_extra = get_option( 'autoptimize_imgopt_settings' );
+		if ( easyio_get_option( 'easyio_exactdn' ) && ! empty( $ao_extra['autoptimize_imgopt_checkbox_field_1'] ) ) {
 			easyio_debug_message( 'detected ExactDN + SP conflict' );
-			$ao_extra['autoptimize_extra_checkbox_field_5'] = 0;
-			update_option( 'autoptimize_extra_settings', $ao_extra );
+			$ao_extra['autoptimize_imgopt_checkbox_field_1'] = 0;
+			update_option( 'autoptimize_imgopt_settings', $ao_extra );
 			add_action( 'admin_notices', 'easyio_notice_sp_conflict' );
 		}
 	}
@@ -615,19 +615,13 @@ function easyio_network_deactivate( $network_wide ) {
 			foreach ( $blogs as $blog ) {
 				switch_to_blog( $blog['blog_id'] );
 				update_option( 'easyio_exactdn', false );
-				update_option( 'exactdn_all_the_things', false );
-				update_option( 'exactdn_lossy', false );
 				update_option( 'easyio_lazy_load', false );
-				update_option( 'easyio_use_lqip', false );
 				restore_current_blog();
 			}
 		}
 	} else {
 		update_option( 'easyio_exactdn', false );
-		update_option( 'exactdn_all_the_things', false );
-		update_option( 'exactdn_lossy', false );
 		update_option( 'easyio_lazy_load', false );
-		update_option( 'easyio_use_lqip', false );
 	}
 }
 
