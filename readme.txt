@@ -55,6 +55,10 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.4.1 =
+* fixed: lazy load for external CSS impacting div elements in JS/JSON
+* removed: JS defer with Easy IO, use SWIS Performance instead: https://ewww.io/swis/
+
 = 2.4.0 =
 * added: Lazy Load for external CSS and separate style blocks (div elements only for now)
 * added: Easy IO/CDN rewriting for Ultimate Member AJAX-powered activity wall
