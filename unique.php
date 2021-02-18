@@ -1049,9 +1049,6 @@ function easyio_options( $network = 'singlesite' ) {
 				$exactdn_percent = round( $exactdn_savings['savings'] / $exactdn_savings['original'], 3 ) * 100;
 				$status_output  .= '<br>' . esc_html__( 'Image Savings:', 'easy-image-optimizer' ) . ' <span style="font-weight:normal;">' . $exactdn_percent . '% (' . esc_html( easyio_size_format( $exactdn_savings['savings'], 1 ) ) . ')</span>';
 			}
-			if ( defined( 'WP_ROCKET_VERSION' ) ) {
-				$status_notices[] = esc_html__( 'If you use the File Optimization options within WP Rocket, you should also enter your Easy IO domain in the WP Rocket CDN settings (reserved for CSS and Javascript):', 'easy-image-optimizer' ) . ' ' . $exactdn->get_exactdn_domain();
-			}
 		} else {
 			easyio_debug_message( 'could not verify: ' . $exactdn->get_exactdn_domain() );
 			$status_output .= '<span style="color: red; font-weight: bolder"><a href="https://ewww.io/manage-sites/" target="_blank">' . esc_html__( 'Not Verified', 'easy-image-optimizer' ) . '</a></span>';
