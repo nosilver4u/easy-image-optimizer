@@ -1,3 +1,6 @@
+= 2.4.3 =
+* fixed: syntax error on PHP 7.2 or less
+
 = 2.4.2 =
 * changed: Easy IO supports img tags with SVG images
 * fixed: error when a class attribute with no value is encountered
