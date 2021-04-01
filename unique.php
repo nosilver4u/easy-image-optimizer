@@ -2,7 +2,7 @@
 /**
  * Functions unique to Easy IO ported from EWWW IO
  *
- * @link https://ewww.io/resize/
+ * @link https://ewww.io/easy/
  * @package Easy_Image_Optimizer
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '243' );
+define( 'EASYIO_VERSION', '250' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -306,10 +306,12 @@ function easyio_set_defaults() {
 	add_option( 'exactdn_lossy', false );
 	add_option( 'exactdn_exclude', '' );
 	add_option( 'easyio_lazy_load', false );
+	add_option( 'easyio_ll_autoscale', true );
 	add_option( 'easyio_ll_exclude', '' );
 
 	// Set network defaults.
 	add_site_option( 'easyio_metadata_remove', true );
+	add_site_option( 'easyio_ll_autoscale', true );
 }
 
 /**
