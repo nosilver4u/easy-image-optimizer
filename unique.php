@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '250' );
+define( 'EASYIO_VERSION', '251' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -91,10 +91,7 @@ function easyio_deactivate() {
 		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
 	}
 	update_option( 'easyio_exactdn', false );
-	update_option( 'exactdn_all_the_things', false );
-	update_option( 'exactdn_lossy', false );
 	update_option( 'easyio_lazy_load', false );
-	update_option( 'easyio_use_lqip', false );
 	$sendback = wp_get_referer();
 	wp_redirect( esc_url_raw( $sendback ) );
 	exit( 0 );
@@ -305,12 +302,14 @@ function easyio_set_defaults() {
 	add_option( 'exactdn_all_the_things', false );
 	add_option( 'exactdn_lossy', false );
 	add_option( 'exactdn_exclude', '' );
+	add_option( 'easyio_add_missing_dims', true );
 	add_option( 'easyio_lazy_load', false );
 	add_option( 'easyio_ll_autoscale', true );
 	add_option( 'easyio_ll_exclude', '' );
 
 	// Set network defaults.
 	add_site_option( 'easyio_metadata_remove', true );
+	add_site_option( 'easyio_add_missing_dims', true );
 	add_site_option( 'easyio_ll_autoscale', true );
 }
 
@@ -384,6 +383,8 @@ function easyio_admin_init() {
 			update_site_option( 'exactdn_lossy', $_POST['exactdn_lossy'] );
 			$_POST['exactdn_exclude'] = empty( $_POST['exactdn_exclude'] ) ? '' : $_POST['exactdn_exclude'];
 			update_site_option( 'exactdn_exclude', easyio_exclude_paths_sanitize( $_POST['exactdn_exclude'] ) );
+			$_POST['easyio_add_missing_dims'] = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
+			update_site_option( 'easyio_add_missing_dims', $_POST['easyio_add_missing_dims'] );
 			$_POST['easyio_lazy_load'] = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
 			update_site_option( 'easyio_lazy_load', $_POST['easyio_lazy_load'] );
 			$_POST['easyio_use_lqip'] = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
@@ -409,6 +410,7 @@ function easyio_admin_init() {
 	register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
 	register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
 	register_setting( 'easyio_options', 'exactdn_exclude', 'easyio_exclude_paths_sanitize' );
+	register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_ll_exclude', 'easyio_exclude_paths_sanitize' );
@@ -1105,7 +1107,7 @@ function easyio_options( $network = 'singlesite' ) {
 			"<input type='hidden' id='easyio_exactdn' name='easyio_exactdn' value='true' />" .
 			"</td></tr>\n";
 		easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) );
-		$output[] = "<tr><th scope='row'><label for='easyio_backup_files'>" . esc_html__( 'Include All Resources', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
+		$output[] = "<tr><th scope='row'><label for='exactdn_all_the_things'>" . esc_html__( 'Include All Resources', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
 			"<td><input type='checkbox' name='exactdn_all_the_things' value='true' " .
 			( 1 === $exactdn->get_plan_id() ? " id='exactdn_all_the_things_disabled' disabled " : " id='exactdn_all_the_things' " ) .
 			( 1 < $exactdn->get_plan_id() && easyio_get_option( 'exactdn_all_the_things' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ) . "</td></tr>\n";
@@ -1124,13 +1126,20 @@ function easyio_options( $network = 'singlesite' ) {
 		}
 		$eio_exclude_paths = easyio_get_option( 'exactdn_exclude' ) ? esc_html( implode( "\n", easyio_get_option( 'exactdn_exclude' ) ) ) : '';
 		$output[]          = "<tr><th scope='row'>" .
-			"<label for='exactdn_exclude'><strong>" . esc_html__( 'Exclusions', 'easy-image-optimizer' ) . '</strong></label>' .
+			"<label for='exactdn_exclude'>" . esc_html__( 'Exclusions', 'easy-image-optimizer' ) . '</label>' .
 			easyio_help_link( 'https://docs.ewww.io/article/68-exactdn-exclude', '5c0042892c7d3a31944e88a4' ) . '</th><td>' .
 			"<textarea id='exactdn_exclude' name='exactdn_exclude' rows='3' cols='60'>$eio_exclude_paths</textarea>\n" .
 			"<p class='description'>" . esc_html__( 'One exclusion per line: any pattern or path provided will not be optimized by Easy IO.', 'easy-image-optimizer' ) .
 			"</p></td></tr>\n";
 		easyio_debug_message( 'Easy IO exclusions:' );
 		easyio_debug_message( $eio_exclude_paths );
+		$output[] = "<tr><th scope='row'>" .
+			"<label for='easyio_add_missing_dims'>" . esc_html__( 'Add Missing Dimensions', 'easy-image-optimizer' ) . '</label></th>' .
+			"<td><input type='checkbox' id='easyio_add_missing_dims' name='easyio_add_missing_dims' value='true' " .
+				checked( easyio_get_option( 'easyio_add_missing_dims' ), true, false ) . ' ' . disabled( easyio_get_option( 'easyio_lazy_load' ), false, false ) . ' /> ' .
+			esc_html__( 'Add width/height attributes to reduce layout shifts and improve user experience.', 'easy-image-optimizer' ) .
+			( ! easyio_get_option( 'easyio_lazy_load' ) ? "<p class ='description'>*" . esc_html__( 'Requires Lazy Load.', 'ewww-image-optimizer' ) . '</p>' : '' ) .
+			"</td></tr>\n";
 		$output[] = "<tr><th scope='row'><p><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' .
 			easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
 			"</th><td><input type='checkbox' id='easyio_lazy_load' name='easyio_lazy_load' value='true' " .

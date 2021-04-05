@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 5.4
+Requires at least: 5.5
 Tested up to: 5.7
-Requires PHP: 7.1
-Stable tag: 2.5.0
+Requires PHP: 7.2
+Stable tag: 2.5.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,10 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.5.1 =
+* change: added setting to enable adding of missing width/height dimensions, disabled by default
+* fixed: warning from plugins using core wp_lazy_load filter without second parameter/argument
+
 = 2.5.0 =
 * added: ability to use SVG placeholders for more efficient lazy load via EASYIO_USE_SIIP override
 * added: Easy IO and Lazy Load add missing width and height to image elements
@@ -69,94 +73,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: removing metadata clobbers APNG animations
 * fixed: some JSON elements still being altered by Lazy Load
 * fixed: Easy IO throws warnings when WP content is not in a sub-directory
-
-= 2.4.3 =
-* fixed: syntax error on PHP 7.2 or less
-
-= 2.4.2 =
-* changed: Easy IO supports img tags with SVG images
-* fixed: error when a class attribute with no value is encountered
-
-= 2.4.1 =
-* fixed: lazy load for external CSS breaking div elements in JS/JSON
-* removed: JS defer with Easy IO, use SWIS Performance instead: https://ewww.io/swis/
-
-= 2.4.0 =
-* added: Lazy Load for external CSS and separate style blocks (div elements only for now)
-* added: Easy IO/CDN rewriting for Ultimate Member AJAX-powered activity wall
-* changed: better compatibility with Theia Smart Thumbnails
-* changed: Lazy Load auto-sizing will no longer decrease the image size, only increasing is allowed
-* changed: filter to include additional HTML element types via eio_allowed_background_image_elements filter for Lazy Load and Easy IO
-* fixed: compatibility between Easy IO and Autoptimize
-* fixed: Easy IO uses hard crop when constraining an image via a width/height found in the style attribute
-* fixed: Easy IO uses hard-coded wp-content/ and wp-includes/ paths in some cases
-* fixed: Easy IO doubles part of image URL when there are no thumbnails, but one is requested by a plugin or theme
-* fixed: Easy IO minifier breaks Beaver Builder
-* fixed: Lazy Load breaks Beaver Builder text editor
-
-= 2.3.1 =
-* changed: Easy IO verification performed via API for better reliability
-* fixed: Easy IO missing https availability for admin-ajax.php requests when home_url is using plain http
-* fixed: Easy IO silently fails to rewrite URLs when using CNAME with WP Offload Media
-* fixed: wp_lazy_loading_enabled filter should have 3 parameters
-* fixed: Easy IO shows alert for domain change when a non-default WPML language is active
-
-= 2.3.0 =
-* fixed: Easy IO missing https availability for admin-ajax.php requests when home_url is using plain http
-* fixed: wp_lazy_loading_enabled filter should have 3 parameters
-* fixed: Easy IO shows alert for domain change when a non-default WPML language is active
-
-= 2.2.9 =
-* added: display total savings on settings page
-* fixed: Lazy Load breaks JSON-encoded img elements
-* fixed: Easy IO adds excess markup for images with height and/or width set to 'auto'
-* fixed: memory_limit check should be case-insensitive: g vs. G
-* fixed: Easy IO skips images in AJAX Load More requests
-
-= 2.2.8 =
-* fixed: lazy loader not loading
-
-= 2.2.7 =
-* added: alert on domain change for Easy IO, like if you clone from a production environment to staging
-* changed: Easy IO domain and plan_id refresh automatically when visiting settings page
-* fixed: error with Lazy Load and AMP
-
-= 2.2.6 =
-* changed: The browser-native portion of the Lazy Load feature obeys the wp_lazy_loading_enabled filter
-* changed: prevent parsing of sitemap.xml
-* fixed: Lazy Load placeholders not rewritten for CDN usage by Autoptimize and WP Offload Media Assets Add-on
-* fixed: ensure video files do not have extra query parameters added
-
-= 2.2.5 =
-* fixed: errors with WP Offload Media 2.4
-* fixed: Easy IO hard crops images when requested height/width is 9999
-* fixed: Lazy Load parser running on customizer preview pane
-
-= 2.2.4 =
-* added: GIF to WebP conversion with API and Easy IO
-* added: disable Lazy Load auto-scale by defining EIO_LL_AUTOSCALE as false
-
-= 2.2.3 =
-* fixed: lazy load skips img elements with unquoted src attributes
-* fixed: sites using S3 fail verification after upgrade
-
-= 2.2.2 =
-* fixed: Lazy Load has nested fall-back img elements if an image is found multiple times in a page
-* fixed: Easy IO mangles srcset URLs when src URL is relative instead of absolute
-* fixed: Easy IO URLs leaking into block editor for new uploads
-
-= 2.2.1 =
-* added: EXACTDN_DEFER_JQUERY_SAFE override for when inline scripts depend on jQuery
-* changed: Easy IO uses better query-string fall-back for plugins
-* changed: Easy IO enforces https if available rather than protocol-relative URLs
-
-= 2.2.0 =
-* added: defer jQuery also with EXACTDN_DEFER_JQUERY override
-* added: Lazy Load supports VC grid layouts retrieved via AJAX
-* fixed: Lazy Load prevents loading of images in oEmbed endpoint
-* fixed: jQuery exclusion was preventing deferral of jQuery extensions also
-* fixed: Lazy Load parsing Owl Lazy images
-* fixed: Easy IO adds srcset/sizes to feeds
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
