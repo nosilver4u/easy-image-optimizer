@@ -949,7 +949,8 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 		 */
 		function no_js_css() {
 			echo '<noscript><style>.lazyload[data-src]{display:none !important;}</style></noscript>';
-			echo '<style>.lazyload{background-image:none !important;}</style>';
+			// And this allows us to lazy load external/internal CSS background images.
+			echo '<style>.lazyload{background-image:none !important;}.lazyload:before{background-image:none !important;}</style>';
 		}
 
 		/**
@@ -993,12 +994,14 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( defined( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) && constant( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) ) {
 				wp_enqueue_script( 'eio-lazy-load-print', plugins_url( '/includes/ls.print.min.js', $plugin_file ), array(), $this->version );
 			}
+			$threshold = defined( 'EIO_LL_THRESHOLD' ) && EIO_LL_THRESHOLD ? EIO_LL_THRESHOLD : 0;
 			wp_localize_script(
 				'eio-lazy-load',
 				'eio_lazy_vars',
 				array(
 					'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
 					'skip_autoscale' => ( defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
+					'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
 				)
 			);
 		}

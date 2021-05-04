@@ -305,6 +305,8 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 
 			if ( $this->is_as3cf_cname_active() ) {
+				global $exactdn_activate_error;
+				$exactdn_activate_error = 'as3cf_cname_active';
 				add_action( 'admin_notices', $this->prefix . 'notice_exactdn_as3cf_cname_active' );
 				return false;
 			}
@@ -346,16 +348,8 @@ if ( ! class_exists( 'ExactDN' ) ) {
 						$this->set_exactdn_option( 'verify_method', -1, false );
 					}
 					if ( ! empty( $response['plan_id'] ) ) {
-						if ( 2 === (int) $response['plan_id'] ) {
-							$this->set_exactdn_option( 'plan_id', 2 );
-							$this->plan_id = 2;
-						} elseif ( 3 === (int) $response['plan_id'] ) {
-							$this->set_exactdn_option( 'plan_id', 3 );
-							$this->plan_id = 3;
-						} else {
-							$this->set_exactdn_option( 'plan_id', 1 );
-							$this->plan_id = 1;
-						}
+						$this->set_exactdn_option( 'plan_id', (int) $response['plan_id'] );
+						$this->plan_id = (int) $response['plan_id'];
 					}
 					if ( get_option( 'exactdn_never_been_active' ) ) {
 						$this->set_option( $this->prefix . 'lazy_load', true );
@@ -488,15 +482,9 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			} elseif ( ! empty( $result['body'] ) && false === strpos( $result['body'], 'error' ) ) {
 				$response = json_decode( $result['body'], true );
 				if ( ! empty( $response['success'] ) ) {
-					if ( 2 === (int) $response['success'] ) {
-						$this->set_exactdn_option( 'plan_id', 2 );
-						$this->plan_id = 2;
-					} elseif ( 3 === (int) $response['success'] ) {
-						$this->set_exactdn_option( 'plan_id', 3 );
-						$this->plan_id = 3;
-					} elseif ( 1 !== (int) $this->plan_id ) {
-						$this->set_exactdn_option( 'plan_id', 1 );
-						$this->plan_id = 1;
+					if ( ! empty( $response['plan_id'] ) ) {
+						$this->set_exactdn_option( 'plan_id', (int) $response['plan_id'] );
+						$this->plan_id = (int) $response['plan_id'];
 					}
 					$this->debug_message( 'exactdn verification via API succeeded' );
 					$this->set_exactdn_option( 'verified', 1, false );

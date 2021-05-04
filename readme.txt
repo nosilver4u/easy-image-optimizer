@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.5
 Tested up to: 5.7
 Requires PHP: 7.2
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,8 +55,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.5.2 =
+* fixed: lazy load threshold missing from minified code
+
 = 2.5.1 =
-* change: added setting to enable adding of missing width/height dimensions, disabled by default
+* change: added setting to enable adding of missing width/height dimensions
 * fixed: warning from plugins using core wp_lazy_load filter without second parameter/argument
 
 = 2.5.0 =

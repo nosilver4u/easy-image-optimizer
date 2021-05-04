@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '251' );
+define( 'EASYIO_VERSION', '252' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -1102,7 +1102,7 @@ function easyio_options( $network = 'singlesite' ) {
 			"</ol></td></tr>\n";
 	} else {
 		$output[] = "<tr><th scope='row'>&nbsp;</th><td>" .
-			'<a href="https://ewww.io/account/#subscriptions" class="page-title-action">' . esc_html__( 'Manage Subscription', 'easy-image-optimizer' ) . '</a>' . '&nbsp;&nbsp;' .
+			'<a href="https://ewww.io/subscriptions/" class="page-title-action">' . esc_html__( 'Manage Subscription', 'easy-image-optimizer' ) . '</a>' . '&nbsp;&nbsp;' .
 			'<a href="admin.php?action=easyio_deactivate" class="page-title-action">' . esc_html__( 'Disable Optimizer', 'easy-image-optimizer' ) . '</a>' .
 			"<input type='hidden' id='easyio_exactdn' name='easyio_exactdn' value='true' />" .
 			"</td></tr>\n";
