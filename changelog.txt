@@ -1,3 +1,8 @@
+= 2.5.3 =
+* added: use 'img-crop' id/class, or data-img-crop attribute to force cropping with Easy IO + Lazy Load.
+* changed: lazysizes script moved to footer of page
+* changed: use core wp_getimagesize() for proper error handling
+
 = 2.5.2 =
 * fixed: lazy load threshold missing from minified code
 

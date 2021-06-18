@@ -546,8 +546,8 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			}
 			$this->debug_message( "current placeholder is $placeholder_src" );
 
+			$placeholder_src = apply_filters( 'eio_lazy_placeholder', $placeholder_src, $image );
 			if ( $srcset ) {
-				$placeholder_src = apply_filters( 'eio_lazy_placeholder', $placeholder_src, $image );
 				if ( strpos( $placeholder_src, '64,R0lGOD' ) ) {
 					$this->set_attribute( $image, 'srcset', $placeholder_src, true );
 					$this->remove_attribute( $image, 'src' );
@@ -961,24 +961,32 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( $this->is_amp() ) {
 				return;
 			}
+			if ( ! defined( 'EIO_LL_FOOTER' ) ) {
+				define( 'EIO_LL_FOOTER', true );
+			}
 			$plugin_file = constant( strtoupper( $this->prefix ) . 'PLUGIN_FILE' );
-			wp_enqueue_script( 'eio-lazy-load-pre', plugins_url( '/includes/lazysizes-pre.js', $plugin_file ), array(), $this->version );
-			wp_enqueue_script( 'eio-lazy-load', plugins_url( '/includes/lazysizes.js', $plugin_file ), array(), $this->version );
-			wp_enqueue_script( 'eio-lazy-load-post', plugins_url( '/includes/lazysizes-post.js', $plugin_file ), array(), $this->version );
-			wp_enqueue_script( 'eio-lazy-load-uvh', plugins_url( '/includes/ls.unveilhooks.js', $plugin_file ), array(), $this->version );
+			wp_enqueue_script( 'eio-lazy-load-pre', plugins_url( '/includes/lazysizes-pre.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
+			wp_enqueue_script( 'eio-lazy-load', plugins_url( '/includes/lazysizes.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
+			wp_enqueue_script( 'eio-lazy-load-post', plugins_url( '/includes/lazysizes-post.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
+			wp_enqueue_script( 'eio-lazy-load-uvh', plugins_url( '/includes/ls.unveilhooks.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
 			if ( defined( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) && constant( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) ) {
-				wp_enqueue_script( 'eio-lazy-load-print', plugins_url( '/includes/ls.print.js', $plugin_file ), array(), $this->version );
+				wp_enqueue_script( 'eio-lazy-load-print', plugins_url( '/includes/ls.print.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
 			}
 			$threshold = defined( 'EIO_LL_THRESHOLD' ) && EIO_LL_THRESHOLD ? EIO_LL_THRESHOLD : 0;
-			wp_localize_script(
+			wp_add_inline_script(
 				'eio-lazy-load',
-				'eio_lazy_vars',
-				array(
-					'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
-					'skip_autoscale' => ( defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
-					'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
-				)
+				'var eio_lazy_vars = ' .
+					wp_json_encode(
+						array(
+							'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
+							'skip_autoscale' => ( defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
+							'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
+						)
+					)
+					. ';',
+				'before'
 			);
+			return;
 		}
 
 		/**
@@ -989,21 +997,29 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( $this->is_amp() ) {
 				return;
 			}
+			if ( ! defined( 'EIO_LL_FOOTER' ) ) {
+				define( 'EIO_LL_FOOTER', true );
+			}
 			$plugin_file = constant( strtoupper( $this->prefix ) . 'PLUGIN_FILE' );
-			wp_enqueue_script( 'eio-lazy-load', plugins_url( '/includes/lazysizes.min.js', $plugin_file ), array(), $this->version );
+			wp_enqueue_script( 'eio-lazy-load', plugins_url( '/includes/lazysizes.min.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
 			if ( defined( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) && constant( strtoupper( $this->prefix ) . 'LAZY_PRINT' ) ) {
-				wp_enqueue_script( 'eio-lazy-load-print', plugins_url( '/includes/ls.print.min.js', $plugin_file ), array(), $this->version );
+				wp_enqueue_script( 'eio-lazy-load-print', plugins_url( '/includes/ls.print.min.js', $plugin_file ), array(), $this->version, EIO_LL_FOOTER );
 			}
 			$threshold = defined( 'EIO_LL_THRESHOLD' ) && EIO_LL_THRESHOLD ? EIO_LL_THRESHOLD : 0;
-			wp_localize_script(
+			wp_add_inline_script(
 				'eio-lazy-load',
-				'eio_lazy_vars',
-				array(
-					'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
-					'skip_autoscale' => ( defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
-					'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
-				)
+				'var eio_lazy_vars = ' .
+					wp_json_encode(
+						array(
+							'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
+							'skip_autoscale' => ( defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
+							'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
+						)
+					)
+					. ';',
+				'before'
 			);
+			return;
 		}
 	}
 }

@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 5.5
+Requires at least: 5.7
 Tested up to: 5.7
 Requires PHP: 7.2
-Stable tag: 2.5.2
+Stable tag: 2.5.3
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.5.3 =
+* added: use 'img-crop' id/class, or data-img-crop attribute to force cropping with Easy IO + Lazy Load.
+* changed: lazysizes script moved to footer of page
+* changed: use core wp_getimagesize() for proper error handling
 
 = 2.5.2 =
 * fixed: lazy load threshold missing from minified code
