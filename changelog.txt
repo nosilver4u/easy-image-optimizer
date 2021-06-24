@@ -1,3 +1,8 @@
+= 2.5.4 =
+* fixed: Lazy Load fails to auto-scale with img-crop class for Easy IO
+* fixed: Lazy Load throws JS error in SCRIPT_DEBUG mode
+* fixed: warnings due to empty needle in strpos() function call
+
 = 2.5.3 =
 * added: use 'img-crop' id/class, or data-img-crop attribute to force cropping with Easy IO + Lazy Load.
 * changed: lazysizes script moved to footer of page
