@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.7
 Tested up to: 5.7
 Requires PHP: 7.2
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.5.5 =
+* fixed: Include All Resources compat with Oxygen Builder and Beaver Builder
+* fixed: regex to detect SVG images in use elements caused excessive backtracking
+* fixed: adding invalid zoom parameter of 1920 to srcset URL
 
 = 2.5.4 =
 * fixed: Lazy Load fails to auto-scale with img-crop class for Easy IO
