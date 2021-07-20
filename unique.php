@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '255' );
+define( 'EASYIO_VERSION', '260' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -92,6 +92,8 @@ function easyio_deactivate() {
 	}
 	update_option( 'easyio_exactdn', false );
 	update_option( 'easyio_lazy_load', false );
+	global $exactdn;
+	$exactdn->cron_setup( false );
 	$sendback = wp_get_referer();
 	wp_redirect( esc_url_raw( $sendback ) );
 	exit( 0 );
@@ -466,7 +468,9 @@ function easyio_current_screen( $screen ) {
 	global $eio_debug;
 	if ( false === strpos( $screen->id, 'settings_page_ewww-image-optimizer' ) && false === strpos( $screen->id, 'settings_page_easy-image-optimizer' ) ) {
 		$easyio_temp_debug = false;
-		$eio_debug         = '';
+		if ( ! function_exists( 'ewww_image_optimizer' ) && ! easyio_get_option( 'easyio_debug' ) ) {
+			$eio_debug = '';
+		}
 	}
 }
 

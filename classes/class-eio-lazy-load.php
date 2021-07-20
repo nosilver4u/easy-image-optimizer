@@ -285,6 +285,16 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				return $buffer;
 			}
 
+			// If JS WebP isn't running, set ewww_webp_supported to false so we have something defined.
+			if ( ! class_exists( 'EIO_JS_Webp' ) ) {
+				$body_tags = $this->get_elements_from_html( $buffer, 'body' );
+				if ( $this->is_iterable( $body_tags ) && ! empty( $body_tags[0] ) && false !== strpos( $body_tags[0], '<body' ) ) {
+					$body_webp_script = '<script>var ewww_webp_supported=false;</script>';
+					// Add the WebP script right after the opening tag.
+					$buffer = str_replace( $body_tags[0], $body_tags[0] . "\n" . $body_webp_script, $buffer );
+				}
+			}
+
 			$above_the_fold   = apply_filters( 'eio_lazy_fold', 0 );
 			$images_processed = 0;
 
@@ -360,8 +370,6 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 								$lazy_source = $source;
 								$this->set_attribute( $lazy_source, 'data-srcset', $srcset );
 								$this->remove_attribute( $lazy_source, 'srcset' );
-								// TODO: remove this after testing.
-								/* $this->set_attribute( $lazy_source, 'srcset', $this->placeholder_src, true ); */
 								$picture = str_replace( $source, $lazy_source, $picture );
 							}
 						}
@@ -372,21 +380,23 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 					}
 				}
 			}
-			// Video elements, looking for poster attributes that are images.
-			/* $videos = $this->get_elements_from_html( $buffer, 'video' ); */
-			$videos = '';
-			if ( $this->is_iterable( $videos ) ) {
-				foreach ( $videos as $index => $video ) {
-					$this->debug_message( 'parsing a video element' );
-					$file = $this->get_attribute( $video, 'poster' );
-					if ( $file ) {
-						$this->debug_message( "checking webp for video poster: $file" );
-						if ( $this->validate_image_tag( $file ) ) {
-							$this->set_attribute( $video, 'data-poster-webp', $this->placeholder_src );
-							$this->set_attribute( $video, 'data-poster-image', $file );
-							$this->remove_attribute( $video, 'poster' );
-							$this->debug_message( "found webp for video poster: $file" );
-							$buffer = str_replace( $videos[ $index ], $video, $buffer );
+			// Iframe elements, looking for stuff like YouTube embeds.
+			if ( in_array( 'iframe', $this->user_element_exclusions, true ) ) {
+				$frames = '';
+			} else {
+				$frames = $this->get_elements_from_html( $buffer, 'iframe' );
+			}
+			if ( $this->is_iterable( $frames ) ) {
+				foreach ( $frames as $index => $frame ) {
+					$this->debug_message( 'parsing an iframe element' );
+					$url = $this->get_attribute( $frame, 'src' );
+					if ( $url && $this->validate_iframe_tag( $frame ) ) {
+						$this->debug_message( "lazifying iframe for: $url" );
+						$this->set_attribute( $frame, 'data-src', $url );
+						$this->remove_attribute( $frame, 'src' );
+						$this->set_attribute( $frame, 'class', trim( $this->get_attribute( $frame, 'class' ) . ' lazyload' ), true );
+						if ( $frame !== $frames[ $index ] ) {
+							$buffer = str_replace( $frames[ $index ], $frame, $buffer );
 						}
 					}
 				}
@@ -440,19 +450,27 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			$insert_dimensions = false;
 			if ( apply_filters( 'eio_add_missing_width_height_attrs', $this->get_option( $this->prefix . 'add_missing_dims' ) ) && ( empty( $width_attr ) || empty( $height_attr ) ) ) {
 				$this->debug_message( 'missing width attr or height attr' );
-				list( $width_attr, $height_attr ) = $this->get_image_dimensions_by_url( $file );
-				if ( $width_attr && is_numeric( $width_attr ) && $height_attr && is_numeric( $height_attr ) ) {
-					$this->debug_message( "found $width_attr and $height_attr to insert" );
-					$physical_width    = $width_attr;
-					$physical_height   = $height_attr;
+				list( $new_width_attr, $new_height_attr ) = $this->get_image_dimensions_by_url( $file );
+				if ( $new_width_attr && is_numeric( $new_width_attr ) && $new_height_attr && is_numeric( $new_height_attr ) ) {
+					$this->debug_message( "found $width_attr and $height_attr to insert (maybe)" );
+					if ( $width_attr && is_numeric( $width_attr ) && $width_attr < $new_width_attr ) { // Then $height_attr is empty...
+						$height_attr = round( ( $new_height_attr / $new_width_attr ) * $width_attr );
+						$this->debug_message( "width was set to $width_attr, height was empty, but now $height_attr" );
+					} elseif ( $height_attr && is_numeric( $height_attr ) && $height_attr < $new_height_attr ) { // Or $width_attr is empty...
+						$width_attr = round( ( $new_width_attr / $new_height_attr ) * $height_attr );
+						$this->debug_message( "height was set to $height_attr, width was empty, but now $width_attr" );
+					} else {
+						$width_attr  = $new_width_attr;
+						$height_attr = $new_height_attr;
+						$this->debug_message( 'both width and height were empty, filling for sure' );
+					}
+					$physical_width    = $new_width_attr;
+					$physical_height   = $new_height_attr;
 					$insert_dimensions = true;
 				}
 			}
-			// Check for native lazy loading images.
-			$loading_attr = $this->get_attribute( $image, 'loading' );
-			if ( defined( 'EIO_ENABLE_NATIVE_LAZY' ) && EIO_ENABLE_NATIVE_LAZY && ! $loading_attr && is_numeric( $width_attr ) && is_numeric( $height_attr ) ) {
-				$this->set_attribute( $image, 'loading', 'lazy' );
-			}
+
+			$use_native_lazy = false;
 
 			$placeholder_types = array();
 			if ( $this->parsing_exactdn && $this->allow_lqip && apply_filters( 'eio_use_lqip', $this->get_option( $this->prefix . 'use_lqip' ), $file ) ) {
@@ -485,6 +503,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 						$this->debug_message( 'using lqip, maybe' );
 						if ( false === strpos( $file, 'nggid' ) && ! preg_match( '#\.svg(\?|$)#', $file ) && strpos( $file, $this->exactdn_domain ) ) {
 							$placeholder_src = add_query_arg( array( 'lazy' => 1 ), $file );
+							$use_native_lazy = true;
 							break 2;
 						}
 						break;
@@ -513,9 +532,11 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 
 							if ( $filename_width && $filename_height ) {
 								$placeholder_src = $exactdn->generate_url( $this->content_url . 'lazy/placeholder-' . $filename_width . 'x' . $filename_height . '.png' );
+								$use_native_lazy = true;
 								break 2;
 							} else {
 								$placeholder_src = add_query_arg( array( 'lazy' => 2 ), $file );
+								$use_native_lazy = true;
 								break 2;
 							}
 						}
@@ -536,6 +557,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 							$png_placeholder_src = $this->create_piip( $filename_width, $filename_height );
 							if ( $png_placeholder_src ) {
 								$placeholder_src = $png_placeholder_src;
+								$use_native_lazy = true;
 								break 2;
 							}
 						}
@@ -547,6 +569,13 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			$this->debug_message( "current placeholder is $placeholder_src" );
 
 			$placeholder_src = apply_filters( 'eio_lazy_placeholder', $placeholder_src, $image );
+
+			// Check for native lazy loading images.
+			$loading_attr = $this->get_attribute( $image, 'loading' );
+			if ( ( ! defined( 'EIO_DISABLE_NATIVE_LAZY' ) || ! EIO_DISABLE_NATIVE_LAZY ) && ! $loading_attr && $use_native_lazy ) {
+				$this->set_attribute( $image, 'loading', 'lazy' );
+			}
+
 			if ( $srcset ) {
 				if ( strpos( $placeholder_src, '64,R0lGOD' ) ) {
 					$this->set_attribute( $image, 'srcset', $placeholder_src, true );
@@ -571,13 +600,14 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				$this->set_attribute( $image, 'src', $placeholder_src, true );
 			}
 
-			$existing_class = trim( $this->get_attribute( $image, 'class' ) );
+			$existing_class = $this->get_attribute( $image, 'class' );
 			if ( ! empty( $existing_class ) ) {
-				$this->set_attribute( $image, 'class', $existing_class . ' lazyload', true );
+				$this->set_attribute( $image, 'class', trim( $existing_class . ' lazyload' ), true );
 			} else {
 				$this->set_attribute( $image, 'class', 'lazyload', true );
 			}
 			if ( $insert_dimensions ) {
+				$this->debug_message( "setting width=$width_attr and height=$height_attr" );
 				$this->set_attribute( $image, 'width', $width_attr, true );
 				$this->set_attribute( $image, 'height', $height_attr, true );
 			}
@@ -585,6 +615,8 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				$this->set_attribute( $image, 'data-eio-rwidth', $physical_width, true );
 				$this->set_attribute( $image, 'data-eio-rheight', $physical_height, true );
 			}
+			$this->debug_message( 'lazified img element:' );
+			$this->debug_message( trim( $image ) );
 			return $image;
 		}
 
@@ -814,6 +846,34 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 						'lazyload',
 						'skip-lazy',
 						'avia-bg-style-fixed',
+					),
+					$this->user_exclusions
+				),
+				$tag
+			);
+			foreach ( $exclusions as $exclusion ) {
+				if ( false !== strpos( $tag, $exclusion ) ) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Checks if an iframe tag is allowed to be lazy loaded.
+		 *
+		 * @param string $tag The tag.
+		 * @return bool True if the tag is allowed, false otherwise.
+		 */
+		function validate_iframe_tag( $tag ) {
+			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+			$exclusions = apply_filters(
+				'eio_lazy_iframe_exclusions',
+				array_merge(
+					array(
+						'data-no-lazy=',
+						'lazyload',
+						'skip-lazy',
 					),
 					$this->user_exclusions
 				),
