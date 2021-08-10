@@ -202,13 +202,19 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			/* add_filter( 'fl_builder_render_assets_inline', '__return_true' ); */
 
-			// Filter for NextGEN image URLs within JS.
-			add_filter( 'ngg_pro_lightbox_images_queue', array( $this, 'ngg_pro_lightbox_images_queue' ) );
-			add_filter( 'ngg_get_image_url', array( $this, 'plugin_get_image_url' ) );
+			// Filter for FacetWP JSON responses.
+			add_filter( 'facetwp_render_output', array( $this, 'filter_facetwp_json_output' ) );
 
 			// Filter for Envira image URLs.
 			add_filter( 'envira_gallery_output_item_data', array( $this, 'envira_gallery_output_item_data' ) );
 			add_filter( 'envira_gallery_image_src', array( $this, 'plugin_get_image_url' ) );
+
+			// Filter for NextGEN image URLs within JS.
+			add_filter( 'ngg_pro_lightbox_images_queue', array( $this, 'ngg_pro_lightbox_images_queue' ) );
+			add_filter( 'ngg_get_image_url', array( $this, 'plugin_get_image_url' ) );
+
+			// Filter for Spotlight Social Media Feeds.
+			add_filter( 'spotlight/instagram/server/transform_item', array( $this, 'spotlight_instagram_response' ) );
 
 			// Filter for legacy WooCommerce API endpoints.
 			add_filter( 'woocommerce_api_product_response', array( $this, 'woocommerce_api_product_response' ) );
@@ -792,9 +798,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				}
 			}
 			$this->user_exclusions[] = 'plugins/anti-captcha/';
-			$this->user_exclusions[] = 'fusion-app';
-			$this->user_exclusions[] = 'themes/Avada/';
-			$this->user_exclusions[] = 'plugins/fusion-builder/';
 		}
 
 		/**
@@ -2783,6 +2786,33 @@ if ( ! class_exists( 'ExactDN' ) ) {
 		}
 
 		/**
+		 * Parse template data from FacetWP that will be included in JSON response.
+		 * https://facetwp.com/documentation/developers/output/facetwp_render_output/
+		 *
+		 * @param array $output The full array of FacetWP data.
+		 * @return array The FacetWP data with Easy IO URLs.
+		 */
+		function filter_facetwp_json_output( $output ) {
+			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+			if ( empty( $output['template'] ) || ! is_string( $output['template'] ) ) {
+				$this->debug_message( 'no template data available' );
+				if ( $this->function_exists( 'print_r' ) ) {
+					$this->debug_message( print_r( $output, true ) );
+				}
+				return $output;
+			}
+			$this->filtering_the_page = true;
+
+			$template = $this->filter_the_content( $output['template'] );
+			if ( $template ) {
+				$this->debug_message( 'template data modified' );
+				$output['template'] = $template;
+			}
+
+			return $output;
+		}
+
+		/**
 		 * Handle direct image urls within Plugins.
 		 *
 		 * @param string $image A url for an image.
@@ -2811,6 +2841,26 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return $this->generate_url( $image );
 			}
 			return $image;
+		}
+
+		/**
+		 * Handle images in Spotlight's Instagram response/endpoint.
+		 *
+		 * @param array $data The Instagram item data.
+		 * @return array The Instagram data with ExactDNified image urls.
+		 */
+		function spotlight_instagram_response( $data ) {
+			if ( is_array( $data ) && ! empty( $data['thumbnails']['s'] ) ) {
+				if ( $this->validate_image_url( $data['thumbnails']['s'] ) ) {
+					$data['thumbnails']['s'] = $this->generate_url( $data['thumbnails']['s'] );
+				}
+			}
+			if ( is_array( $data ) && ! empty( $data['thumbnails']['m'] ) ) {
+				if ( $this->validate_image_url( $data['thumbnails']['m'] ) ) {
+					$data['thumbnails']['m'] = $this->generate_url( $data['thumbnails']['m'] );
+				}
+			}
+			return $data;
 		}
 
 		/**
