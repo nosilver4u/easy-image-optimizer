@@ -127,12 +127,10 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				}
 			}
 
-			if ( $this->parsing_exactdn ) {
-				$this->allow_piip = true;
-			} elseif ( ! is_dir( $this->piip_folder ) ) {
-				$this->allow_piip = wp_mkdir_p( $this->piip_folder ) && $this->gd_support();
+			if ( ! is_dir( $this->piip_folder ) ) {
+				$this->allow_piip = wp_mkdir_p( $this->piip_folder ) && ( $this->gd_support() || $this->imagick_support() );
 			} else {
-				$this->allow_piip = is_writable( $this->piip_folder ) && $this->gd_support();
+				$this->allow_piip = is_writable( $this->piip_folder ) && ( $this->gd_support() || $this->imagick_support() );
 			}
 
 			add_filter( 'wp_lazy_loading_enabled', array( $this, 'wp_lazy_loading_enabled' ), 10, 2 );
@@ -981,8 +979,10 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			}
 			clearstatcache();
 			if ( is_file( $piip_path ) ) {
+				if ( defined( 'EIO_USE_EXTERNAL_PLACEHOLDERS' ) && EIO_USE_EXTERNAL_PLACEHOLDERS ) {
+					return $this->content_url . 'lazy/placeholder-' . $width . 'x' . $height . '.png';
+				}
 				return 'data:image/png;base64,' . base64_encode( file_get_contents( $piip_path ) );
-				return $this->content_url . 'lazy/placeholder-' . $width . 'x' . $height . '.png';
 			}
 			return $this->placeholder_src;
 		}

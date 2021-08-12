@@ -1,3 +1,6 @@
+= 2.7.2 =
+* fixed: Lazy Load not automatically creating placeholder folder
+
 = 2.7.1 =
 * added: integration with JSON/AJAX respones from Spotlight Social Media Feeds plugin
 * fixed: img element search parsing JSON incorrectly

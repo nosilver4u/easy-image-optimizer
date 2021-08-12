@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.7
 Tested up to: 5.8
 Requires PHP: 7.2
-Stable tag: 2.7.1
+Stable tag: 2.7.2
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,9 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.7.2 =
+* fixed: Lazy Load not automatically creating placeholder folder
+
 = 2.7.1 =
 * added: integration with JSON/AJAX respones from Spotlight Social Media Feeds plugin
 * fixed: img element search parsing JSON incorrectly
@@ -78,43 +81,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * changed: move Easy IO check-in to wp_cron
 * fixed: Add Missing Dimensions overwrites smaller width/height attribute if only one is set
 * fixed: replacing an existing attribute (like width) with a numeric value is broken
-
-= 2.5.5 =
-* fixed: Include All Resources compat with Oxygen Builder and Beaver Builder
-* fixed: regex to detect SVG images in use elements caused excessive backtracking
-* fixed: adding invalid zoom parameter of 1920 to srcset URL
-
-= 2.5.4 =
-* fixed: Lazy Load fails to auto-scale with img-crop class for Easy IO
-* fixed: Lazy Load throws JS error in SCRIPT_DEBUG mode
-* fixed: warnings due to empty needle in strpos() function call
-
-= 2.5.3 =
-* added: use 'img-crop' id/class, or data-img-crop attribute to force cropping with Easy IO + Lazy Load.
-* changed: lazysizes script moved to footer of page
-* changed: use core wp_getimagesize() for proper error handling
-
-= 2.5.2 =
-* fixed: lazy load threshold missing from minified code
-
-= 2.5.1 =
-* change: added setting to enable adding of missing width/height dimensions
-* fixed: warning from plugins using core wp_lazy_load filter without second parameter/argument
-
-= 2.5.0 =
-* added: ability to use SVG placeholders for more efficient lazy load via EASYIO_USE_SIIP override
-* added: Easy IO and Lazy Load add missing width and height to image elements
-* added: Lazy Load - right-sized placeholders can be generated for full-sized images
-* added: configure Lazy Load pre-load threshold via EIO_LL_THRESHOLD constant
-* changed: Lazy Load for external (non-inline) CSS images must be configured for specific elements
-* changed: Easy IO's Include All Resources unlocked for all plans
-* changed: native lazy loading is now disabled when using Easy IO lazy load, override with EIO_ENABLE_NATIVE_LAZY constant
-* changed: Lazy Load pre-load threshold increased from 500px to 1000px
-* changed: Lazy Load picture elements use right-sized img placeholder instead of 1x1 inline GIF
-* fixed: native iframe lazy load disabled in WP 5.7+
-* fixed: removing metadata clobbers APNG animations
-* fixed: some JSON elements still being altered by Lazy Load
-* fixed: Easy IO throws warnings when WP content is not in a sub-directory
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
