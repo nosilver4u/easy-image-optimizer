@@ -183,9 +183,6 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				$this->debug_message( 'is_admin' );
 				return false;
 			}
-			if ( $this->is_amp() ) {
-				return false;
-			}
 			if ( empty( $uri ) ) {
 				$uri = add_query_arg( null, null );
 			}
@@ -228,6 +225,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			global $wp_query;
 			if ( ! isset( $wp_query ) ) {
 				return $should_process;
+			}
+			if ( $this->is_amp() ) {
+				return false;
 			}
 			if ( is_embed() ) {
 				$this->debug_message( 'is_embed' );
@@ -286,6 +286,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			}
 			if ( strpos( $buffer, 'amp-boilerplate' ) ) {
 				$this->debug_message( 'AMP page processing' );
+				return $buffer;
+			}
+			if ( $this->is_json( $buffer ) ) {
 				return $buffer;
 			}
 			if ( ! $this->should_process_page() ) {
@@ -399,7 +402,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 				foreach ( $frames as $index => $frame ) {
 					$this->debug_message( 'parsing an iframe element' );
 					$url = $this->get_attribute( $frame, 'src' );
-					if ( $url && $this->validate_iframe_tag( $frame ) ) {
+					if ( $url && 0 === strpos( $url, 'http' ) && $this->validate_iframe_tag( $frame ) ) {
 						$this->debug_message( "lazifying iframe for: $url" );
 						$this->set_attribute( $frame, 'data-src', $url );
 						$this->remove_attribute( $frame, 'src' );
@@ -540,7 +543,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 								$filename_height = $height_attr;
 							}
 
-							if ( $filename_width && $filename_height ) {
+							if ( $filename_width && $filename_height && $this->allow_piip ) {
 								$placeholder_src = $this->create_piip( $filename_width, $filename_height );
 								/* $placeholder_src = $exactdn->generate_url( $this->content_url . 'lazy/placeholder-' . $filename_width . 'x' . $filename_height . '.png' ); */
 								$use_native_lazy = true;
@@ -886,6 +889,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 						'data-no-lazy=',
 						'lazyload',
 						'skip-lazy',
+						'about:blank',
 					),
 					$this->user_exclusions
 				),
