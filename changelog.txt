@@ -1,3 +1,12 @@
+= 2.7.4 =
+* added: Easy IO and Lazy Load support for AJAX responses from FacetWP
+* changed: Vimeo videos excluded from iframe lazy load
+* changed: use 'bg-image-crop' class on elements with CSS background images that need to be cropped by auto-scaling
+* fixed: sub-folder multi-site installs which use separate domains could not activate Easy IO
+* fixed: Lazy Load PNG placeholders cannot be cached if the WP_CONTENT_DIR location is read-only (notably on Pantheon servers)
+* fixed: is_amp() called too early
+* fixed: Fusion Builder (Avada) does not load when Lazy Load or Easy IO options are enabled
+
 = 2.7.3 =
 * fixed: local PNG placeholders enabled with Easy IO when placeholder folder is not writable
 * fixed: iframe lazy loading breaks Gravity Forms and FacetWP when parsing JSON

@@ -73,6 +73,14 @@ if ( ! class_exists( 'ExactDN' ) ) {
 		private $exactdn_domain = false;
 
 		/**
+		 * Is this a sub-folder network/multi-site install?
+		 *
+		 * @access private
+		 * @var bool $sub_folder
+		 */
+		private $sub_folder = false;
+
+		/**
 		 * The Easy IO Plan/Tier ID
 		 *
 		 * @access private
@@ -121,6 +129,25 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return;
 			}
 
+			$uri = add_query_arg( null, null );
+			$this->debug_message( "request uri is $uri" );
+
+			if ( '/robots.txt' === $uri || '/sitemap.xml' === $uri ) {
+				return;
+			}
+
+			add_filter( 'exactdn_skip_page', array( $this, 'skip_page' ), 10, 2 );
+
+			/**
+			 * Allow pre-empting the parsers by page.
+			 *
+			 * @param bool Whether to skip parsing the page.
+			 * @param string $uri The URL of the page.
+			 */
+			if ( apply_filters( 'exactdn_skip_page', false, $uri ) ) {
+				return;
+			}
+
 			if ( ! $this->scheme ) {
 				$site_url = get_home_url();
 				$scheme   = 'http';
@@ -139,23 +166,25 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				$this->scheme = $scheme;
 			}
 
-			$uri = add_query_arg( null, null );
-			$this->debug_message( "request uri is $uri" );
-
-			if ( '/robots.txt' === $uri || '/sitemap.xml' === $uri ) {
-				return;
-			}
-
-			add_filter( 'exactdn_skip_page', array( $this, 'skip_page' ), 10, 2 );
-
-			/**
-			 * Allow pre-empting the parsers by page.
-			 *
-			 * @param bool Whether to skip parsing the page.
-			 * @param string $uri The URL of the page.
-			 */
-			if ( apply_filters( 'exactdn_skip_page', false, $uri ) ) {
-				return;
+			if ( is_multisite() && defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL ) {
+				$this->debug_message( 'working in sub-domain mode' );
+			} elseif ( is_multisite() ) {
+				if ( defined( 'EXACTDN_SUB_FOLDER' ) && EXACTDN_SUB_FOLDER ) {
+					$this->sub_folder = true;
+					$this->debug_message( 'working in sub-folder mode due to constant override' );
+				} elseif ( defined( 'EXACTDN_SUB_FOLDER' ) ) {
+					$this->debug_message( 'working in sub-domain mode due to constant override' );
+				} elseif ( get_site_option( 'exactdn_sub_folder' ) ) {
+					$this->sub_folder = true;
+					$this->debug_message( 'working in sub-folder mode due to global option' );
+				} elseif ( get_current_blog_id() > 1 ) {
+					$network_site_url = network_site_url();
+					$network_domain   = $this->parse_url( $network_site_url, PHP_URL_HOST );
+					if ( $network_domain === $this->upload_domain ) {
+						$this->sub_folder = true;
+						$this->debug_message( 'working in sub-folder mode due to matching domain' );
+					}
+				}
 			}
 
 			// Make sure we have an ExactDN domain to use.
@@ -199,8 +228,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			// Responsive image srcset substitution.
 			add_filter( 'wp_calculate_image_srcset', array( $this, 'filter_srcset_array' ), 1001, 5 );
 			add_filter( 'wp_calculate_image_sizes', array( $this, 'filter_sizes' ), 1, 2 ); // Early so themes can still filter.
-
-			/* add_filter( 'fl_builder_render_assets_inline', '__return_true' ); */
 
 			// Filter for FacetWP JSON responses.
 			add_filter( 'facetwp_render_output', array( $this, 'filter_facetwp_json_output' ) );
@@ -652,7 +679,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return $this->sanitize_domain( EXACTDN_DOMAIN );
 			}
 			if ( is_multisite() ) {
-				if ( ! SUBDOMAIN_INSTALL ) {
+				if ( $this->sub_folder ) {
 					return $this->sanitize_domain( get_site_option( $this->prefix . 'exactdn_domain' ) );
 				}
 			}
@@ -681,7 +708,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return get_option( $this->prefix . 'exactdn_' . $option_name );
 			}
 			if ( is_multisite() ) {
-				if ( ! SUBDOMAIN_INSTALL ) {
+				if ( $this->sub_folder ) {
 					return get_site_option( $this->prefix . 'exactdn_' . $option_name );
 				}
 			}
@@ -703,7 +730,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return false;
 			}
 			if ( is_multisite() ) {
-				if ( ! SUBDOMAIN_INSTALL ) {
+				if ( $this->sub_folder ) {
 					update_site_option( $this->prefix . 'exactdn_domain', $domain );
 					return $domain;
 				}
@@ -725,7 +752,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				return update_option( $this->prefix . 'exactdn_' . $option_name, $option_value, $autoload );
 			}
 			if ( is_multisite() ) {
-				if ( ! SUBDOMAIN_INSTALL ) {
+				if ( $this->sub_folder ) {
 					return update_site_option( $this->prefix . 'exactdn_' . $option_name, $option_value );
 				}
 			}
@@ -2946,13 +2973,10 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			if ( false !== strpos( $uri, '?brizy-edit' ) ) {
 				return true;
 			}
+			if ( false !== strpos( $uri, '&builder=true' ) ) {
+				return true;
+			}
 			if ( false !== strpos( $uri, 'cornerstone=' ) || false !== strpos( $uri, 'cornerstone-endpoint' ) ) {
-				return true;
-			}
-			if ( false !== strpos( $uri, 'et_fb=' ) ) {
-				return true;
-			}
-			if ( false !== strpos( $uri, 'tatsu=' ) ) {
 				return true;
 			}
 			if ( false !== strpos( $uri, 'ct_builder=' ) ) {
@@ -2961,7 +2985,16 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			if ( false !== strpos( $uri, 'ct_render_shortcode=' ) || false !== strpos( $uri, 'action=oxy_render' ) ) {
 				return true;
 			}
+			if ( false !== strpos( $uri, 'et_fb=' ) ) {
+				return true;
+			}
+			if ( false !== strpos( $uri, 'fb-edit=' ) ) {
+				return true;
+			}
 			if ( false !== strpos( $uri, '?fl_builder' ) ) {
+				return true;
+			}
+			if ( false !== strpos( $uri, 'tatsu=' ) ) {
 				return true;
 			}
 			return $skip;

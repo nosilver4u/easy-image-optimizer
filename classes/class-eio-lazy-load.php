@@ -111,6 +111,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 
 			add_filter( 'vc_get_vc_grid_data_response', array( $this, 'filter_page_output' ) );
 
+			// Filter for FacetWP JSON responses.
+			add_filter( 'facetwp_render_output', array( $this, 'filter_facetwp_json_output' ) );
+
 			if ( class_exists( 'ExactDN' ) && $this->get_option( $this->prefix . 'exactdn' ) ) {
 				global $exactdn;
 				$this->exactdn_domain = $exactdn->get_exactdn_domain();
@@ -189,6 +192,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( false !== strpos( $uri, '?brizy-edit' ) ) {
 				return false;
 			}
+			if ( false !== strpos( $uri, '&builder=true' ) ) {
+				return false;
+			}
 			if ( false !== strpos( $uri, 'cornerstone=' ) || false !== strpos( $uri, 'cornerstone-endpoint' ) ) {
 				return false;
 			}
@@ -207,6 +213,9 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( false !== strpos( $uri, 'et_fb=' ) ) {
 				return false;
 			}
+			if ( false !== strpos( $uri, 'fb-edit=' ) ) {
+				return false;
+			}
 			if ( false !== strpos( $uri, '?fl_builder' ) ) {
 				return false;
 			}
@@ -222,8 +231,15 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			if ( ! empty( $_POST['action'] ) && 'tatsu_get_concepts' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return false;
 			}
+			if ( is_customize_preview() ) {
+				$this->debug_message( 'is_customize_preview' );
+				return false;
+			}
 			global $wp_query;
-			if ( ! isset( $wp_query ) ) {
+			if ( ! isset( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
+				return $should_process;
+			}
+			if ( ! did_action( 'parse_query' ) ) {
 				return $should_process;
 			}
 			if ( $this->is_amp() ) {
@@ -235,10 +251,6 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			}
 			if ( is_feed() ) {
 				$this->debug_message( 'is_feed' );
-				return false;
-			}
-			if ( is_customize_preview() ) {
-				$this->debug_message( 'is_customize_preview' );
 				return false;
 			}
 			if ( is_preview() ) {
@@ -298,7 +310,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			// If JS WebP isn't running, set ewww_webp_supported to false so we have something defined.
 			if ( ! class_exists( 'EIO_JS_Webp' ) ) {
 				$body_tags        = $this->get_elements_from_html( $buffer, 'body' );
-				$body_webp_script = '<script>var ewww_webp_supported=false;</script>';
+				$body_webp_script = '<script data-cfasync="false">var ewww_webp_supported=false;</script>';
 				if ( $this->is_iterable( $body_tags ) && ! empty( $body_tags[0] ) && false !== strpos( $body_tags[0], '<body' ) ) {
 					// Add the WebP script right after the opening tag.
 					$buffer = str_replace( $body_tags[0], $body_tags[0] . "\n" . $body_webp_script, $buffer );
@@ -711,6 +723,32 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 		}
 
 		/**
+		 * Parse template data from FacetWP that will be included in JSON response.
+		 * https://facetwp.com/documentation/developers/output/facetwp_render_output/
+		 *
+		 * @param array $output The full array of FacetWP data.
+		 * @return array The FacetWP data with lazy loaded images.
+		 */
+		function filter_facetwp_json_output( $output ) {
+			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+			if ( empty( $output['template'] ) || ! is_string( $output['template'] ) ) {
+				$this->debug_message( 'no template data available' );
+				if ( $this->function_exists( 'print_r' ) ) {
+					$this->debug_message( print_r( $output, true ) );
+				}
+				return $output;
+			}
+
+			$template = $this->filter_page_output( $output['template'] );
+			if ( $template ) {
+				$this->debug_message( 'template data modified' );
+				$output['template'] = $template;
+			}
+
+			return $output;
+		}
+
+		/**
 		 * Validate the user-defined exclusions.
 		 */
 		function validate_user_exclusions() {
@@ -889,6 +927,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 						'data-no-lazy=',
 						'lazyload',
 						'skip-lazy',
+						'vimeo',
 						'about:blank',
 					),
 					$this->user_exclusions

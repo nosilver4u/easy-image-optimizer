@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.7
 Tested up to: 5.8
 Requires PHP: 7.2
-Stable tag: 2.7.3
+Stable tag: 2.7.4
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,15 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.7.4 =
+* added: Easy IO and Lazy Load support for AJAX responses from FacetWP
+* changed: Vimeo videos excluded from iframe lazy load
+* changed: use 'bg-image-crop' class on elements with CSS background images that need to be cropped by auto-scaling
+* fixed: sub-folder multi-site installs which use separate domains could not activate Easy IO
+* fixed: Lazy Load PNG placeholders cannot be cached if the WP_CONTENT_DIR location is read-only (notably on Pantheon servers)
+* fixed: is_amp() called too early
+* fixed: Fusion Builder (Avada) does not load when Lazy Load or Easy IO options are enabled
 
 = 2.7.3 =
 * fixed: local PNG placeholders enabled with Easy IO when placeholder folder is not writable
