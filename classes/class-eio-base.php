@@ -379,7 +379,7 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 		 * @return bool True for an AMP endpoint, false otherwise.
 		 */
 		function is_amp() {
-			if ( ! did_action( 'parse_query' ) ) {
+			if ( ! did_action( 'wp' ) ) {
 				return false;
 			}
 			if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
@@ -444,6 +444,28 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 				return false;
 			}
 			return true;
+		}
+
+		/**
+		 * Checks if the image URL points to a lazy load placeholder.
+		 *
+		 * @param string $image The image URL (or an image element).
+		 * @return bool True if it matches a known placeholder pattern, false otherwise.
+		 */
+		function is_lazy_placeholder( $image ) {
+			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+			if (
+				strpos( $image, 'base64,R0lGOD' ) ||
+				strpos( $image, 'lazy-load/images/1x1' ) ||
+				strpos( $image, '/assets/images/lazy' ) ||
+				strpos( $image, '/assets/images/dummy.png' ) ||
+				strpos( $image, '/assets/images/transparent.png' ) ||
+				strpos( $image, '/lazy/placeholder' )
+			) {
+				$this->debug_message( 'lazy load placeholder' );
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -831,7 +853,7 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 			if ( $this->s3_active ) {
 				$this->site_url = defined( 'EXACTDN_LOCAL_DOMAIN' ) && EXACTDN_LOCAL_DOMAIN ? EXACTDN_LOCAL_DOMAIN : $s3_scheme . '://' . $s3_domain;
 			} else {
-				// Normally, we use this one, as it will be shorter for sub-directory installs.
+				// Normally, we use this one, as it will be shorter for sub-directory (not multi-site) installs.
 				$home_url    = get_home_url();
 				$site_url    = get_site_url();
 				$home_domain = $this->parse_url( $home_url, PHP_URL_HOST );

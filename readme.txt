@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.7
 Tested up to: 5.8
 Requires PHP: 7.2
-Stable tag: 2.7.4
+Stable tag: 2.8.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,15 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 2.8.0 =
+* added: EIO_LAZY_FOLD override to configure number of images above-the-fold that will be skipped by Lazy Load
+* added: Easy IO URLs for custom (non-WP) srcset markup
+* added: Easy IO support for CSS background images with relative URLs
+* fixed: Easy IO scaling not working on full-size images without srcset/responsive markup
+* fixed: Lazy Load skips images dynamically created by Brizy builder
+* fixed: Easy IO conflict on Elementor preview pages
+* fixed: EXACTDN_CONTENT_WIDTH not effective at overriding $content_width during image_downsize filter
 
 = 2.7.4 =
 * added: Easy IO and Lazy Load support for AJAX responses from FacetWP
