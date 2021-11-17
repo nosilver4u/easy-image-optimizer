@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '281' );
+define( 'EASYIO_VERSION', '282' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -93,9 +93,10 @@ function easyio_deactivate() {
 	update_option( 'easyio_exactdn', false );
 	update_option( 'easyio_lazy_load', false );
 	global $exactdn;
-	$exactdn->cron_setup( false );
-	$sendback = wp_get_referer();
-	wp_redirect( esc_url_raw( $sendback ) );
+	if ( isset( $exactdn ) && is_object( $exactdn ) ) {
+		$exactdn->cron_setup( false );
+	}
+	wp_safe_redirect( wp_get_referer() );
 	exit( 0 );
 }
 
@@ -1047,7 +1048,7 @@ function easyio_options( $network = 'singlesite' ) {
 
 	global $exactdn;
 	if ( class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) && easyio_get_option( 'easyio_exactdn' ) ) {
-		$status_output .= '<span style="color: red">' . esc_html__( 'Inactive, please disable the Image Performance option on the Jetpack Dashboard.', 'easy-image-optimizer' ) . '</span>';
+		$status_output .= '<span style="color: red">' . esc_html__( 'Inactive, please disable the Site Accelerator option in the Jetpack settings.', 'easy-image-optimizer' ) . '</span>';
 	} elseif ( class_exists( 'ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) {
 			$exactdn_savings = $exactdn->savings();

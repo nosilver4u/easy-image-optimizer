@@ -1,3 +1,7 @@
+= 2.8.2 =
+* fixed: error when disabling Easy IO
+* updated: instructions for disabling Jetpack site accelerator
+
 = 2.8.1 =
 * changed: first image in a page is assumed to be "above the fold" and will not be lazy loaded, override with EIO_LAZY_FOLD constant
 * fixed: mismatched quotes break HTML markup in some cases
