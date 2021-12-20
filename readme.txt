@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 2.8.3 =
+* changed: Lazy Load no longer excludes first image in a page due to potential CLS issues and auto-scaling suppression
+* fixed: AMP detection throws notices in some cases
+* fixed: Easy IO misses some image URLs on multi-site when using domain-mapping
+
 = 2.8.2 =
 * fixed: error when disabling Easy IO
 * updated: instructions for disabling Jetpack site accelerator
