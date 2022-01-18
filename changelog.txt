@@ -1,3 +1,13 @@
+= 2.9.0 =
+* changed: Lazy Load no longer excludes first image in a page due to potential CLS issues and auto-scaling suppression
+* fixed: AMP detection throws notices in some cases
+* fixed: Easy IO misses some image URLs on multi-site when using domain-mapping
+* fixed: Lazy Loader incorrectly parses fall-back iframe from Google Tag Manager, triggering 403 errors in some WAF systems
+* fixed: Easy IO URL rewriter changing links if they matched a custom upload folder
+* fixed: Easy IO incompatible with Toolset Blocks
+* fixed: Easy IO incorrectly sizing wide/full width cover blocks
+* fixed: SWIS CDN compat called too early in some cases
+
 = 2.8.2 =
 * fixed: error when disabling Easy IO
 * updated: instructions for disabling Jetpack site accelerator
