@@ -1,3 +1,8 @@
+= 2.9.1 =
+* added: use decoding=async to prevent images from blocking text render
+* fixed: Auto-scale incorrectly handles Divi parallax background images
+* fixed: native lazy loading used on inline PNG placeholders
+
 = 2.9.0 =
 * changed: Lazy Load no longer excludes first image in a page due to potential CLS issues and auto-scaling suppression
 * fixed: AMP detection throws notices in some cases
