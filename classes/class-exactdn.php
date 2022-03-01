@@ -130,7 +130,11 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 
 			$uri = add_query_arg( null, null );
-			$this->debug_message( "request uri is $uri" );
+			if ( false === strpos( $uri, 'page=ewww-image-optimizer-options' ) ) {
+				$this->debug_message( "request uri is $uri" );
+			} else {
+				$this->debug_message( 'request uri is EWWW IO settings' );
+			}
 
 			if ( '/robots.txt' === $uri || '/sitemap.xml' === $uri ) {
 				return;
@@ -2364,15 +2368,17 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			if (
 				/** Short-circuit via exactdn_srcset_multipliers filter. */
-				is_array( $multipliers )
+				is_array( $multipliers ) &&
+				/** This isn't an SVG image. */
+				'.svg' !== strtolower( substr( $image_meta['file'], -4 ) ) &&
 				/** This filter is already documented in class-exactdn.php */
-				&& ! apply_filters( 'exactdn_skip_image', false, $url, null )
+				! apply_filters( 'exactdn_skip_image', false, $url, null ) &&
 				/** The original url is valid/allowed. */
-				&& $this->validate_image_url( $url )
+				$this->validate_image_url( $url ) &&
 				/** Verify basic meta is intact. */
-				&& isset( $image_meta['width'] ) && isset( $image_meta['height'] ) && isset( $image_meta['file'] )
+				isset( $image_meta['width'] ) && isset( $image_meta['height'] ) && isset( $image_meta['file'] ) &&
 				/** Verify we have the requested width/height. */
-				&& isset( $size_array[0] ) && isset( $size_array[1] )
+				isset( $size_array[0] ) && isset( $size_array[1] )
 			) {
 
 				$fullwidth  = $image_meta['width'];
@@ -2928,10 +2934,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 		function filter_facetwp_json_output( $output ) {
 			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 			if ( empty( $output['template'] ) || ! is_string( $output['template'] ) ) {
-				$this->debug_message( 'no template data available' );
-				if ( $this->function_exists( 'print_r' ) ) {
-					$this->debug_message( print_r( $output, true ) );
-				}
 				return $output;
 			}
 			$this->filtering_the_page = true;

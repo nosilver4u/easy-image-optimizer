@@ -634,6 +634,7 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 					)
 				) {
 					// We will wait until the paths loop to fix this one.
+					$this->debug_message( 'skipping domains and going to URLs' );
 					continue;
 				}
 				if ( false !== strpos( $url, $allowed_domain ) ) {
@@ -650,6 +651,9 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 					continue;
 				}
 				$this->debug_message( "looking for path $allowed_url in $url" );
+				if ( ! empty( $this->s3_active ) && ! empty( $this->s3_object_prefix ) ) {
+					$this->debug_message( "checking first for $this->s3_active and $allowed_url" . $this->s3_object_prefix );
+				}
 				if (
 					! empty( $this->s3_active ) && // We've got an S3 configuration, and...
 					false !== strpos( $url, $this->s3_active ) && // the S3 domain is present in the URL, and...
@@ -786,22 +790,23 @@ if ( ! class_exists( 'EIO_Base' ) ) {
 				} elseif ( ! empty( $s3_bucket ) && ! is_wp_error( $s3_bucket ) && method_exists( $as3cf, 'get_storage_provider' ) ) {
 					$s3_domain = $as3cf->get_storage_provider()->get_url_domain( $s3_bucket, $s3_region );
 				}
+				if ( $as3cf->get_setting( 'enable-object-prefix' ) ) {
+					$this->s3_object_prefix = $as3cf->get_setting( 'object-prefix' );
+					$this->debug_message( $this->s3_object_prefix );
+				} else {
+					$this->s3_object_prefix = '';
+					$this->debug_message( 'no WOM prefix' );
+				}
 				if ( ! empty( $s3_domain ) && $as3cf->get_setting( 'serve-from-s3' ) ) {
 					$this->s3_active = $s3_domain;
 					$this->debug_message( "found S3 domain of $s3_domain with bucket $s3_bucket and region $s3_region" );
 					$this->allowed_urls[] = $s3_scheme . '://' . $s3_domain . '/';
 					if ( $as3cf->get_setting( 'enable-delivery-domain' ) && $as3cf->get_setting( 'delivery-domain' ) ) {
 						$delivery_domain         = $as3cf->get_setting( 'delivery-domain' );
-						$this->allowed_urls[]    = $s3_scheme . '://' . $delivery_domain . '/';
+						$this->allowed_urls[]    = $s3_scheme . '://' . \trailingslashit( $delivery_domain ) . trailingslashit( trim( $this->s3_object_prefix, '/' ) );
 						$this->allowed_domains[] = $delivery_domain;
 						$this->debug_message( "found WOM delivery domain of $delivery_domain" );
 					}
-				}
-				if ( $as3cf->get_setting( 'enable-object-prefix' ) ) {
-					$this->s3_object_prefix = $as3cf->get_setting( 'object-prefix' );
-					$this->debug_message( $as3cf->get_setting( 'object-prefix' ) );
-				} else {
-					$this->debug_message( 'no WOM prefix' );
 				}
 				if ( $as3cf->get_setting( 'object-versioning' ) ) {
 					$this->s3_object_version = true;

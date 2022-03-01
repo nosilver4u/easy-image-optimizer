@@ -80,7 +80,11 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 
 			$uri = add_query_arg( null, null );
-			$this->debug_message( "request uri is $uri" );
+			if ( false === strpos( $uri, 'page=ewww-image-optimizer-options' ) ) {
+				$this->debug_message( "request uri is $uri" );
+			} else {
+				$this->debug_message( 'request uri is EWWW IO settings' );
+			}
 
 			add_filter( 'eio_do_lazyload', array( $this, 'should_process_page' ), 10, 2 );
 
@@ -779,10 +783,6 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 		function filter_facetwp_json_output( $output ) {
 			$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 			if ( empty( $output['template'] ) || ! is_string( $output['template'] ) ) {
-				$this->debug_message( 'no template data available' );
-				if ( $this->function_exists( 'print_r' ) ) {
-					$this->debug_message( print_r( $output, true ) );
-				}
 				return $output;
 			}
 
@@ -1228,6 +1228,7 @@ if ( ! class_exists( 'EIO_Lazy_Load' ) ) {
 			);
 			return;
 		}
+
 		/**
 		 * Load minified inline version of lazysizes script.
 		 */
