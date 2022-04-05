@@ -1,3 +1,9 @@
+= 3.0.0 =
+* added: Lazy Load and CDN support for multiple background images and mixing with gradients
+* changed: all Easy IO settings available to all plan levels
+* fixed: LQIP and SVG placeholder options not auto-loaded correctly
+* fixed: invalid path in translation loader
+
 = 2.9.2 =
 * fixed: Easy IO was adding srcset markup for SVG images
 

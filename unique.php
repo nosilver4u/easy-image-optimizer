@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '292' );
+define( 'EASYIO_VERSION', '300' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -274,7 +274,7 @@ function easyio_function_exists( $function, $debug = false ) {
  * Runs on 'plugins_loaded' to make make sure the language files are loaded early.
  */
 function easyio_load() {
-	load_plugin_textdomain( 'easy-image-optimizer', false, EASYIO_PLUGIN_PATH . 'languages/' );
+	load_plugin_textdomain( 'easy-image-optimizer' );
 }
 
 /**
@@ -305,8 +305,12 @@ function easyio_set_defaults() {
 	add_option( 'exactdn_all_the_things', false );
 	add_option( 'exactdn_lossy', false );
 	add_option( 'exactdn_exclude', '' );
+	add_option( 'exactdn_sub_folder', false );
+	add_option( 'exactdn_prevent_db_queries', true );
 	add_option( 'easyio_add_missing_dims', true );
 	add_option( 'easyio_lazy_load', false );
+	add_option( 'easyio_use_lqip', false );
+	add_option( 'easyio_use_siip', false );
 	add_option( 'easyio_ll_autoscale', true );
 	add_option( 'easyio_ll_exclude', '' );
 
@@ -314,6 +318,8 @@ function easyio_set_defaults() {
 	add_site_option( 'easyio_metadata_remove', true );
 	add_site_option( 'easyio_add_missing_dims', true );
 	add_site_option( 'easyio_ll_autoscale', true );
+	add_site_option( 'exactdn_sub_folder', false );
+	add_site_option( 'exactdn_prevent_db_queries', true );
 }
 
 /**
@@ -1113,22 +1119,16 @@ function easyio_options( $network = 'singlesite' ) {
 			"</td></tr>\n";
 		easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) );
 		$output[] = "<tr><th scope='row'><label for='exactdn_all_the_things'>" . esc_html__( 'Include All Resources', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
-			"<td><input type='checkbox' name='exactdn_all_the_things' value='true' " .
-			( 1 === $exactdn->get_plan_id() ? " id='exactdn_all_the_things_disabled' disabled " : " id='exactdn_all_the_things' " ) .
-			( 1 < $exactdn->get_plan_id() && easyio_get_option( 'exactdn_all_the_things' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ) . "</td></tr>\n";
+			"<td><input type='checkbox' name='exactdn_all_the_things' value='true' id='exactdn_all_the_things' " .
+			( easyio_get_option( 'exactdn_all_the_things' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ) . "</td></tr>\n";
 		easyio_debug_message( 'ExactDN all the things: ' . ( easyio_get_option( 'exactdn_all_the_things' ) ? 'on' : 'off' ) );
 		$output[] = "<tr><th scope='row'><label for='exactdn_lossy'>" . esc_html__( 'Premium Compression', 'easy-image-optimizer' ) . '</label>' . easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ) . '</th>' .
-			"<td><input type='checkbox' name='exactdn_lossy' value='true' " .
-			( 1 === $exactdn->get_plan_id() ? " id='exactdn_lossy_disabled' disabled " : " id='exactdn_lossy' " ) .
-			( 1 === $exactdn->get_plan_id() || easyio_get_option( 'exactdn_lossy' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Enable high quality premium compression for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ) . "</td></tr>\n";
+			"<td><input type='checkbox' name='exactdn_lossy' value='true' id='exactdn_lossy' " .
+			( easyio_get_option( 'exactdn_lossy' ) ? "checked='true'" : '' ) . '> ' . esc_html__( 'Enable high quality premium compression for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ) . "</td></tr>\n";
 		easyio_debug_message( 'ExactDN lossy: ' . intval( easyio_get_option( 'exactdn_lossy' ) ) );
 		easyio_debug_message( 'ExactDN resize existing: ' . ( easyio_get_option( 'exactdn_resize_existing' ) ? 'on' : 'off' ) );
 		easyio_debug_message( 'ExactDN attachment queries: ' . ( easyio_get_option( 'exactdn_prevent_db_queries' ) ? 'off' : 'on' ) );
-		if ( 1 === $exactdn->get_plan_id() ) {
-			$output[] = "<input type='hidden' id='exactdn_all_the_things' name='exactdn_all_the_things' value='0'>\n";
-			$output[] = "<input type='hidden' id='exactdn_lossy' name='exactdn_lossy' value='1'>\n";
-			$output[] = "<input type='hidden' id='easyio_use_lqip' name='easyio_use_lqip' value='0'>\n";
-		}
+		$output[]          = "<input type='hidden' id='easyio_use_lqip' name='easyio_use_lqip' value='0'>\n";
 		$eio_exclude_paths = easyio_get_option( 'exactdn_exclude' ) ? esc_html( implode( "\n", easyio_get_option( 'exactdn_exclude' ) ) ) : '';
 		$output[]          = "<tr><th scope='row'>" .
 			"<label for='exactdn_exclude'>" . esc_html__( 'Exclusions', 'easy-image-optimizer' ) . '</label>' .
@@ -1154,9 +1154,8 @@ function easyio_options( $network = 'singlesite' ) {
 			"</td></tr>\n";
 		easyio_debug_message( 'lazy load: ' . ( easyio_get_option( 'easyio_lazy_load' ) ? 'on' : 'off' ) );
 		$output[] = '<tr><td>&nbsp;</td><td>' .
-			"<p><input type='checkbox' name='easyio_use_lqip' value='true' " .
-			( 1 === $exactdn->get_plan_id() ? " id='easyio_use_lqip_disabled' disabled " : " id='easyio_use_lqip' " ) .
-			( 1 < $exactdn->get_plan_id() && easyio_get_option( 'easyio_use_lqip' ) ? "checked='true'" : '' ) . ' /> ' .
+			"<p><input type='checkbox' name='easyio_use_lqip' value='true' id='easyio_use_lqip' " .
+			( easyio_get_option( 'easyio_use_lqip' ) ? "checked='true'" : '' ) . ' /> ' .
 			"<label for='easyio_use_lqip'><strong>LQIP:</strong></label> " . esc_html__( 'Use low-quality versions of your images as placeholders. Can improve user experience, but may be slower than blank placeholders.', 'easy-image-optimizer' ) .
 			easyio_help_link( 'https://docs.ewww.io/article/75-lazy-load-placeholders', '5c9a7a302c7d3a1544615e47' ) . "</p>\n" .
 			"</td></tr>\n";

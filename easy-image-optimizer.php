@@ -13,7 +13,7 @@ Plugin Name: Easy Image Optimizer
 Plugin URI: https://wordpress.org/plugins/easy-image-optimizer/
 Description: Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
 Author: Exactly WWW
-Version: 2.9.2
+Version: 3.0.0
 Requires at least: 5.7
 Requires PHP: 7.2
 Author URI: https://ewww.io/
@@ -71,6 +71,6 @@ if ( ! function_exists( 'easyio_unsupported_php' ) ) {
 	 * Runs on 'plugins_loaded' to load the language files when EWWW is not loading.
 	 */
 	function easyio_false_init() {
-		load_plugin_textdomain( 'easy-image-optimizer', false, plugin_dir_path( __FILE__ ) . 'languages/' );
+		load_plugin_textdomain( 'easy-image-optimizer' );
 	}
 }
