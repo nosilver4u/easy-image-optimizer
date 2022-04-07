@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '300' );
+define( 'EASYIO_VERSION', '301' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -29,8 +29,6 @@ add_filter( 'easyio_superadmin_permissions', 'easyio_superadmin_permissions', 8 
 // Add a link to the plugins page so the user can go straight to the settings page.
 $easyio_plugin_slug = plugin_basename( EASYIO_PLUGIN_FILE );
 add_filter( "plugin_action_links_$easyio_plugin_slug", 'easyio_settings_link' );
-// Loads the plugin translations.
-add_action( 'plugins_loaded', 'easyio_load' );
 // Runs any checks that need to run everywhere and early.
 add_action( 'init', 'easyio_init', 9 );
 // Load our front-end parsers for ExactDN and/or Alt WebP.
@@ -268,13 +266,6 @@ function easyio_function_exists( $function, $debug = false ) {
 		}
 	}
 	return function_exists( $function );
-}
-
-/**
- * Runs on 'plugins_loaded' to make make sure the language files are loaded early.
- */
-function easyio_load() {
-	load_plugin_textdomain( 'easy-image-optimizer' );
 }
 
 /**

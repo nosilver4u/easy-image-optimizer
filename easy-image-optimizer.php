@@ -13,7 +13,7 @@ Plugin Name: Easy Image Optimizer
 Plugin URI: https://wordpress.org/plugins/easy-image-optimizer/
 Description: Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
 Author: Exactly WWW
-Version: 3.0.0
+Version: 3.0.1
 Requires at least: 5.7
 Requires PHP: 7.2
 Author URI: https://ewww.io/
@@ -28,8 +28,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 70200 ) {
 	add_action( 'network_admin_notices', 'easyio_unsupported_php' );
 	add_action( 'admin_notices', 'easyio_unsupported_php' );
-	// Loads the plugin translations.
-	add_action( 'plugins_loaded', 'easyio_false_init' );
 } elseif ( empty( $_GET['easyio_disable'] ) ) {
 	/**
 	 * The full path of the plugin file (this file).
@@ -66,11 +64,5 @@ if ( ! function_exists( 'easyio_unsupported_php' ) ) {
 	 */
 	function easyio_unsupported_php() {
 		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 7.2 or greater. Newer versions of PHP are faster and more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) . '</a></p></div>';
-	}
-	/**
-	 * Runs on 'plugins_loaded' to load the language files when EWWW is not loading.
-	 */
-	function easyio_false_init() {
-		load_plugin_textdomain( 'easy-image-optimizer' );
 	}
 }

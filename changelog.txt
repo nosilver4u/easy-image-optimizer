@@ -1,3 +1,6 @@
+= 3.0.1 =
+* changed: image links constrained to 2560px, use EIO_PRESERVE_LINKED_IMAGES to override
+
 = 3.0.0 =
 * added: Lazy Load and CDN support for multiple background images and mixing with gradients
 * changed: all Easy IO settings available to all plan levels
