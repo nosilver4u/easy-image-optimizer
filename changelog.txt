@@ -1,3 +1,7 @@
+= 3.0.2 =
+* changed: Easy IO WebP quality can be defined separately from the JPG quality used for resizing operations
+* fixed: Lazy Load integration with WooCommerce Product Recommendations handling AJAX output incorrectly
+
 = 3.0.1 =
 * changed: image links constrained to 2560px, use EIO_PRESERVE_LINKED_IMAGES to override
 

@@ -1506,10 +1506,10 @@ if ( ! class_exists( 'ExactDN' ) ) {
 								// Replace original tag with modified version.
 								$content = str_replace( $images['img_tag'][ $index ], $new_tag, $content );
 							}
-						}
-					}
-				} // End foreach().
-			} // End if();
+						} // End if() -- no srcset or sizes attributes found.
+					} // End if() -- not a feed and EIO_SRCSET_FILL enabled.
+				} // End foreach() -- of all images found in the page.
+			} // End if() -- we found images in the page at all.
 
 			// Process <a> elements in the page for image URLs.
 			$content = $this->filter_image_links( $content );
@@ -3319,6 +3319,7 @@ if ( ! class_exists( 'ExactDN' ) ) {
 
 			$jpg_quality  = apply_filters( 'jpeg_quality', null, 'image_resize' );
 			$webp_quality = apply_filters( 'webp_quality', 75, 'image/webp' );
+			$avif_quality = apply_filters( 'avif_quality', 45, 'image/avif' );
 
 			$more_args = array();
 			if ( false === strpos( $image_url, 'strip=all' ) && $this->get_option( $this->prefix . 'metadata_remove' ) ) {
@@ -3332,13 +3333,16 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			} elseif ( false === strpos( $image_url, 'lossy=' ) && ! $this->get_option( 'exactdn_lossy' ) ) {
 				$more_args['lossy'] = 0;
 			} elseif ( false === strpos( $image_url, 'lossy=' ) && $this->get_option( 'exactdn_lossy' ) ) {
-				$more_args['lossy'] = is_numeric( $this->get_option( 'exactdn_lossy' ) ) ? (int) $this->get_option( 'exactdn_lossy' ) : 80;
+				$more_args['lossy'] = is_numeric( $this->get_option( 'exactdn_lossy' ) ) ? (int) $this->get_option( 'exactdn_lossy' ) : 1;
 			}
 			if ( false === strpos( $image_url, 'quality=' ) && ! is_null( $jpg_quality ) && 82 !== (int) $jpg_quality ) {
 				$more_args['quality'] = $jpg_quality;
 			}
-			if ( false === strpos( $image_url, 'quality=' ) && 75 !== (int) $webp_quality && $webp_quality < $jpg_quality ) {
-				$more_args['quality'] = $webp_quality;
+			if ( false === strpos( $image_url, 'webp=' ) && 75 !== (int) $webp_quality ) {
+				$more_args['webp'] = $webp_quality;
+			}
+			if ( false === strpos( $image_url, 'avif=' ) && 45 !== (int) $avif_quality ) {
+				$more_args['avif'] = $avif_quality;
 			}
 			if ( defined( 'EIO_WEBP_SHARP_YUV' ) && EIO_WEBP_SHARP_YUV ) {
 				$more_args['sharp'] = 1;
