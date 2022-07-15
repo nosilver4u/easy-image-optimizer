@@ -48,6 +48,21 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 70200 ) {
 	 */
 	define( 'EASYIO_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
+	if ( ! defined( 'EASYIO_CONTENT_DIR' ) ) {
+		if ( defined( 'EWWWIO_CONTENT_DIR' ) ) {
+			define( 'EASYIO_CONTENT_DIR', EWWWIO_CONTENT_DIR );
+		} else {
+			$easyio_content_dir = trailingslashit( WP_CONTENT_DIR ) . trailingslashit( 'easyio' );
+			if ( ! is_writable( WP_CONTENT_DIR ) || ! empty( $_ENV['PANTHEON_ENVIRONMENT'] ) ) {
+				$upload_dir = wp_get_upload_dir();
+				if ( false === strpos( $upload_dir['basedir'], '://' ) && is_writable( $upload_dir['basedir'] ) ) {
+					$easyio_content_dir = trailingslashit( $upload_dir['basedir'] ) . trailingslashit( 'easyio' );
+				}
+			}
+			define( 'EASYIO_CONTENT_DIR', $easyio_content_dir );
+		}
+	}
+
 	/**
 	 * All the 'unique' functions for the core Easy I.O. plugin.
 	 */

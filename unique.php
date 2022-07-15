@@ -1210,7 +1210,7 @@ function easyio_options( $network = 'singlesite' ) {
 	global $eio_debug;
 	if ( ! empty( $eio_debug ) ) {
 		$debug_output = '<p style="clear:both"><b>' . esc_html__( 'Debugging Information', 'easy-image-optimizer' ) . ':</b> <button id="easyio-copy-debug" class="button button-secondary" type="button">' . esc_html__( 'Copy', 'easy-image-optimizer' ) . '</button>';
-		if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) || is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
+		if ( is_file( EASYIO_CONTENT_DIR . 'debug.log' ) || is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
 			$debug_output .= "&emsp;<a href='admin.php?action=easyio_view_debug_log'>" . esc_html( 'View Debug Log', 'easy-image-optimizer' ) . "</a> - <a href='admin.php?action=easyio_delete_debug_log'>" . esc_html( 'Remove Debug Log', 'easy-image-optimizer' ) . '</a>';
 		}
 		$debug_output .= '</p>';
@@ -1326,8 +1326,8 @@ function easyio_debug_log() {
 	}
 	global $eio_debug;
 	global $easyio_temp_debug;
-	$debug_log = WP_CONTENT_DIR . '/easyio/debug.log';
-	if ( ! is_dir( dirname( $debug_log ) ) && is_writable( WP_CONTENT_DIR ) ) {
+	$debug_log = EASYIO_CONTENT_DIR . 'debug.log';
+	if ( ! is_dir( dirname( $debug_log ) ) && is_writable( dirname( EASYIO_CONTENT_DIR ) ) ) {
 		wp_mkdir_p( dirname( $debug_log ) );
 	}
 	if (
@@ -1364,10 +1364,10 @@ function easyio_view_debug_log() {
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
 	}
-	if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) ) {
+	if ( is_file( EASYIO_CONTENT_DIR . 'debug.log' ) ) {
 		easyio_ob_clean();
 		header( 'Content-Type: text/plain;charset=UTF-8' );
-		readfile( WP_CONTENT_DIR . '/easyio/debug.log' );
+		readfile( EASYIO_CONTENT_DIR . 'debug.log' );
 		exit;
 	}
 	if ( is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
@@ -1387,8 +1387,8 @@ function easyio_delete_debug_log() {
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
 	}
-	if ( is_file( WP_CONTENT_DIR . '/easyio/debug.log' ) ) {
-		unlink( WP_CONTENT_DIR . '/easyio/debug.log' );
+	if ( is_file( EASYIO_CONTENT_DIR . 'debug.log' ) ) {
+		unlink( EASYIO_CONTENT_DIR . 'debug.log' );
 	}
 	if ( is_file( WP_CONTENT_DIR . '/ewww/debug.log' ) ) {
 		unlink( WP_CONTENT_DIR . '/ewww/debug.log' );
