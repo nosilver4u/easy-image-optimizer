@@ -55,6 +55,9 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.1.2 =
+* fixed: trailing space on image URL handled incorrectly
+
 = 3.1.1 =
 * fixed: Lazy Load not using EWWWIO_CONTENT_DIR
 * fixed: Lazy Load Auto-scale adds query parameters to SVG images
