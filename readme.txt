@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 5.7
+Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.1.1 =
+* fixed: Lazy Load not using EWWWIO_CONTENT_DIR
+* fixed: Lazy Load Auto-scale adds query parameters to SVG images
+* fixed: Lazy Load prevents image loading in GiveWP iframe
+* fixed: Auto Scale crops too much for object-* images in Oxygen
 
 = 3.1.0 =
 * added: AVIF support via Easy IO, enable on site management at ewww.io

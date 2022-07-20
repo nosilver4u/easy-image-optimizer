@@ -1,3 +1,9 @@
+= 3.1.1 =
+* fixed: Lazy Load not using EWWWIO_CONTENT_DIR
+* fixed: Lazy Load Auto-scale adds query parameters to SVG images
+* fixed: Lazy Load prevents image loading in GiveWP iframe
+* fixed: Auto Scale crops too much for object-* images in Oxygen
+
 = 3.1.0 =
 * added: AVIF support via Easy IO, enable on site management at ewww.io
 * added: ability for Easy IO to get full-size path when using offloaded media
