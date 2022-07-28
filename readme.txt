@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.8
 Tested up to: 6.0
 Requires PHP: 7.2
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -57,6 +57,7 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 = 3.1.2 =
 * fixed: trailing space on image URL handled incorrectly
+* fixed: lazy load sometimes incorrectly scales images in AffiliateWP portal
 
 = 3.1.1 =
 * fixed: Lazy Load not using EWWWIO_CONTENT_DIR

@@ -1,3 +1,7 @@
+= 3.1.2 =
+* fixed: trailing space on image URL handled incorrectly
+* fixed: lazy load sometimes incorrectly scales images in AffiliateWP portal
+
 = 3.1.1 =
 * fixed: Lazy Load not using EWWWIO_CONTENT_DIR
 * fixed: Lazy Load Auto-scale adds query parameters to SVG images
