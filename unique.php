@@ -51,6 +51,8 @@ add_action( 'admin_action_easyio_delete_debug_log', 'easyio_delete_debug_log' );
 register_deactivation_hook( EASYIO_PLUGIN_FILE, 'easyio_network_deactivate' );
 // Makes sure we flush the debug info to the log on shutdown.
 add_action( 'shutdown', 'easyio_debug_log' );
+// Disable core WebP generation since we already do that.
+add_filter( 'wp_upload_image_mime_transforms', '__return_empty_array' );
 
 /**
  * Attempt to activate the site with ExactDN/Easy IO.

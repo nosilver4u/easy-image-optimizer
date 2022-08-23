@@ -55,6 +55,10 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.1.3 =
+* added: image watermarking, configure at https://ewww.io/manage-sites/
+* fixed: prevent WP core from generating duplicate WebP images
+
 = 3.1.2 =
 * fixed: trailing space on image URL handled incorrectly
 * fixed: lazy load sometimes incorrectly scales images in AffiliateWP portal
@@ -85,85 +89,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * changed: all Easy IO settings available to all plan levels
 * fixed: LQIP and SVG placeholder options not auto-loaded correctly
 * fixed: invalid path in translation loader
-
-= 2.9.2 =
-* fixed: Easy IO was adding srcset markup for SVG images
-
-= 2.9.1 =
-* added: use decoding=async to prevent images from blocking text render
-* fixed: Auto-scale incorrectly handles Divi parallax background images
-* fixed: native lazy loading used on inline PNG placeholders
-
-= 2.9.0 =
-* changed: Lazy Load no longer excludes first image in a page due to potential CLS issues and auto-scaling suppression
-* fixed: AMP detection throws notices in some cases
-* fixed: Easy IO misses some image URLs on multi-site when using domain-mapping
-* fixed: Lazy Loader incorrectly parses fall-back iframe from Google Tag Manager, triggering 403 errors in some WAF systems
-* fixed: Easy IO URL rewriter changing links if they matched a custom upload folder
-* fixed: Easy IO incompatible with Toolset Blocks
-* fixed: Easy IO incorrectly sizing wide/full width cover blocks
-* fixed: SWIS CDN compat called too early in some cases
-
-= 2.8.2 =
-* fixed: error when disabling Easy IO
-* updated: instructions for disabling Jetpack site accelerator
-
-= 2.8.1 =
-* changed: first image in a page is assumed to be "above the fold" and will not be lazy loaded, override with EIO_LAZY_FOLD constant
-* fixed: mismatched quotes break HTML markup in some cases
-* fixed: Lazy Loader incorrectly parses fall-back iframe from Google Tag Manager, triggering 403 errors in some WAF systems
-* fixed: Easy IO could not properly resize PNG-8 images
-* fixed: default WebP quality was too high
-
-= 2.8.0 =
-* added: EIO_LAZY_FOLD override to configure number of images above-the-fold that will be skipped by Lazy Load
-* added: Easy IO URLs for custom (non-WP) srcset markup
-* added: Easy IO support for CSS background images with relative URLs
-* fixed: Easy IO scaling not working on full-size images without srcset/responsive markup
-* fixed: Lazy Load skips images dynamically created by Brizy builder
-* fixed: Easy IO conflict on Elementor preview pages
-* fixed: EXACTDN_CONTENT_WIDTH not effective at overriding $content_width during image_downsize filter
-
-= 2.7.4 =
-* added: Easy IO and Lazy Load support for AJAX responses from FacetWP
-* changed: Vimeo videos excluded from iframe lazy load
-* changed: use 'bg-image-crop' class on elements with CSS background images that need to be cropped by auto-scaling
-* fixed: sub-folder multi-site installs which use separate domains could not activate Easy IO
-* fixed: Lazy Load PNG placeholders cannot be cached if the WP_CONTENT_DIR location is read-only (notably on Pantheon servers)
-* fixed: is_amp() called too early
-* fixed: Fusion Builder (Avada) does not load when Lazy Load or Easy IO options are enabled
-
-= 2.7.3 =
-* fixed: local PNG placeholders enabled with Easy IO when placeholder folder is not writable
-* fixed: iframe lazy loading breaks Gravity Forms and FacetWP when parsing JSON
-* fixed: is_amp() called too early
-
-= 2.7.2 =
-* fixed: Lazy Load not automatically creating placeholder folder
-
-= 2.7.1 =
-* added: integration with JSON/AJAX respones from Spotlight Social Media Feeds plugin
-* fixed: img element search parsing JSON incorrectly
-
-= 2.7.0 =
-* added: disable "deep" integration with image_downsize filter via EIO_DISABLE_DEEP_INTEGRATION override
-* changed: PNG placeholders are now inlined for less HTTP requests and better auto-scaling
-* fixed: LQIP query strings not allowing resize operations
-* fixed: Lazy Load throws error when ewww_webp_supported not defined in edge cases.
-* fixed: Lazy Load regression prevents above-the-fold CSS background images from loading
-* fixed: WebP source images ignored by URL rewriter
-* fixed: Lazy Load scripts loading for page builders when they shouldn't be
-* fixed: Easy IO does not rewrite image (href) links if image_downsize integration has rewritten the img tag
-
-= 2.6.0 =
-* added: enable -sharp_yuv option for WebP conversion with the EIO_WEBP_SHARP_YUV override
-* added: Lazy Load for iframes, add 'iframe' in exclusions to disable
-* added: preserve metadata and apply lossless compression to linked versions of images via Easy IO with EIO_PRESERVE_LINKED_IMAGES constant
-* added: Easy IO rewrites URLs in existing picture elements
-* changed: native lazy loading is now enabled for right-sized PNG placeholders, override with EIO_DISABLE_NATIVE_LAZY constant
-* changed: move Easy IO check-in to wp_cron
-* fixed: Add Missing Dimensions overwrites smaller width/height attribute if only one is set
-* fixed: replacing an existing attribute (like width) with a numeric value is broken
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
