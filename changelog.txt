@@ -1,3 +1,9 @@
+= 3.2.0 =
+* added: exclude by page for Easy IO and Lazy Load
+* changed: include upstream lazysizes unveilhooks for use by developers, props @saas786
+* fixed: better compatibility with S3 Uploads when using autoload
+* fixed: Easy IO srcset URL construction not accounting for object versioning with S3 (or other cloud storage)
+
 = 3.1.3 =
 * added: image watermarking, configure at https://ewww.io/manage-sites/
 * fixed: prevent WP core from generating duplicate WebP images

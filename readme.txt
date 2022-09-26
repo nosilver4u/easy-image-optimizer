@@ -2,9 +2,9 @@
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.8
-Tested up to: 6.0
+Tested up to: 6.1
 Requires PHP: 7.2
-Stable tag: 3.1.3
+Stable tag: 3.2.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.2.0 =
+* added: exclude by page for Easy IO and Lazy Load
+* changed: include upstream lazysizes unveilhooks for use by developers, props @saas786
+* fixed: better compatibility with S3 Uploads when using autoload
+* fixed: Easy IO srcset URL construction not accounting for object versioning with S3 (or other cloud storage)
+
 = 3.1.3 =
 * added: image watermarking, configure at https://ewww.io/manage-sites/
 * fixed: prevent WP core from generating duplicate WebP images
@@ -76,19 +82,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: Easy IO not finding scaled full-size for dynamic size generation
 * fixed: cover images not cropped properly by Easy IO
 * fixed: Easy IO URLs leaking into post editor with WP 6.0
-
-= 3.0.2 =
-* changed: Easy IO WebP quality can be defined separately from the JPG quality used for resizing operations
-* fixed: Lazy Load integration with WooCommerce Product Recommendations handling AJAX output incorrectly
-
-= 3.0.1 =
-* changed: image links constrained to 2560px, use EIO_PRESERVE_LINKED_IMAGES to override
-
-= 3.0.0 =
-* added: Lazy Load and CDN support for multiple background images and mixing with gradients
-* changed: all Easy IO settings available to all plan levels
-* fixed: LQIP and SVG placeholder options not auto-loaded correctly
-* fixed: invalid path in translation loader
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.

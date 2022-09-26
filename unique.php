@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '313' );
+define( 'EASYIO_VERSION', '320' );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -226,15 +226,27 @@ function easyio_superadmin_permissions( $permissions ) {
 	return $permissions;
 }
 
-if ( ! function_exists( 'boolval' ) ) {
+if ( ! function_exists( 'str_ends_with' ) ) {
 	/**
-	 * Cast a value to boolean.
+	 * Polyfill for `str_ends_with()` function added in WP 5.9 or PHP 8.0.
 	 *
-	 * @param mixed $value Any value that can be cast to boolean.
-	 * @return bool The boolean version of the provided value.
+	 * Performs a case-sensitive check indicating if
+	 * the haystack ends with needle.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $haystack The string to search in.
+	 * @param string $needle   The substring to search for in the `$haystack`.
+	 * @return bool True if `$haystack` ends with `$needle`, otherwise false.
 	 */
-	function boolval( $value ) {
-		return (bool) $value;
+	function str_ends_with( $haystack, $needle ) {
+		if ( '' === $haystack && '' !== $needle ) {
+			return false;
+		}
+
+		$len = strlen( $needle );
+
+		return 0 === substr_compare( $haystack, $needle, -$len, $len );
 	}
 }
 
@@ -335,15 +347,6 @@ function easyio_upgrade() {
 		}
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
 			add_option( 'exactdn_never_been_active', true, '', false );
-		}
-		if ( easyio_get_option( 'easyio_exactdn' ) ) {
-			if ( 'external' === get_option( 'elementor_css_print_method' ) ) {
-				update_option( 'elementor_css_print_method', 'internal' );
-			}
-			if ( function_exists( 'et_get_option' ) && function_exists( 'et_update_option' ) && 'on' === et_get_option( 'et_pb_static_css_file', 'on' ) ) {
-				et_update_option( 'et_pb_static_css_file', 'off' );
-				et_update_option( 'et_pb_css_in_footer', 'off' );
-			}
 		}
 		update_option( 'easyio_version', EASYIO_VERSION );
 		easyio_debug_log();
@@ -471,21 +474,6 @@ function easyio_current_screen( $screen ) {
 		if ( ! function_exists( 'ewww_image_optimizer' ) && ! easyio_get_option( 'easyio_debug' ) ) {
 			$eio_debug = '';
 		}
-	}
-}
-
-if ( ! function_exists( 'wp_doing_ajax' ) ) {
-	/**
-	 * Checks to see if this is an AJAX request.
-	 *
-	 * For backwards compatiblity with WordPress < 4.7.0.
-	 *
-	 * @since 3.3.0
-	 *
-	 * @return bool True if this is an AJAX request.
-	 */
-	function wp_doing_ajax() {
-		return apply_filters( 'wp_doing_ajax', defined( 'DOING_AJAX' ) && DOING_AJAX );
 	}
 }
 
@@ -1127,7 +1115,8 @@ function easyio_options( $network = 'singlesite' ) {
 			"<label for='exactdn_exclude'>" . esc_html__( 'Exclusions', 'easy-image-optimizer' ) . '</label>' .
 			easyio_help_link( 'https://docs.ewww.io/article/68-exactdn-exclude', '5c0042892c7d3a31944e88a4' ) . '</th><td>' .
 			"<textarea id='exactdn_exclude' name='exactdn_exclude' rows='3' cols='60'>$eio_exclude_paths</textarea>\n" .
-			"<p class='description'>" . esc_html__( 'One exclusion per line: any pattern or path provided will not be optimized by Easy IO.', 'easy-image-optimizer' ) .
+			"<p class='description'>" . esc_html__( 'One exclusion per line, no wildcards (*) needed. Any pattern or path provided will not be optimized by Easy IO.', 'easy-image-optimizer' ) .
+			' ' . esc_html__( 'Exclude entire pages with page:/xyz/ syntax.', 'easy-image-optimizer' ) .
 			"</p></td></tr>\n";
 		easyio_debug_message( 'Easy IO exclusions:' );
 		easyio_debug_message( $eio_exclude_paths );
@@ -1136,7 +1125,7 @@ function easyio_options( $network = 'singlesite' ) {
 			"<td><input type='checkbox' id='easyio_add_missing_dims' name='easyio_add_missing_dims' value='true' " .
 				checked( easyio_get_option( 'easyio_add_missing_dims' ), true, false ) . ' ' . disabled( easyio_get_option( 'easyio_lazy_load' ), false, false ) . ' /> ' .
 			esc_html__( 'Add width/height attributes to reduce layout shifts and improve user experience.', 'easy-image-optimizer' ) .
-			( ! easyio_get_option( 'easyio_lazy_load' ) ? "<p class ='description'>*" . esc_html__( 'Requires Lazy Load.', 'ewww-image-optimizer' ) . '</p>' : '' ) .
+			( ! easyio_get_option( 'easyio_lazy_load' ) ? "<p class ='description'>*" . esc_html__( 'Requires Lazy Load.', 'easy-image-optimizer' ) . '</p>' : '' ) .
 			"</td></tr>\n";
 		$output[] = "<tr><th scope='row'><p><label for='easyio_lazy_load'>" . esc_html__( 'Lazy Load', 'easy-image-optimizer' ) . '</label>' .
 			easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) .
@@ -1159,7 +1148,8 @@ function easyio_options( $network = 'singlesite' ) {
 			easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ) . '<br>' .
 			"<textarea id='easyio_ll_exclude' name='easyio_ll_exclude' rows='3' cols='60'>$ll_exclude_paths</textarea>\n" .
 			"<p class='description'>" .
-			esc_html__( 'One exclusion per line: use any string that matches the desired element(s) or exclude entire element types like "div", "span", etc. The class "skip-lazy" and attribute "data-skip-lazy" are excluded by default.', 'easy-image-optimizer' ) .
+			esc_html__( 'One exclusion per line, no wildcards (*) needed. Use any string that matches the desired element(s) or exclude entire element types like "div", "span", etc. The class "skip-lazy" and attribute "data-skip-lazy" are excluded by default.', 'easy-image-optimizer' ) .
+			' ' . esc_html__( 'Exclude entire pages with page:/xyz/ syntax.', 'easy-image-optimizer' ) .
 			"</p></td></tr>\n";
 		easyio_debug_message( 'LL exclusions:' );
 		easyio_debug_message( $ll_exclude_paths );

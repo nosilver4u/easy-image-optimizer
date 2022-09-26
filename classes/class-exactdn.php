@@ -25,6 +25,14 @@ if ( ! class_exists( 'ExactDN' ) ) {
 		protected $user_exclusions = array();
 
 		/**
+		 * A list of user-defined page/URL exclusions, populated by validate_user_exclusions().
+		 *
+		 * @access protected
+		 * @var array $user_page_exclusions
+		 */
+		protected $user_page_exclusions = array();
+
+		/**
 		 * A list of image sizes registered for attachments.
 		 *
 		 * @access protected
@@ -822,6 +830,11 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				if ( is_array( $user_exclusions ) ) {
 					foreach ( $user_exclusions as $exclusion ) {
 						if ( ! is_string( $exclusion ) ) {
+							continue;
+						}
+						$exclusion = trim( $exclusion );
+						if ( 0 === strpos( $exclusion, 'page:' ) ) {
+							$this->user_page_exclusions[] = str_replace( 'page:', '', $exclusion );
 							continue;
 						}
 						if ( $this->content_path && false !== strpos( $exclusion, $this->content_path ) ) {
@@ -2320,7 +2333,6 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			}
 
 			$this->debug_message( "image_src = $image_src" );
-			$upload_dir      = wp_get_upload_dir();
 			$resize_existing = defined( 'EXACTDN_RESIZE_EXISTING' ) && EXACTDN_RESIZE_EXISTING;
 			$w_descriptor    = true;
 
@@ -2359,10 +2371,16 @@ if ( ! class_exists( 'ExactDN' ) ) {
 				$this->debug_message( 'continuing: ' . $width . ' vs. ' . $source['value'] );
 
 				// It's quicker to get the full size with the data we have already, if available.
-				if ( ! empty( $attachment_id ) ) {
-					$url = wp_get_attachment_url( $attachment_id );
+				if ( ! empty( $full_url ) ) {
+					$url = $full_url;
+				} elseif ( ! empty( $attachment_id ) ) {
+					$full_url = wp_get_attachment_url( $attachment_id );
+					$url      = $full_url;
 				} else {
-					$url = $this->strip_image_dimensions_maybe( $url );
+					$full_url = $this->strip_image_dimensions_maybe( $url );
+					if ( $full_url === $url ) {
+						$full_url = '';
+					}
 				}
 				$this->debug_message( "building srcs from $url" );
 
@@ -2393,8 +2411,35 @@ if ( ! class_exists( 'ExactDN' ) ) {
 			 */
 			$multipliers = apply_filters( 'exactdn_srcset_multipliers', array( .2, .4, .6, .8, 1, 2, 3, 1920 ) );
 
-			$this->debug_message( "building url from {$upload_dir['baseurl']} and {$image_meta['file']}" );
-			$url = trailingslashit( $upload_dir['baseurl'] ) . $image_meta['file'];
+			if ( ! empty( $full_url ) ) {
+				$this->debug_message( "already built url via db: $full_url" );
+				$url = $full_url;
+			} elseif ( 0 === strpos( $image_meta['file'], '/' ) ) {
+				$this->debug_message( 'full meta appears to be absolute path, retrieving URL via wp_get_attachment_url()' );
+				$url = \wp_get_attachment_url( $attachment_id );
+			} else {
+				$base_dir  = \dirname( $url );
+				$meta_file = $image_meta['file'];
+				$this->debug_message( "checking to see if we can join $base_dir with $meta_file" );
+				if ( false !== \strpos( $meta_file, '/' ) ) {
+					$meta_dir = \dirname( $meta_file );
+					if ( \str_ends_with( $base_dir, $meta_dir ) ) {
+						$meta_file = \wp_basename( $meta_file );
+						$this->debug_message( "trimmed file down to $meta_file" );
+					} else {
+						// This happens if there is object versioning, or thumbs in a sub-folder.
+						$this->debug_message( "could not splice $base_dir and $meta_file" );
+						$base_dir = false;
+					}
+				}
+				if ( $base_dir ) {
+					$this->debug_message( "building url from $base_dir and $meta_file" );
+					$url = \trailingslashit( $base_dir ) . $meta_file;
+				} else {
+					$this->debug_message( 'splicing disabled previously, or empty base_dir, so retrieving URL via wp_get_attachment_url()' );
+					$url = \wp_get_attachment_url( $attachment_id );
+				}
+			}
 
 			if ( ! $w_descriptor ) {
 				$this->debug_message( 'using x descriptors instead of w' );
@@ -3128,6 +3173,18 @@ if ( ! class_exists( 'ExactDN' ) ) {
 		 * @return boolean True to skip the page, unchanged otherwise.
 		 */
 		function skip_page( $skip = false, $uri = '' ) {
+			if ( $this->is_iterable( $this->user_page_exclusions ) ) {
+				foreach ( $this->user_page_exclusions as $page_exclusion ) {
+					if ( '/' === $page_exclusion && '/' === $uri ) {
+						return true;
+					} elseif ( '/' === $page_exclusion ) {
+						continue;
+					}
+					if ( false !== strpos( $uri, $page_exclusion ) ) {
+						return true;
+					}
+				}
+			}
 			if ( false !== strpos( $uri, 'bricks=run' ) ) {
 				return true;
 			}
