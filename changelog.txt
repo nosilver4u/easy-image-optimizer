@@ -1,3 +1,6 @@
+= 3.2.1 =
+* fixed: PHP notices when Easy IO filters srcset URLs
+
 = 3.2.0 =
 * added: exclude by page for Easy IO and Lazy Load
 * changed: include upstream lazysizes unveilhooks for use by developers, props @saas786
