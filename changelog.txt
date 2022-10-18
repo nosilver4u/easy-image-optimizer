@@ -1,3 +1,8 @@
+= 3.2.2 =
+* changed: improved detection for site URL changes
+* fixed: Lazy Load JS throws error if inline script vars are missing
+* fixed: Easy IO + Lazy Load auto-scale produces invalid URL if an image with no query string is constrained by height
+
 = 3.2.1 =
 * fixed: PHP notices when Easy IO filters srcset URLs
 

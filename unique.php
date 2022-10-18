@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', '321' );
+define( 'EASYIO_VERSION', 322 );
 
 // Initialize a couple globals.
 $eio_debug = '';
@@ -521,6 +521,13 @@ function easyio_notice_exactdn_domain_mismatch() {
 	if ( ! isset( $exactdn->upload_domain ) ) {
 		return;
 	}
+	$stored_local_domain = easyio_get_option( 'easyio_exactdn_local_domain' );
+	if ( empty( $stored_local_domain ) ) {
+		return;
+	}
+	if ( false === strpos( $stored_local_domain, '.' ) ) {
+		$stored_local_domain = base64_decode( $stored_local_domain );
+	}
 	?>
 	<div id="easyio-notice-exactdn-domain-mismatch" class="notice notice-warning">
 		<p>
@@ -528,7 +535,7 @@ function easyio_notice_exactdn_domain_mismatch() {
 			printf(
 				/* translators: 1: old domain name, 2: current domain name */
 				esc_html__( 'Easy IO detected that the Site URL has changed since the initial activation (previously %1$s, currently %2$s).', 'easy-image-optimizer' ),
-				'<strong>' . esc_html( easyio_get_option( 'easyio_exactdn_local_domain' ) ) . '</strong>',
+				'<strong>' . esc_html( $stored_local_domain ) . '</strong>',
 				'<strong>' . esc_html( $exactdn->upload_domain ) . '</strong>'
 			);
 	?>
