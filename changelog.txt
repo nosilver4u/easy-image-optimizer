@@ -1,3 +1,9 @@
+= 3.2.3 =
+* changed: improved Brizy Builder compatibility
+* fixed: Easy IO fails to apply crop for custom size in some cases
+* fixed: Easy IO not applying watermark consistently on PNG images
+* fixed: Easy IO not scaling watermark when scaling original image
+
 = 3.2.2 =
 * changed: improved detection for site URL changes
 * fixed: Lazy Load JS throws error if inline script vars are missing

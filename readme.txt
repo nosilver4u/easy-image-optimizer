@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 5.8
 Tested up to: 6.1
 Requires PHP: 7.2
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,12 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.2.3 =
+* changed: improved Brizy Builder compatibility
+* fixed: Easy IO fails to apply crop for custom size in some cases
+* fixed: Easy IO not applying watermark consistently on PNG images
+* fixed: Easy IO not scaling watermark when scaling original image
 
 = 3.2.2 =
 * changed: improved detection for site URL changes
