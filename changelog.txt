@@ -1,3 +1,7 @@
+= 3.2.4 =
+* changed: allow video files to go through Easy IO CDN (pass through)
+* fixed: PHP 8.1 deprecation notices from usage of add_submenu_page and add_query_arg
+
 = 3.2.3 =
 * changed: improved Brizy Builder compatibility
 * fixed: Easy IO fails to apply crop for custom size in some cases
