@@ -111,7 +111,7 @@ function easyio_parser_init() {
 		/**
 		 * Page Parsing class for working with HTML content.
 		 */
-		require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-page-parser.php' );
+		require_once( EASYIO_PLUGIN_PATH . 'classes/class-page-parser.php' );
 		/**
 		 * ExactDN class for parsing image urls and rewriting them.
 		 */
@@ -123,14 +123,14 @@ function easyio_parser_init() {
 		/**
 		 * Page Parsing class for working with HTML content.
 		 */
-		require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-page-parser.php' );
+		require_once( EASYIO_PLUGIN_PATH . 'classes/class-page-parser.php' );
 		/**
 		 * Lazy Load class for parsing image urls and deferring off-screen images.
 		 */
-		require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-lazy-load.php' );
+		require_once( EASYIO_PLUGIN_PATH . 'classes/class-lazy-load.php' );
 
 		global $eio_lazy_load;
-		$eio_lazy_load = new EIO_Lazy_Load();
+		$eio_lazy_load = new EasyIO\Lazy_Load();
 	}
 	if ( $buffer_start ) {
 		// Start an output buffer before any output starts.
@@ -363,9 +363,11 @@ function easyio_upgrade() {
 function easyio_admin_init() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 	/**
-	 * EWWWIO_HS_Beacon class for embedding the HelpScout Beacon.
+	 * EasyIO\HS_Beacon class for embedding the HelpScout Beacon.
 	 */
-	require_once( EASYIO_PLUGIN_PATH . 'classes/class-eio-hs-beacon.php' );
+	require_once( EASYIO_PLUGIN_PATH . 'classes/class-hs-beacon.php' );
+	global $easyio_hs_beacon;
+	$easyio_hs_beacon = new EasyIO\HS_Beacon();
 	easyio_upgrade();
 	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
 		// Need to include the plugin library for the is_plugin_active function.
@@ -419,7 +421,7 @@ function easyio_admin_init() {
 	register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 	register_setting( 'easyio_options', 'easyio_ll_exclude', 'easyio_exclude_paths_sanitize' );
-	if ( ! class_exists( 'ExactDN' ) || ! easyio_get_option( 'easyio_exactdn' ) ) {
+	if ( ! class_exists( 'EasyIO\ExactDN' ) || ! easyio_get_option( 'easyio_exactdn' ) ) {
 		add_action( 'network_admin_notices', 'easyio_notice_inactive' );
 		add_action( 'admin_notices', 'easyio_notice_inactive' );
 	}
@@ -1015,8 +1017,8 @@ function easyio_options( $network = 'singlesite' ) {
 	easyio_debug_message( 'upload_dir: ' . $upload_info['basedir'] );
 	easyio_debug_message( "content_width: $content_width" );
 
-	global $eio_hs_beacon;
-	$eio_hs_beacon->admin_notice( 'singlesite' );
+	global $easyio_hs_beacon;
+	$easyio_hs_beacon->admin_notice( 'singlesite' );
 
 	$output = array();
 
@@ -1043,7 +1045,7 @@ function easyio_options( $network = 'singlesite' ) {
 	global $exactdn;
 	if ( class_exists( 'Jetpack_Photon' ) && Jetpack::is_module_active( 'photon' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		$status_output .= '<span style="color: red">' . esc_html__( 'Inactive, please disable the Site Accelerator option in the Jetpack settings.', 'easy-image-optimizer' ) . '</span>';
-	} elseif ( class_exists( 'ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
+	} elseif ( class_exists( 'EasyIO\ExactDN' ) && easyio_get_option( 'easyio_exactdn' ) ) {
 		if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) {
 			$exactdn_savings = $exactdn->savings();
 			$status_output  .= '<span style="color: #3eadc9;">' . esc_html__( 'Verified', 'easy-image-optimizer' ) . ' </span>';
@@ -1091,7 +1093,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = '<noscript><h2>' . esc_html__( 'Configure', 'easy-image-optimizer' ) . '</h2></noscript>';
 	$output[] = "<table class='form-table'>\n";
 	if ( ! easyio_get_option( 'easyio_exactdn' ) ) {
-		$eio_base = new EIO_Base();
+		$eio_base = new EasyIO\Base();
 		$site_url = $eio_base->content_url();
 		$output[] = '<tr><td>' .
 			'<ol><li><a href="https://ewww.io/easy/" target="_blank">' . esc_html__( 'Start a free trial subscription for your site.', 'easy-image-optimizer' ) . '</a></li>' .
