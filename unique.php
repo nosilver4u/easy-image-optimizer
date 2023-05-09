@@ -10,11 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EASYIO_VERSION', 324 );
-
-// Initialize a couple globals.
-$eio_debug = '';
-
 /*
  * Hooks
  */
@@ -33,8 +28,6 @@ add_filter( "plugin_action_links_$easyio_plugin_slug", 'easyio_settings_link' );
 add_action( 'init', 'easyio_init', 9 );
 // Load our front-end parsers for ExactDN and/or Alt WebP.
 add_action( 'init', 'easyio_parser_init', 99 );
-// Initializes the plugin for admin interactions, like saving network settings and scheduling cron jobs.
-add_action( 'admin_init', 'easyio_admin_init' );
 // Check the current screen ID to see if temp debugging should still be enabled.
 add_action( 'current_screen', 'easyio_current_screen', 10, 1 );
 // Adds the Easy IO pages to the admin menu.
@@ -251,38 +244,6 @@ if ( ! function_exists( 'str_ends_with' ) ) {
 }
 
 /**
- * Checks if a function is disabled or does not exist.
- *
- * @param string $function The name of a function to test.
- * @param bool   $debug Whether to output debugging.
- * @return bool True if the function is available, False if not.
- */
-function easyio_function_exists( $function, $debug = false ) {
-	if ( function_exists( 'ini_get' ) ) {
-		$disabled = @ini_get( 'disable_functions' );
-		if ( $debug ) {
-			easyio_debug_message( "disable_functions: $disabled" );
-		}
-	}
-	if ( extension_loaded( 'suhosin' ) && function_exists( 'ini_get' ) ) {
-		$suhosin_disabled = @ini_get( 'suhosin.executor.func.blacklist' );
-		if ( $debug ) {
-			easyio_debug_message( "suhosin_blacklist: $suhosin_disabled" );
-		}
-		if ( ! empty( $suhosin_disabled ) ) {
-			$suhosin_disabled = explode( ',', $suhosin_disabled );
-			$suhosin_disabled = array_map( 'trim', $suhosin_disabled );
-			$suhosin_disabled = array_map( 'strtolower', $suhosin_disabled );
-			if ( function_exists( $function ) && ! in_array( $function, $suhosin_disabled, true ) ) {
-				return true;
-			}
-			return false;
-		}
-	}
-	return function_exists( $function );
-}
-
-/**
  * Runs early for checks that need to happen on init before anything else.
  */
 function easyio_init() {
@@ -298,36 +259,6 @@ function easyio_init() {
 }
 
 /**
- * Set some default option values.
- */
-function easyio_set_defaults() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	// Set defaults for all options that need to be autoloaded.
-	add_option( 'easyio_debug', false );
-	add_option( 'easyio_metadata_remove', true );
-	add_option( 'easyio_exactdn', false );
-	add_option( 'easyio_plan_id', 0 );
-	add_option( 'exactdn_all_the_things', false );
-	add_option( 'exactdn_lossy', false );
-	add_option( 'exactdn_exclude', '' );
-	add_option( 'exactdn_sub_folder', false );
-	add_option( 'exactdn_prevent_db_queries', true );
-	add_option( 'easyio_add_missing_dims', true );
-	add_option( 'easyio_lazy_load', false );
-	add_option( 'easyio_use_lqip', false );
-	add_option( 'easyio_use_siip', false );
-	add_option( 'easyio_ll_autoscale', true );
-	add_option( 'easyio_ll_exclude', '' );
-
-	// Set network defaults.
-	add_site_option( 'easyio_metadata_remove', true );
-	add_site_option( 'easyio_add_missing_dims', true );
-	add_site_option( 'easyio_ll_autoscale', true );
-	add_site_option( 'exactdn_sub_folder', false );
-	add_site_option( 'exactdn_prevent_db_queries', true );
-}
-
-/**
  * Plugin upgrade function
  *
  * @global object $wpdb
@@ -338,7 +269,7 @@ function easyio_upgrade() {
 		if ( wp_doing_ajax() ) {
 			return;
 		}
-		easyio_set_defaults();
+		easyio()->set_defaults();
 		// This will get re-enabled if things are too slow.
 		update_option( 'exactdn_prevent_db_queries', true );
 		if ( easyio_get_option( 'easyio_exactdn_verify_method' ) > 0 ) {
@@ -350,100 +281,6 @@ function easyio_upgrade() {
 		}
 		update_option( 'easyio_version', EASYIO_VERSION );
 		easyio_debug_log();
-	}
-}
-
-/**
- * Plugin initialization for admin area.
- *
- * Saves settings when run network-wide, registers all 'common' settings, schedules wp-cron tasks,
- * includes necessary files for bulk operations, runs tool initialization, and ensures
- * compatibility with AJAX calls from other media generation plugins.
- */
-function easyio_admin_init() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	/**
-	 * EasyIO\HS_Beacon class for embedding the HelpScout Beacon.
-	 */
-	require_once( EASYIO_PLUGIN_PATH . 'classes/class-hs-beacon.php' );
-	global $easyio_hs_beacon;
-	$easyio_hs_beacon = new EasyIO\HS_Beacon();
-	easyio_upgrade();
-	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
-		// Need to include the plugin library for the is_plugin_active function.
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	}
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-		easyio_debug_message( 'saving network settings' );
-		// Set the common network settings if they have been POSTed.
-		if ( isset( $_POST['option_page'] ) && false !== strpos( $_POST['option_page'], 'easyio_options' ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'easyio_options-options' ) && current_user_can( 'manage_network_options' ) && ! get_site_option( 'easyio_allow_multisite_override' ) && false === strpos( $_POST['_wp_http_referer'], 'options-general' ) ) {
-			easyio_debug_message( 'network-wide settings, no override' );
-			$_POST['easyio_debug'] = ( empty( $_POST['easyio_debug'] ) ? false : true );
-			update_site_option( 'easyio_debug', $_POST['easyio_debug'] );
-			$_POST['easyio_metadata_remove'] = ( empty( $_POST['easyio_metadata_remove'] ) ? false : true );
-			update_site_option( 'easyio_metadata_remove', $_POST['easyio_metadata_remove'] );
-			$_POST['easyio_exactdn'] = ( empty( $_POST['easyio_exactdn'] ) ? false : true );
-			update_site_option( 'easyio_exactdn', $_POST['easyio_exactdn'] );
-			$_POST['exactdn_all_the_things'] = ( empty( $_POST['exactdn_all_the_things'] ) ? false : true );
-			update_site_option( 'exactdn_all_the_things', $_POST['exactdn_all_the_things'] );
-			$_POST['exactdn_lossy'] = ( empty( $_POST['exactdn_lossy'] ) ? false : true );
-			update_site_option( 'exactdn_lossy', $_POST['exactdn_lossy'] );
-			$_POST['exactdn_exclude'] = empty( $_POST['exactdn_exclude'] ) ? '' : $_POST['exactdn_exclude'];
-			update_site_option( 'exactdn_exclude', easyio_exclude_paths_sanitize( $_POST['exactdn_exclude'] ) );
-			$_POST['easyio_add_missing_dims'] = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
-			update_site_option( 'easyio_add_missing_dims', $_POST['easyio_add_missing_dims'] );
-			$_POST['easyio_lazy_load'] = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
-			update_site_option( 'easyio_lazy_load', $_POST['easyio_lazy_load'] );
-			$_POST['easyio_use_lqip'] = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
-			update_site_option( 'easyio_use_lqip', $_POST['easyio_use_lqip'] );
-			$_POST['easyio_ll_exclude'] = empty( $_POST['easyio_ll_exclude'] ) ? '' : $_POST['easyio_ll_exclude'];
-			update_site_option( 'easyio_ll_exclude', easyio_exclude_paths_sanitize( $_POST['easyio_ll_exclude'] ) );
-			$_POST['easyio_allow_multisite_override'] = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			update_site_option( 'easyio_allow_multisite_override', $_POST['easyio_allow_multisite_override'] );
-			$_POST['easyio_enable_help'] = empty( $_POST['easyio_enable_help'] ) ? false : true;
-			update_site_option( 'easyio_enable_help', $_POST['easyio_enable_help'] );
-			add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
-		} elseif ( isset( $_POST['easyio_allow_multisite_override_active'] ) && current_user_can( 'manage_network_options' ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'easyio_options-options' ) ) {
-			easyio_debug_message( 'network-wide settings, single-site overriding' );
-			$_POST['easyio_allow_multisite_override'] = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			update_site_option( 'easyio_allow_multisite_override', $_POST['easyio_allow_multisite_override'] );
-			add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
-		} // End if().
-	} // End if().
-	// Register all the common Easy IO settings.
-	register_setting( 'easyio_options', 'easyio_debug', 'boolval' );
-	register_setting( 'easyio_options', 'easyio_enable_help', 'boolval' );
-	register_setting( 'easyio_options', 'easyio_exactdn', 'boolval' );
-	register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
-	register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
-	register_setting( 'easyio_options', 'exactdn_exclude', 'easyio_exclude_paths_sanitize' );
-	register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
-	register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
-	register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
-	register_setting( 'easyio_options', 'easyio_ll_exclude', 'easyio_exclude_paths_sanitize' );
-	if ( ! class_exists( 'EasyIO\ExactDN' ) || ! easyio_get_option( 'easyio_exactdn' ) ) {
-		add_action( 'network_admin_notices', 'easyio_notice_inactive' );
-		add_action( 'admin_notices', 'easyio_notice_inactive' );
-	}
-	// Prevent ShortPixel AIO messiness.
-	remove_action( 'admin_notices', 'autoptimizeMain::notice_plug_imgopt' );
-	if ( class_exists( 'autoptimizeExtra' ) ) {
-		$ao_extra = get_option( 'autoptimize_imgopt_settings' );
-		if ( easyio_get_option( 'easyio_exactdn' ) && ! empty( $ao_extra['autoptimize_imgopt_checkbox_field_1'] ) ) {
-			easyio_debug_message( 'detected ExactDN + SP conflict' );
-			$ao_extra['autoptimize_imgopt_checkbox_field_1'] = 0;
-			update_option( 'autoptimize_imgopt_settings', $ao_extra );
-			add_action( 'admin_notices', 'easyio_notice_sp_conflict' );
-		}
-	}
-
-	if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
-		easyio_privacy_policy_content();
-	}
-	// Increase the version when the next bump is coming.
-	if ( defined( 'PHP_VERSION_ID' ) && PHP_VERSION_ID < 50600 ) {
-		add_action( 'network_admin_notices', 'easyio_php55_warning' );
-		add_action( 'admin_notices', 'easyio_php55_warning' );
 	}
 }
 
@@ -836,88 +673,6 @@ function easyio_attachment_path( $meta, $id, $file = '', $refresh_cache = true )
 }
 
 /**
- * Get mimetype based on file extension instead of file contents when speed outweighs accuracy.
- *
- * @param string $path The name of the file.
- * @return string|bool The mime type based on the extension or false.
- */
-function easyio_quick_mimetype( $path ) {
-	$pathextension = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
-	switch ( $pathextension ) {
-		case 'jpg':
-		case 'jpeg':
-		case 'jpe':
-			return 'image/jpeg';
-		case 'png':
-			return 'image/png';
-		case 'gif':
-			return 'image/gif';
-		case 'webp':
-			return 'image/webp';
-		case 'pdf':
-			return 'application/pdf';
-		default:
-			if ( empty( $pathextension ) && ! easyio_stream_wrapped( $path ) && is_file( $path ) ) {
-				return easyio_mimetype( $path, 'i' );
-			}
-			return false;
-	}
-}
-
-/**
- * Check for GD support of both PNG and JPG.
- *
- * @return bool True if full GD support is detected.
- */
-function easyio_gd_support() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	if ( function_exists( 'gd_info' ) ) {
-		$gd_support = gd_info();
-		easyio_debug_message( 'GD found, supports:' );
-		if ( easyio_iterable( $gd_support ) ) {
-			foreach ( $gd_support as $supports => $supported ) {
-				easyio_debug_message( "$supports: $supported" );
-			}
-			if ( ( ! empty( $gd_support['JPEG Support'] ) || ! empty( $gd_support['JPG Support'] ) ) && ! empty( $gd_support['PNG Support'] ) ) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-/**
- * Sanitize an array of exclusions.
- *
- * @param string $input A list of URL exclusions, from a textarea.
- * @return array The sanitized list of paths/patterns to exclude.
- */
-function easyio_exclude_paths_sanitize( $input ) {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	if ( empty( $input ) ) {
-		return '';
-	}
-	$path_array = array();
-	if ( is_array( $input ) ) {
-		$paths = $input;
-	} elseif ( is_string( $input ) ) {
-		$paths = explode( "\n", $input );
-	}
-	if ( easyio_iterable( $paths ) ) {
-		$i = 0;
-		foreach ( $paths as $path ) {
-			$i++;
-			easyio_debug_message( "validating path exclusion: $path" );
-			$path = trim( sanitize_text_field( $path ), '*' );
-			if ( ! empty( $path ) ) {
-				$path_array[] = $path;
-			}
-		}
-	}
-	return $path_array;
-}
-
-/**
  * Retrieve option: use single-site setting or override from constant.
  *
  * Retrieves single-site options as appropriate as well as allowing overrides with
@@ -928,29 +683,14 @@ function easyio_exclude_paths_sanitize( $input ) {
  * @return mixed The value of the option.
  */
 function easyio_get_option( $option_name, $default = false ) {
-	$constant_name = strtoupper( $option_name );
-	if ( defined( $constant_name ) && ( is_int( constant( $constant_name ) ) || is_bool( constant( $constant_name ) ) ) ) {
-		return constant( $constant_name );
-	}
-	if (
-		(
-			'exactdn_exclude' === $option_name ||
-			'easyio_ll_exclude' === $option_name
-		)
-		&& defined( $constant_name )
-	) {
-		return easyio_exclude_paths_sanitize( constant( $constant_name ) );
-	}
-	return get_option( $option_name );
+	return easyio()->get_option( $option_name, $default );
 }
 
 /**
  * Clear output buffers without throwing a fit.
  */
 function easyio_ob_clean() {
-	if ( ob_get_length() ) {
-		ob_end_clean();
-	}
+	easyio()->ob_clean();
 }
 
 /**
@@ -1017,8 +757,7 @@ function easyio_options( $network = 'singlesite' ) {
 	easyio_debug_message( 'upload_dir: ' . $upload_info['basedir'] );
 	easyio_debug_message( "content_width: $content_width" );
 
-	global $easyio_hs_beacon;
-	$easyio_hs_beacon->admin_notice( 'singlesite' );
+	easyio()->hs_beacon->admin_notice( 'singlesite' );
 
 	$output = array();
 
@@ -1293,27 +1032,7 @@ function easyio_is_amp() {
  * @param string $message Debug information to add to the log.
  */
 function easyio_debug_message( $message ) {
-	if ( ! is_string( $message ) && ! is_int( $message ) && ! is_float( $message ) ) {
-		return;
-	}
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		WP_CLI::debug( $message );
-		return;
-	}
-	global $easyio_temp_debug;
-	if ( $easyio_temp_debug || easyio_get_option( 'easyio_debug' ) ) {
-		$memory_limit = easyio_memory_limit();
-		if ( strlen( $message ) + 4000000 + memory_get_usage( true ) <= $memory_limit ) {
-			global $eio_debug;
-			$message    = str_replace( "\n\n\n", '<br>', $message );
-			$message    = str_replace( "\n\n", '<br>', $message );
-			$message    = str_replace( "\n", '<br>', $message );
-			$eio_debug .= "$message<br>";
-		} else {
-			global $eio_debug;
-			$eio_debug = "not logging message, memory limit is $memory_limit";
-		}
-	}
+	easyio()->debug_message( $message );
 }
 
 /**
@@ -1322,39 +1041,7 @@ function easyio_debug_message( $message ) {
  * @global string $eio_debug The in-memory debug log.
  */
 function easyio_debug_log() {
-	if ( function_exists( 'ewww_image_optimizer_debug_log' ) && ewww_image_optimizer_get_option( 'ewww_image_optimizer_debug' ) ) {
-		return;
-	}
-	global $eio_debug;
-	global $easyio_temp_debug;
-	$debug_log = EASYIO_CONTENT_DIR . 'debug.log';
-	if ( ! is_dir( dirname( $debug_log ) ) && is_writable( dirname( EASYIO_CONTENT_DIR ) ) ) {
-		wp_mkdir_p( dirname( $debug_log ) );
-	}
-	if (
-		! empty( $eio_debug ) &&
-		empty( $easyio_temp_debug ) &&
-		easyio_get_option( 'easyio_debug' ) &&
-		is_dir( dirname( $debug_log ) ) &&
-		is_writable( dirname( $debug_log ) )
-	) {
-		$memory_limit = easyio_memory_limit();
-		clearstatcache();
-		$timestamp = gmdate( 'Y-m-d H:i:s' ) . "\n";
-		if ( ! file_exists( $debug_log ) ) {
-			touch( $debug_log );
-		} else {
-			if ( filesize( $debug_log ) + 4000000 + memory_get_usage( true ) > $memory_limit ) {
-				unlink( $debug_log );
-				touch( $debug_log );
-			}
-		}
-		if ( filesize( $debug_log ) + strlen( $eio_debug ) + 4000000 + memory_get_usage( true ) <= $memory_limit && is_writable( $debug_log ) ) {
-			$eio_debug = str_replace( '<br>', "\n", $eio_debug );
-			file_put_contents( $debug_log, $timestamp . $eio_debug, FILE_APPEND );
-		}
-	}
-	$eio_debug = '';
+	easyio()->debug_log();
 }
 
 /**
@@ -1395,7 +1082,10 @@ function easyio_delete_debug_log() {
 		unlink( WP_CONTENT_DIR . '/ewww/debug.log' );
 	}
 	$sendback = wp_get_referer();
-	wp_redirect( esc_url_raw( $sendback ) );
+	if ( empty( $sendback ) ) {
+		$sendback = admin_url( 'options-general.php?page=easy-image-optimizer-options' );
+	}
+	wp_safe_redirect( $sendback );
 	exit;
 }
 
@@ -1503,7 +1193,7 @@ function easyio_implode( $delimiter, $data = '' ) {
  * @return mixed Whatever they gave us.
  */
 function easyio_dump_var( $var, $var2 = false, $var3 = false ) {
-	if ( ! easyio_function_exists( 'print_r' ) ) {
+	if ( ! easyio()->function_exists( 'print_r' ) ) {
 		return $var;
 	}
 	easyio_debug_message( 'dumping var' );

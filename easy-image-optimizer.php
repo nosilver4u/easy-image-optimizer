@@ -29,6 +29,11 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 70200 ) {
 	add_action( 'network_admin_notices', 'easyio_unsupported_php' );
 	add_action( 'admin_notices', 'easyio_unsupported_php' );
 } elseif ( empty( $_GET['easyio_disable'] ) ) {
+	define( 'EASYIO_VERSION', 324 );
+
+	// Initialize a couple globals.
+	$eio_debug = '';
+
 	/**
 	 * The full path of the plugin file (this file).
 	 *
@@ -64,13 +69,26 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 70200 ) {
 	}
 
 	/**
-	 * All the 'unique' functions for the core Easy I.O. plugin.
+	 * All the 'unique' functions for the core Easy IO plugin.
 	 */
 	require_once( EASYIO_PLUGIN_PATH . 'unique.php' );
 	/**
 	 * All the base functions for our plugins.
 	 */
 	require_once( EASYIO_PLUGIN_PATH . 'classes/class-base.php' );
+	/**
+	 * The setup functions for Easy IO.
+	 */
+	require_once( EASYIO_PLUGIN_PATH . 'classes/class-plugin.php' );
+	/**
+	 * The main function to return a single EasyIO\Plugin object to functions elsewhere.
+	 *
+	 * @return object object|EasyIO\Plugin The one true EasyIO\Plugin instance.
+	 */
+	function easyio() {
+		return EasyIO\Plugin::instance();
+	}
+	easyio();
 } // End if().
 
 if ( ! function_exists( 'easyio_unsupported_php' ) ) {
