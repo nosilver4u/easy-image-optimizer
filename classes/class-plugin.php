@@ -123,11 +123,6 @@ final class Plugin extends Base {
 		if ( ! \defined( '\WP_CLI' ) || ! \WP_CLI ) {
 			\easyio_privacy_policy_content();
 		}
-		// Increase the version when the next bump is coming.
-		if ( \defined( '\PHP_VERSION_ID' ) && \PHP_VERSION_ID < 50600 ) {
-			\add_action( 'network_admin_notices', 'easyio_php55_warning' );
-			\add_action( 'admin_notices', 'easyio_php55_warning' );
-		}
 	}
 
 	/**

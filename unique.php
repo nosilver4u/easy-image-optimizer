@@ -414,15 +414,6 @@ function easyio_notice_sp_conflict() {
 }
 
 /**
- * Display a notice that PHP version 5.5 support is going away.
- */
-function easyio_php55_warning() {
-	echo '<div id="easyio-notice-php55" class="notice notice-info"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' .
-		esc_html__( 'The next major release of Easy Image Optimizer will require PHP 7.0 or greater. Newer versions of PHP, like 7.1 and 7.2, are significantly faster and much more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) .
-		'</a></p></div>';
-}
-
-/**
  * Inform the user of our beacon function so that they can opt-in.
  */
 function easyio_notice_beacon() {
@@ -909,7 +900,7 @@ function easyio_options( $network = 'singlesite' ) {
 	$output[] = '<noscript><h2>' . esc_html__( 'Support', 'easy-image-optimizer' ) . '</h2></noscript>';
 	$output[] = "<p><a class='easyio-docs-root' href='https://docs.ewww.io/category/76-easy-io'>" . esc_html__( 'Documentation', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a class='easyio-docs-root' href='https://ewww.io/contact-us/'>" . esc_html__( 'Plugin Support', 'easy-image-optimizer' ) . '</a> | ' .
-		"<a href='https://ewww.io/status/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a> | ' .
+		"<a href='https://status.ewww.io/'>" . esc_html__( 'Server Status', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/'>" . esc_html__( 'Translate Easy IO', 'easy-image-optimizer' ) . '</a> | ' .
 		"<a href='https://wordpress.org/support/view/plugin-reviews/easy-image-optimizer#postform'>" . esc_html__( 'Write a review', 'easy-image-optimizer' ) . '</a>';
 		"</p>\n";

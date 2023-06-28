@@ -1,3 +1,7 @@
+= 3.4.0 =
+* added: deliver Google Fonts via Easy IO or Bunny Fonts for improved user privacy
+* fixed: incorrect syntax for constants in namespaced code
+
 = 3.3.0 =
 * breaking: namespaced and reorganized several classes, third party integrations should check for compatibility
 * added: Easy IO support for BuddyBoss images, video, and documents
