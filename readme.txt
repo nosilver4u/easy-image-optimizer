@@ -2,9 +2,9 @@
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 6.0
-Tested up to: 6.2
+Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 3.4.0
+Stable tag: 3.5.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,13 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.5.0 =
+* added: Easy IO rewrites poster/thumbnail image URLs for video elements
+* changed: Easy IO + Auto Scale checks images on load and resize events to reduce browser upscaling
+* changed: prevent Easy IO font substitution when OMGF is active
+* fixed: Auto Scale downscales too much for landscape images displayed in portrait containers
+* fixed: Easy IO compatibility with Brizy thumbnail generation endpoint
 
 = 3.4.0 =
 * added: deliver Google Fonts via Easy IO or Bunny Fonts for improved user privacy
