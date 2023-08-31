@@ -68,7 +68,7 @@ final class Plugin extends Base {
 	 */
 	public function __clone() {
 		// Cloning instances of the class is forbidden.
-		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot clone core object.', 'ewww-image-optimizer' ), \esc_html( \EWWW_IMAGE_OPTIMIZER_VERSION ) );
+		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot clone core object.', 'ewww-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
 	}
 
 	/**
@@ -76,7 +76,7 @@ final class Plugin extends Base {
 	 */
 	public function __wakeup() {
 		// Unserializing instances of the class is forbidden.
-		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot unserialize (wakeup) the core object.', 'ewww-image-optimizer' ), \esc_html( \EWWW_IMAGE_OPTIMIZER_VERSION ) );
+		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot unserialize (wakeup) the core object.', 'ewww-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
 	}
 
 	/**
@@ -86,20 +86,20 @@ final class Plugin extends Base {
 	 */
 	private function requires() {
 		// EasyIO\HS_Beacon class for integrated help/docs.
-		require_once( \EASYIO_PLUGIN_PATH . 'classes/class-hs-beacon.php' );
+		require_once EASYIO_PLUGIN_PATH . 'classes/class-hs-beacon.php';
 	}
 
 	/**
 	 * Setup mandatory child classes.
 	 */
-	function load_children() {
+	public function load_children() {
 		/* self::$instance->class = new Class(); */
 	}
 
 	/**
 	 * Setup plugin for wp-admin.
 	 */
-	function admin_init() {
+	public function admin_init() {
 		$this->hs_beacon = new HS_Beacon();
 		\easyio_upgrade();
 		$this->register_settings();
@@ -120,7 +120,7 @@ final class Plugin extends Base {
 			}
 		}
 
-		if ( ! \defined( '\WP_CLI' ) || ! \WP_CLI ) {
+		if ( ! \defined( '\WP_CLI' ) || ! WP_CLI ) {
 			\easyio_privacy_policy_content();
 		}
 	}
@@ -128,17 +128,17 @@ final class Plugin extends Base {
 	/**
 	 * Save the multi-site settings, if this is the WP admin, and they've been POSTed.
 	 */
-	function save_network_settings() {
+	public function save_network_settings() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		// NOTE: we don't actually have a network settings screen, so...
 		if ( ! \function_exists( 'is_plugin_active_for_network' ) && \is_multisite() ) {
 			// Need to include the plugin library for the is_plugin_active function.
-			require_once( \ABSPATH . 'wp-admin/includes/plugin.php' );
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 			// Set the common network settings if they have been POSTed.
 		if (
 			\is_multisite() &&
-			\is_plugin_active_for_network( \EASYIO_PLUGIN_FILE_REL ) &&
+			\is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) &&
 			isset( $_POST['option_page'] ) &&
 			false !== \strpos( $_POST['option_page'], 'easyio_options' ) &&
 			\wp_verify_nonce( $_REQUEST['_wpnonce'], 'easyio_options-options' ) &&
@@ -183,12 +183,11 @@ final class Plugin extends Base {
 	/**
 	 * Register all our options and santiation functions.
 	 */
-	function register_settings() {
+	public function register_settings() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		// Register all the common Easy IO settings.
 		\register_setting( 'easyio_options', 'easyio_debug', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_enable_help', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_exactdn', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_exclude', array( $this, 'exclude_paths_sanitize' ) );
@@ -201,7 +200,7 @@ final class Plugin extends Base {
 	/**
 	 * Set some default option values.
 	 */
-	function set_defaults() {
+	public function set_defaults() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		// Set defaults for all options that need to be autoloaded.
 		\add_option( 'easyio_debug', false );

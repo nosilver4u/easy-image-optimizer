@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.5.1 =
+* changed: use updated coding standards
+* changed: sanitize/escape remaining strings on settings page
+* security: randomize filename of debug log
+
 = 3.5.0 =
 * added: Easy IO rewrites poster/thumbnail image URLs for video elements
 * changed: Easy IO + Auto Scale checks images on load and resize events to reduce browser upscaling
