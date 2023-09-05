@@ -1,3 +1,8 @@
+= 3.5.1 =
+* changed: use updated coding standards
+* changed: sanitize/escape remaining strings on settings page
+* security: randomize filename of debug log
+
 = 3.5.0 =
 * added: Easy IO rewrites poster/thumbnail image URLs for video elements
 * changed: Easy IO + Auto Scale checks images on load and resize events to reduce browser upscaling

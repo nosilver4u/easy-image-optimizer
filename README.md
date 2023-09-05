@@ -1,5 +1,5 @@
 # Easy Image Optimizer
-**Minimum WordPress:** 6.0
+**Minimum WordPress:** 6.1
 **Minimum PHP:** 7.4
 
 [![Build Status](https://travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://travis-ci.com/nosilver4u/easy-image-optimizer)
@@ -21,6 +21,8 @@ Beyond image optimization, it will also speed up the delivery of your CSS, JS (J
 ### Support
 
 If you need assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/).
+
+You may report security issues through our Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/easy-image-optimizer)
 
 ### Translations
 

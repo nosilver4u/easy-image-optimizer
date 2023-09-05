@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 6.0
+Requires at least: 6.1
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 3.5.0
+Stable tag: 3.5.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -21,6 +21,8 @@ Beyond image optimization, it will also speed up the delivery of your CSS, JS (J
 
 If you need assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/).
 The Easy Image Optimizer is developed at https://github.com/nosilver4u/easy-image-optimizer
+
+You may report security issues through our Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/easy-image-optimizer)
 
 = Translations =
 
