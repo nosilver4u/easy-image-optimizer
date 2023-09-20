@@ -139,43 +139,42 @@ final class Plugin extends Base {
 		if (
 			\is_multisite() &&
 			\is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) &&
+			! empty( $_REQUEST['_wpnonce'] ) &&
 			isset( $_POST['option_page'] ) &&
-			false !== \strpos( $_POST['option_page'], 'easyio_options' ) &&
-			\wp_verify_nonce( $_REQUEST['_wpnonce'], 'easyio_options-options' ) &&
+			false !== \strpos( sanitize_text_field( wp_unslash( $_POST['option_page'] ) ), 'easyio_options' ) &&
+			\wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'easyio_options-options' ) &&
 			\current_user_can( 'manage_network_options' ) &&
 			! \get_site_option( 'easyio_allow_multisite_override' ) &&
-			false === \strpos( $_POST['_wp_http_referer'], 'options-general' )
+			false === \strpos( wp_get_referer(), 'options-general' )
 		) {
 			$this->debug_message( 'network-wide settings, no override' );
-			$_POST['easyio_debug'] = ( empty( $_POST['easyio_debug'] ) ? false : true );
-			\update_site_option( 'easyio_debug', $_POST['easyio_debug'] );
-			$_POST['easyio_metadata_remove'] = ( empty( $_POST['easyio_metadata_remove'] ) ? false : true );
-			\update_site_option( 'easyio_metadata_remove', $_POST['easyio_metadata_remove'] );
-			$_POST['easyio_exactdn'] = ( empty( $_POST['easyio_exactdn'] ) ? false : true );
-			\update_site_option( 'easyio_exactdn', $_POST['easyio_exactdn'] );
-			$_POST['exactdn_all_the_things'] = ( empty( $_POST['exactdn_all_the_things'] ) ? false : true );
-			\update_site_option( 'exactdn_all_the_things', $_POST['exactdn_all_the_things'] );
-			$_POST['exactdn_lossy'] = ( empty( $_POST['exactdn_lossy'] ) ? false : true );
-			\update_site_option( 'exactdn_lossy', $_POST['exactdn_lossy'] );
-			$_POST['exactdn_exclude'] = empty( $_POST['exactdn_exclude'] ) ? '' : $_POST['exactdn_exclude'];
-			\update_site_option( 'exactdn_exclude', $this->exclude_paths_sanitize( $_POST['exactdn_exclude'] ) );
-			$_POST['easyio_add_missing_dims'] = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
-			\update_site_option( 'easyio_add_missing_dims', $_POST['easyio_add_missing_dims'] );
-			$_POST['easyio_lazy_load'] = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
-			\update_site_option( 'easyio_lazy_load', $_POST['easyio_lazy_load'] );
-			$_POST['easyio_use_lqip'] = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
-			\update_site_option( 'easyio_use_lqip', $_POST['easyio_use_lqip'] );
-			$_POST['easyio_ll_exclude'] = empty( $_POST['easyio_ll_exclude'] ) ? '' : $_POST['easyio_ll_exclude'];
-			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $_POST['easyio_ll_exclude'] ) );
-			$_POST['easyio_allow_multisite_override'] = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			\update_site_option( 'easyio_allow_multisite_override', $_POST['easyio_allow_multisite_override'] );
-			$_POST['easyio_enable_help'] = empty( $_POST['easyio_enable_help'] ) ? false : true;
-			\update_site_option( 'easyio_enable_help', $_POST['easyio_enable_help'] );
+			$easyio_debug = ( empty( $_POST['easyio_debug'] ) ? false : true );
+			\update_site_option( 'easyio_debug', $easyio_debug );
+			$easyio_metadata_remove = ( empty( $_POST['easyio_metadata_remove'] ) ? false : true );
+			\update_site_option( 'easyio_metadata_remove', $easyio_metadata_remove );
+			$exactdn_all_the_things = ( empty( $_POST['exactdn_all_the_things'] ) ? false : true );
+			\update_site_option( 'exactdn_all_the_things', $exactdn_all_the_things );
+			$exactdn_lossy = ( empty( $_POST['exactdn_lossy'] ) ? false : true );
+			\update_site_option( 'exactdn_lossy', $exactdn_lossy );
+			$exactdn_exclude = empty( $_POST['exactdn_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['exactdn_exclude'] ) );
+			\update_site_option( 'exactdn_exclude', $this->exclude_paths_sanitize( $exactdn_exclude ) );
+			$easyio_add_missing_dims = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
+			\update_site_option( 'easyio_add_missing_dims', $easyio_add_missing_dims );
+			$easyio_lazy_load = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
+			\update_site_option( 'easyio_lazy_load', $easyio_lazy_load );
+			$easyio_use_lqip = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
+			\update_site_option( 'easyio_use_lqip', $easyio_use_lqip );
+			$easyio_ll_exclude = empty( $_POST['easyio_ll_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_exclude'] ) );
+			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $easyio_ll_exclude ) );
+			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
+			\update_site_option( 'easyio_allow_multisite_override', $easyio_allow_multisite_override );
+			$easyio_enable_help = empty( $_POST['easyio_enable_help'] ) ? false : true;
+			\update_site_option( 'easyio_enable_help', $easyio_enable_help );
 			\add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
-		} elseif ( isset( $_POST['easyio_allow_multisite_override_active'] ) && \current_user_can( 'manage_network_options' ) && \wp_verify_nonce( $_REQUEST['_wpnonce'], 'easyio_options-options' ) ) {
+		} elseif ( isset( $_POST['easyio_allow_multisite_override_active'] ) && \current_user_can( 'manage_network_options' ) && ! empty( $_REQUEST['_wpnonce'] ) && \wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'easyio_options-options' ) ) {
 			$this->debug_message( 'network-wide settings, single-site overriding' );
-			$_POST['easyio_allow_multisite_override'] = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			\update_site_option( 'easyio_allow_multisite_override', $_POST['easyio_allow_multisite_override'] );
+			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
+			\update_site_option( 'easyio_allow_multisite_override', $easyio_allow_multisite_override );
 			\add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
 		} // End if().
 	}

@@ -72,7 +72,7 @@ function easyio_activate() {
 		update_option( 'ewww_image_optimizer_webp_for_cdn', false );
 	}
 	$sendback = wp_get_referer();
-	wp_redirect( esc_url_raw( $sendback ) );
+	wp_safe_redirect( esc_url_raw( $sendback ) );
 	exit( 0 );
 }
 
@@ -101,7 +101,7 @@ function easyio_deactivate() {
 function easyio_parser_init() {
 	$buffer_start = false;
 	// If ExactDN is enabled.
-	if ( easyio_get_option( 'easyio_exactdn' ) && empty( $_GET['exactdn_disable'] ) ) {
+	if ( easyio_get_option( 'easyio_exactdn' ) && false === strpos( add_query_arg( '', '' ), 'exactdn_disable=1' ) ) {
 		$buffer_start = true;
 		/**
 		 * Page Parsing class for working with HTML content.
@@ -317,9 +317,8 @@ function easyio_current_screen( $screen ) {
  * Let the user know they need to take action!
  */
 function easyio_notice_inactive() {
-	$settings_url = esc_url( admin_url( 'options-general.php?page=easy-image-optimizer-options' ) );
 	echo "<div id='easyio-inactive' class='notice notice-warning'><p>" .
-		"<a href='$settings_url'>" . esc_html__( 'Please visit the settings page to complete activation of the Easy Image Optimizer.', 'easy-image-optimizer' ) . '</a></p></div>';
+		'<a href="' . esc_url( admin_url( 'options-general.php?page=easy-image-optimizer-options' ) ) . '">' . esc_html__( 'Please visit the settings page to complete activation of the Easy Image Optimizer.', 'easy-image-optimizer' ) . '</a></p></div>';
 }
 
 /**
@@ -336,7 +335,7 @@ function easyio_notice_exactdn_activation_error() {
 			esc_html__( 'Could not activate Easy Image Optimizer, please try again in a few minutes. If this error continues, please see %s for troubleshooting steps.', 'easy-image-optimizer' ),
 			'https://docs.ewww.io/article/66-exactdn-not-verified'
 		) .
-		'<br><code>' . $exactdn_activate_error . '</code>' .
+		'<br><code>' . esc_html( $exactdn_activate_error ) . '</code>' .
 		'</p></div>';
 }
 
@@ -712,16 +711,14 @@ function easyio_settings_script( $hook ) {
  * Displays the Easy IO network settings page.
  */
 function easyio_network_options() {
-	$output  = '';
-	$output .= "<div class='wrap'>\n";
-
 	$icon_link = plugins_url( '/images/easyio-toon-car.png', __FILE__ );
-	$output   .= "<img style='float:right;' src='$icon_link' />";
-
-	$output .= "<h1>Easy Image Optimizer</h1>\n";
-	$output .= '<p>' . esc_html__( 'The Easy Image Optimizer must be configured and activated on each individual site.', 'easy-image-optimizer' ) . '</p>';
-	$output .= '</div>';
-	echo $output;
+	?>
+	<div class='wrap'>
+		<img style='float:right;' src='<?php esc_url( $icon_link ); ?>' />
+		<h1>Easy Image Optimizer</h1>
+		<p><?php esc_html_e( 'The Easy Image Optimizer must be configured and activated on each individual site.', 'easy-image-optimizer' ); ?></p>
+	</div>
+	<?php
 }
 
 /**
@@ -1078,7 +1075,7 @@ function easyio_options( $network = 'singlesite' ) {
 	window.Beacon('init', 'aa9c3d3b-d4bc-4e9b-b6cb-f11c9f69da87');
 	Beacon( 'prefill', {
 		email: '<?php echo esc_js( $help_email ); ?>',
-		text: '\n\n----------------------------------------\n<?php echo $hs_debug; ?>',
+		text: '\n\n----------------------------------------\n<?php echo wp_kses_post( $hs_debug ); ?>',
 	});
 </script>
 		<?php

@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 70400 ) {
 	add_action( 'network_admin_notices', 'easyio_unsupported_php' );
 	add_action( 'admin_notices', 'easyio_unsupported_php' );
-} elseif ( empty( $_GET['easyio_disable'] ) ) {
+} elseif ( false === strpos( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
 	define( 'EASYIO_VERSION', 351 );
 
 	/**

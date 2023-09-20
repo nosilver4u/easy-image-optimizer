@@ -57,6 +57,10 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.5.2 =
+* fixed: Lazy Load compatibility with X/Pro themes and Cornerstone builder
+* security: sanitize and escape a few remaining strings
+
 = 3.5.1 =
 * changed: use updated coding standards
 * changed: sanitize/escape remaining strings on settings page

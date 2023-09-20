@@ -29,4 +29,17 @@
 			<property name="customVariablesWhitelist" type="array" value="formatOutput,parentNode,nextSibling,documentElement" />
 		</properties>
 	</rule>
+
+	<config name="testVersion">7.4-</config>
+	<rule ref="PHPCompatibilityWP">
+		<severity>10</severity>
+	</rule>
+
+	<rule ref="WordPress.Security">
+		<severity>10</severity>
+	</rule>
+
+	<rule ref="WordPress.DB.PreparedSQL">
+		<severity>10</severity>
+	</rule>
 </ruleset>
