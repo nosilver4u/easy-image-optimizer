@@ -1,3 +1,7 @@
+= 3.5.2 =
+* fixed: Lazy Load compatibility with X/Pro themes and Cornerstone builder
+* security: sanitize and escape a few remaining strings
+
 = 3.5.1 =
 * changed: use updated coding standards
 * changed: sanitize/escape remaining strings on settings page
