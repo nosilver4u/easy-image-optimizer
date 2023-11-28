@@ -1,3 +1,7 @@
+= 3.5.4 =
+* fixed: Easy IO strips extra sub-folders in non-image URLs
+* fixed: PHP notice from VC fix
+
 = 3.5.3 =
 * fixed: too much scaling for Visual Composer background images with zoom effect
 
