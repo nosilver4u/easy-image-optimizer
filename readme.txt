@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 6.1
+Requires at least: 6.2
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 3.5.4
+Stable tag: 3.5.5
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -46,7 +46,7 @@ No, all optimization is performed transparently on our network of cloud servers,
 
 = What if something breaks? =
 
-Don't panic, just disable the plugin and contact us at https://ewww.io/contact-us/ All changes made by the plugin will automatically be reverted when you disable the plugin.
+Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us/). All changes made by the plugin are automatically reverted when you disable the plugin.
 
 == Screenshots ==
 
@@ -57,23 +57,38 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.5.5 =
+*Release Date - January 4, 2023*
+
+* fixed: Easy IO incorrectly modifies JS/CSS URLs when using S3 on multisite
+
 = 3.5.4 =
+*Release Date - November 28, 2023*
+
 * fixed: Easy IO strips extra sub-folders in non-image URLs
 * fixed: PHP notice from VC fix
 
 = 3.5.3 =
+*Release Date - November 2, 2023*
+
 * fixed: too much scaling for Visual Composer background images with zoom effect
 
 = 3.5.2 =
+*Release Date - September 21, 2023*
+
 * fixed: Lazy Load compatibility with X/Pro themes and Cornerstone builder
 * security: sanitize and escape a few remaining strings
 
 = 3.5.1 =
+*Release Date - September 5, 2023*
+
 * changed: use updated coding standards
 * changed: sanitize/escape remaining strings on settings page
 * security: randomize filename of debug log
 
 = 3.5.0 =
+*Release Date - July 19, 2023*
+
 * added: Easy IO rewrites poster/thumbnail image URLs for video elements
 * changed: Easy IO + Auto Scale checks images on load and resize events to reduce browser upscaling
 * changed: prevent Easy IO font substitution when OMGF is active
@@ -81,10 +96,14 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: Easy IO compatibility with Brizy thumbnail generation endpoint
 
 = 3.4.0 =
+*Release Date - June 28, 2023*
+
 * added: deliver Google Fonts via Easy IO or Bunny Fonts for improved user privacy
 * fixed: incorrect syntax for constants in namespaced code
 
 = 3.3.0 =
+*Release Date - May 9, 2023*
+
 * breaking: namespaced and reorganized several classes, third party integrations should check for compatibility
 * added: Easy IO support for BuddyBoss images, video, and documents
 * added: improved support for Hide My WP Ghost in Lazy Load 
@@ -93,52 +112,6 @@ Don't panic, just disable the plugin and contact us at https://ewww.io/contact-u
 * fixed: content dir functions don't resolve symlinks
 * fixed: Easy IO image URLs leaking into image gallery block via post editor
 * fixed: clearing debug log does not redirect back to settings page in rare cases
-
-= 3.2.4 =
-* changed: allow video files to go through Easy IO CDN (pass through)
-* fixed: PHP 8.1 deprecation notices from usage of add_submenu_page and add_query_arg
-
-= 3.2.3 =
-* changed: improved Brizy Builder compatibility
-* fixed: Easy IO fails to apply crop for custom size in some cases
-* fixed: Easy IO not applying watermark consistently on PNG images
-* fixed: Easy IO not scaling watermark when scaling original image
-
-= 3.2.2 =
-* changed: improved detection for site URL changes
-* fixed: Lazy Load JS throws error if inline script vars are missing
-* fixed: Easy IO + Lazy Load auto-scale produces invalid URL if an image with no query string is constrained by height
-
-= 3.2.1 =
-* fixed: PHP notices when Easy IO filters srcset URLs
-
-= 3.2.0 =
-* added: exclude by page for Easy IO and Lazy Load
-* changed: include upstream lazysizes unveilhooks for use by developers, props @saas786
-* fixed: better compatibility with S3 Uploads when using autoload
-* fixed: Easy IO srcset URL construction not accounting for object versioning with S3 (or other cloud storage)
-
-= 3.1.3 =
-* added: image watermarking, configure at https://ewww.io/manage-sites/
-* fixed: prevent WP core from generating duplicate WebP images
-
-= 3.1.2 =
-* fixed: trailing space on image URL handled incorrectly
-* fixed: lazy load sometimes incorrectly scales images in AffiliateWP portal
-
-= 3.1.1 =
-* fixed: Lazy Load not using EWWWIO_CONTENT_DIR
-* fixed: Lazy Load Auto-scale adds query parameters to SVG images
-* fixed: Lazy Load prevents image loading in GiveWP iframe
-* fixed: Auto Scale crops too much for object-* images in Oxygen
-
-= 3.1.0 =
-* added: AVIF support via Easy IO, enable on site management at ewww.io
-* added: ability for Easy IO to get full-size path when using offloaded media
-* fixed: front-end HTML parsers running within Bricks editor
-* fixed: Easy IO not finding scaled full-size for dynamic size generation
-* fixed: cover images not cropped properly by Easy IO
-* fixed: Easy IO URLs leaking into post editor with WP 6.0
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
