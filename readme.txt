@@ -58,7 +58,7 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
 = 3.5.5 =
-*Release Date - January 4, 2023*
+*Release Date - January 4, 2024*
 
 * fixed: Easy IO incorrectly modifies JS/CSS URLs when using S3 on multisite
 

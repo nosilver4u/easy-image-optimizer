@@ -1,5 +1,5 @@
 = 3.5.5 =
-*Release Date - January 4, 2023*
+*Release Date - January 4, 2024*
 
 * fixed: Easy IO incorrectly modifies JS/CSS URLs when using S3 on multisite
 
