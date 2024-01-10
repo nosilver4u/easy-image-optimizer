@@ -980,6 +980,20 @@ function easyio_options( $network = 'singlesite' ) {
 				easyio_debug_message( 'LL exclusions:' );
 				easyio_debug_message( $ll_exclude_paths );
 				?>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<label for='easyio_ll_all_things'><strong><?php esc_html_e( 'External Background Images', 'easy-image-optimizer' ); ?></strong></label>
+						<?php easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ); ?><br>
+						<textarea id='easyio_ll_all_things' name='easyio_ll_all_things' rows='3' cols='60'><?php echo esc_html( easyio_get_option( 'easyio_ll_all_things' ) ); ?></textarea>
+						<p class='description'>
+							<?php esc_html_e( 'Specify class/id values of elements with CSS background images (comma-separated).', 'easy-image-optimizer' ); ?>
+							<?php esc_html_e( 'Can match any text within the target element, like elementor-widget-container or et_pb_column.', 'easy-image-optimizer' ); ?>
+							<br>*<?php esc_html_e( 'Background images directly attached via inline style attributes will be lazy loaded by default.', 'easy-image-optimizer' ); ?>
+						</p>
+					</td>
+				</tr>
+				<?php easyio_debug_message( 'External CSS Background (all things): ' . easyio_get_option( 'easyio_ll_all_things' ) ); ?>
 			<?php endif; ?>
 			<?php easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) ); ?>
 			</table>
