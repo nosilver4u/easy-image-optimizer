@@ -166,6 +166,8 @@ final class Plugin extends Base {
 			\update_site_option( 'easyio_use_lqip', $easyio_use_lqip );
 			$easyio_ll_exclude = empty( $_POST['easyio_ll_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_exclude'] ) );
 			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $easyio_ll_exclude ) );
+			$easyio_ll_all_things = empty( $_POST['easyio_ll_all_things'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_all_things'] ) );
+			\update_site_option( 'easyio_ll_all_things', $easyio_ll_all_things );
 			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
 			\update_site_option( 'easyio_allow_multisite_override', $easyio_allow_multisite_override );
 			$easyio_enable_help = empty( $_POST['easyio_enable_help'] ) ? false : true;
@@ -180,7 +182,7 @@ final class Plugin extends Base {
 	}
 
 	/**
-	 * Register all our options and santiation functions.
+	 * Register all our options and sanitation functions.
 	 */
 	public function register_settings() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
@@ -194,6 +196,7 @@ final class Plugin extends Base {
 		\register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
+		\register_setting( 'easyio_options', 'easyio_ll_all_things', 'sanitize_textarea_field' );
 	}
 
 	/**
@@ -217,6 +220,7 @@ final class Plugin extends Base {
 		\add_option( 'easyio_use_siip', false );
 		\add_option( 'easyio_ll_autoscale', true );
 		\add_option( 'easyio_ll_exclude', '' );
+		\add_option( 'easyio_ll_all_things', '' );
 
 		// Set network defaults.
 		\add_site_option( 'easyio_metadata_remove', true );
