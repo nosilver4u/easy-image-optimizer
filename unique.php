@@ -993,7 +993,7 @@ function easyio_options( $network = 'singlesite' ) {
 						</p>
 					</td>
 				</tr>
-				<?php easyio_debug_message( 'External CSS Background (all things): ' .  easyio_get_option( 'easyio_ll_all_things' ) ); ?>
+				<?php easyio_debug_message( 'External CSS Background (all things): ' . easyio_get_option( 'easyio_ll_all_things' ) ); ?>
 			<?php endif; ?>
 			<?php easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) ); ?>
 			</table>
