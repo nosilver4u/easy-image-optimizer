@@ -57,6 +57,13 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.6.0 =
+*Release Date - TBD*
+
+* added: Lazy Load for CSS background images in external CSS files or internal CSS sections
+* fixed: Easy IO applying resize parameters to existing (re)sizes
+* security: improve authentication for some plugin actions
+
 = 3.5.5 =
 *Release Date - January 4, 2024*
 

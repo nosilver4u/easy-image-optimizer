@@ -54,6 +54,7 @@ add_filter( 'wp_upload_image_mime_transforms', '__return_empty_array' );
  */
 function easyio_activate() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	check_admin_referer( 'easy-image-optimizer-settings' );
 	$permissions = apply_filters( 'easyio_admin_permissions', '' );
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
@@ -81,6 +82,7 @@ function easyio_activate() {
  */
 function easyio_deactivate() {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+	check_admin_referer( 'easy-image-optimizer-settings' );
 	$permissions = apply_filters( 'easyio_admin_permissions', '' );
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
@@ -417,8 +419,8 @@ function easyio_notice_beacon() {
 	$optout_url = 'admin.php?action=eio_opt_out_of_hs_beacon';
 	echo '<div id="easyio-hs-beacon" class="notice notice-info"><p>' .
 		esc_html__( 'Enable the Easy IO support beacon, which gives you access to documentation and our support team right from your WordPress dashboard. To assist you more efficiently, we collect the current url, IP address, browser/device information, and debugging information.', 'easy-image-optimizer' ) .
-		'<br><a href="' . esc_url( $optin_url ) . '" class="button-secondary">' . esc_html__( 'Allow', 'easy-image-optimizer' ) . '</a>' .
-		'&nbsp;<a href="' . esc_url( $optout_url ) . '" class="button-secondary">' . esc_html__( 'Do not allow', 'easy-image-optimizer' ) . '</a>' .
+		'<br><a href="' . esc_url( wp_nonce_url( $optin_url, 'eio_beacon' ) ) . '" class="button-secondary">' . esc_html__( 'Allow', 'easy-image-optimizer' ) . '</a>' .
+		'&nbsp;<a href="' . esc_url( wp_nonce_url( $optout_url, 'eio_beacon' ) ) . '" class="button-secondary">' . esc_html__( 'Do not allow', 'easy-image-optimizer' ) . '</a>' .
 		'</p></div>';
 }
 
@@ -861,7 +863,7 @@ function easyio_options( $network = 'singlesite' ) {
 								<?php echo esc_html( $site_url ); ?>
 							</li>
 							<li>
-								<a id="easyio-activate" href="<?php echo esc_url( admin_url( 'admin.php?action=easyio_activate' ) ); ?>" class="button-primary">
+								<a id="easyio-activate" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?action=easyio_activate' ), 'easy-image-optimizer-settings' ) ); ?>" class="button-primary">
 									<?php esc_html_e( 'Activate', 'easy-image-optimizer' ); ?>
 								</a>
 							</li>
@@ -878,7 +880,7 @@ function easyio_options( $network = 'singlesite' ) {
 						<a href="https://ewww.io/subscriptions/" class="page-title-action">
 							<?php esc_html_e( 'Manage Subscription', 'easy-image-optimizer' ); ?>
 						</a>&nbsp;&nbsp;
-						<a href="admin.php?action=easyio_deactivate" class="page-title-action">
+						<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?action=easyio_deactivate' ), 'easy-image-optimizer-settings' ) ); ?>" class="page-title-action">
 							<?php esc_html_e( 'Disable Optimizer', 'easy-image-optimizer' ); ?>
 						</a>
 					</td>
@@ -1038,10 +1040,10 @@ function easyio_options( $network = 'singlesite' ) {
 					</th>
 					<td>
 						<p>
-							<a target='_blank' href='<?php echo esc_url( admin_url( 'admin.php?action=easyio_view_debug_log' ) ); ?>'><?php esc_html_e( 'View Log', 'easy-image-optimizer' ); ?></a> -
-							<a href='<?php echo esc_url( admin_url( 'admin.php?action=easyio_delete_debug_log' ) ); ?>'><?php esc_html_e( 'Clear Log', 'easy-image-optimizer' ); ?></a>
+							<a target='_blank' href='<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?action=easyio_view_debug_log' ), 'easy-image-optimizer-settings' ) ); ?>'><?php esc_html_e( 'View Log', 'easy-image-optimizer' ); ?></a> -
+							<a href='<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?action=easyio_delete_debug_log' ), 'easy-image-optimizer-settings' ) ); ?>'><?php esc_html_e( 'Clear Log', 'easy-image-optimizer' ); ?></a>
 						</p>
-						<p><a class='button button-secondary' target='_blank' href='<?php echo esc_url( admin_url( 'admin.php?action=easyio_download_debug_log' ) ); ?>'><?php esc_html_e( 'Download Log', 'easy-image-optimizer' ); ?></a></p>
+						<p><a class='button button-secondary' target='_blank' href='<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?action=easyio_download_debug_log' ), 'easy-image-optimizer-settings' ) ); ?>'><?php esc_html_e( 'Download Log', 'easy-image-optimizer' ); ?></a></p>
 					</td>
 				</tr>
 			<?php endif; ?>
@@ -1160,6 +1162,7 @@ function easyio_debug_log() {
  * View the debug log file from the wp-admin.
  */
 function easyio_view_debug_log() {
+	check_admin_referer( 'easy-image-optimizer-settings' );
 	$permissions = apply_filters( 'easyio_admin_permissions', 'manage_options' );
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
@@ -1177,6 +1180,7 @@ function easyio_view_debug_log() {
  * Removes the debug log file from the plugin folder.
  */
 function easyio_delete_debug_log() {
+	check_admin_referer( 'easy-image-optimizer-settings' );
 	$permissions = apply_filters( 'easyio_admin_permissions', 'manage_options' );
 	if ( false === current_user_can( $permissions ) ) {
 		wp_die( esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
@@ -1196,6 +1200,7 @@ function easyio_delete_debug_log() {
  * Download the debug log file from the wp-admin.
  */
 function easyio_download_debug_log() {
+	check_admin_referer( 'easy-image-optimizer-settings' );
 	if ( ! current_user_can( apply_filters( 'easyio_admin_permissions', 'manage_options' ) ) ) {
 		wp_die( esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
 	}
