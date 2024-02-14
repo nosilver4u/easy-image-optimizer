@@ -1,3 +1,10 @@
+= 3.6.0 =
+*Release Date - February 14, 2024*
+
+* added: Lazy Load for CSS background images in external CSS files or internal CSS sections
+* fixed: Easy IO applying resize parameters to existing (re)sizes
+* security: improve authentication for some plugin actions
+
 = 3.5.5 =
 *Release Date - January 4, 2024*
 
