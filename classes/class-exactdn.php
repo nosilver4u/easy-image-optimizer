@@ -329,6 +329,13 @@ class ExactDN extends Page_Parser {
 		\add_filter( 'ngg_pro_lightbox_images_queue', array( $this, 'ngg_pro_lightbox_images_queue' ) );
 		\add_filter( 'ngg_get_image_url', array( $this, 'plugin_get_image_url' ) );
 
+		// Filter Slider Revolution 7 REST API JSON.
+		if ( ! \defined( 'EXACTDN_SUPPRESS_JSON_FILTER' ) ) {
+			\add_filter( 'sr_get_full_slider_JSON', array( $this, 'sr7_slider_object' ) );
+		}
+		\add_filter( 'revslider_add_slider_base', array( $this, 'sr7_slider_object' ) );
+		\add_filter( 'sr_get_image_lists', array( $this, 'filter_sr7_image_lists' ) );
+
 		// Filter for Spotlight Social Media Feeds.
 		\add_filter( 'spotlight/instagram/server/transform_item', array( $this, 'spotlight_instagram_response' ) );
 
@@ -1035,6 +1042,10 @@ class ExactDN extends Page_Parser {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		$images = $this->get_images_from_html( $content, true );
 
+		if ( $this->filtering_the_page ) {
+			$this->get_preload_images( $content );
+		}
+
 		if ( ! empty( $images ) ) {
 			$this->debug_message( 'we have images to parse' );
 			if ( false !== \strpos( $content, 'elementor-section-full_width' ) ) {
@@ -1156,6 +1167,9 @@ class ExactDN extends Page_Parser {
 				if ( ! $lazy && \strpos( $images['img_tag'][ $index ], 'revslider/admin/assets/images/dummy' ) ) {
 					$lazy_load_src = \trim( $this->get_attribute( $images['img_tag'][ $index ], 'data-lazyload' ) );
 				}
+				if ( ! $lazy && \strpos( $images['img_tag'][ $index ], '/assets/dummy.png' ) ) {
+					$lazy_load_src = \trim( $this->get_attribute( $images['img_tag'][ $index ], 'data-lazyload' ) );
+				}
 				if ( ! $lazy && $lazy_load_src ) {
 					$placeholder_src      = $src;
 					$placeholder_src_orig = $src;
@@ -1184,6 +1198,7 @@ class ExactDN extends Page_Parser {
 				if ( $this->validate_image_url( $src ) ) {
 					$this->debug_message( 'url validated' );
 
+					$srcset_attr = $this->get_attribute( $images['img_tag'][ $index ], $this->srcset_attr );
 					// Find the width and height attributes.
 					$width  = $this->get_attribute( $images['img_tag'][ $index ], 'width' );
 					$height = $this->get_attribute( $images['img_tag'][ $index ], 'height' );
@@ -1246,11 +1261,11 @@ class ExactDN extends Page_Parser {
 						$this->debug_message( 'data-id not found, looking for wp-image-x in class' );
 						\preg_match( '#class=["|\']?[^"\']*wp-image-([\d]+)[^"\']*["|\']?#i', $images['img_tag'][ $index ], $attachment_id );
 					}
-					if ( ! $this->get_option( 'exactdn_prevent_db_queries' ) && empty( $attachment_id ) ) {
+					if ( ! $srcset_attr && ! $this->get_option( 'exactdn_prevent_db_queries' ) && empty( $attachment_id ) ) {
 						$this->debug_message( 'looking for attachment id' );
 						$attachment_id = attachment_url_to_postid( $src );
 					}
-					if ( ! $this->get_option( 'exactdn_prevent_db_queries' ) && ! empty( $attachment_id ) ) {
+					if ( ! $srcset_attr && ! $this->get_option( 'exactdn_prevent_db_queries' ) && ! empty( $attachment_id ) ) {
 						if ( \is_array( $attachment_id ) ) {
 							$attachment_id = \intval( \array_pop( $attachment_id ) );
 						}
@@ -1368,7 +1383,10 @@ class ExactDN extends Page_Parser {
 						$args['h'] = $height;
 					}
 
-					if ( ! $resize_existing && ( ! $width || (int) $filename_width === (int) $width ) ) {
+					if ( ! empty( $srcset_attr ) ) {
+						$this->debug_message( 'src resize not needed, srcset present' );
+						$args = array();
+					} elseif ( ! $resize_existing && ( ! $width || (int) $filename_width === (int) $width ) ) {
 						$this->debug_message( 'preventing resize' );
 						$args = array();
 					} elseif ( ! $fullsize_url ) {
@@ -1432,24 +1450,6 @@ class ExactDN extends Page_Parser {
 							);
 						}
 
-						$srcset_url = false;
-						// Insert new image src into the srcset as well, if we have a width.
-						if ( false !== $width && false === \strpos( $width, '%' ) && $width ) {
-							$srcset_url = $exactdn_url . ' ' . (int) $width . 'w, ';
-						}
-						$srcset_attr = $this->get_attribute( $new_tag, $this->srcset_attr );
-						if ( $srcset_attr ) {
-							$new_srcset_attr = $srcset_attr;
-							if ( $srcset_url && false === \strpos( $srcset_attr, ' ' . (int) $width . 'w' ) && ! \preg_match( '/\s(1|2|3)x/', $srcset_attr ) ) {
-								$this->debug_message( 'src not in srcset, adding' );
-								$new_srcset_attr = $srcset_url . $new_srcset_attr;
-							}
-							$new_srcset_attr = $this->srcset_replace( $new_srcset_attr );
-							if ( $new_srcset_attr && $new_srcset_attr !== $srcset_attr ) {
-								$this->set_attribute( $new_tag, $this->srcset_attr, $new_srcset_attr, true );
-							}
-						}
-
 						// Check if content width pushed the respimg sizes attribute too far down.
 						if ( ! empty( $constrain_width ) && (int) $constrain_width !== (int) $content_width ) {
 							$sizes_attr     = $this->get_attribute( $new_tag, 'sizes' );
@@ -1467,6 +1467,19 @@ class ExactDN extends Page_Parser {
 							$this->set_attribute( $new_tag, 'src', $exactdn_url, true );
 						} else {
 							$new_tag = \str_replace( $src_orig, $exactdn_url, $new_tag );
+						}
+
+						$preload_image = $this->is_image_preloaded( $exactdn_url, $src_orig );
+						if ( $preload_image ) {
+							if ( $exactdn_url !== $preload_image['url'] ) {
+								$this->debug_message( "replacing {$preload_image['url']} with $exactdn_url" );
+								$new_preload_tag = $preload_image['tag'];
+								$this->set_attribute( $new_preload_tag, 'href', \esc_url( $exactdn_url ), true );
+								if ( $preload_image['tag'] !== $new_preload_tag ) {
+									$content = \str_replace( $preload_image['tag'], $new_preload_tag, $content );
+								}
+							}
+							$new_tag = $this->skip_lazyload_for_preload( $new_tag );
 						}
 
 						// If Lazy Load is in use, pass placeholder image through ExactDN.
@@ -1489,8 +1502,8 @@ class ExactDN extends Page_Parser {
 						// Replace original tag with modified version.
 						$content = \str_replace( $tag, $new_tag, $content );
 					}
-				} elseif ( ! $lazy && $this->validate_image_url( $src, true ) ) {
-					$this->debug_message( "found a potential exactdn src url to wrangle, and maybe insert into srcset: $src" );
+				} elseif ( ! $lazy && ! $this->get_attribute( $images['img_tag'][ $index ], $this->srcset_attr ) && $this->validate_image_url( $src, true ) ) {
+					$this->debug_message( "found a potential exactdn src url to wrangle: $src" );
 
 					$args    = array();
 					$new_tag = $tag;
@@ -1522,33 +1535,6 @@ class ExactDN extends Page_Parser {
 						}
 					}
 
-					$srcset_url = false;
-					if ( $width ) {
-						$this->debug_message( 'found the width' );
-						// Insert new image src into the srcset as well, if we have a width.
-						if (
-							false !== $width &&
-							false === \strpos( $width, '%' ) &&
-							false !== \strpos( $src, $width ) &&
-							false !== \strpos( $src, $this->exactdn_domain )
-						) {
-							$exactdn_url = $src;
-
-							$srcset_url = $exactdn_url . ' ' . (int) $width . 'w, ';
-						}
-					}
-					$srcset_attr = $this->get_attribute( $new_tag, $this->srcset_attr );
-					if ( $srcset_attr ) {
-						$new_srcset_attr = $srcset_attr;
-						if ( $srcset_url && false === \strpos( $srcset_attr, ' ' . (int) $width . 'w' ) && ! \preg_match( '/\s(1|2|3)x/', $srcset_attr ) ) {
-							$this->debug_message( 'src not in srcset, adding' );
-							$new_srcset_attr = $srcset_url . $new_srcset_attr;
-						}
-						$new_srcset_attr = $this->srcset_replace( $new_srcset_attr );
-						if ( $new_srcset_attr && $new_srcset_attr !== $srcset_attr ) {
-							$this->set_attribute( $new_tag, $this->srcset_attr, $new_srcset_attr, true );
-						}
-					}
 					if ( $new_tag && $new_tag !== $tag ) {
 						// Replace original tag with modified version.
 						$content = \str_replace( $tag, $new_tag, $content );
@@ -1638,13 +1624,14 @@ class ExactDN extends Page_Parser {
 		$content = $this->filter_video_elements( $content );
 
 		// Process background images on HTML elements.
-		$element_types = \apply_filters( 'eio_allowed_background_image_elements', array( 'div', 'li', 'span', 'section', 'a' ) );
+		$element_types = \apply_filters( 'eio_allowed_background_image_elements', array( 'div', 'li', 'span', 'section', 'a', 'rs-bg-elem' ) );
 		foreach ( $element_types as $element_type ) {
 			$content = $this->filter_bg_images( $content, $element_type );
 		}
 		if ( $this->filtering_the_page ) {
 			$content = $this->filter_prz_thumb( $content );
 			$content = $this->filter_style_blocks( $content );
+			$content = $this->filter_sr6_slides( $content );
 			if ( $this->get_option( 'exactdn_all_the_things' ) ) {
 				$this->debug_message( 'rewriting all other wp-content/wp-includes urls' );
 				$content = $this->filter_all_the_things( $content );
@@ -1652,6 +1639,13 @@ class ExactDN extends Page_Parser {
 		}
 		$this->debug_message( 'done parsing page' );
 		$this->filtering_the_content = false;
+
+		foreach ( $this->preload_images as $preload_index => $preload_image ) {
+			if ( ! empty( $preload_image['found'] ) ) {
+				continue;
+			}
+			$this->debug_message( "never found matching img for image preload: {$preload_image['tag']}" );
+		}
 
 		$elapsed_time = \microtime( true ) - $started;
 		$this->debug_message( "parsing the_content took $elapsed_time seconds" );
@@ -1864,12 +1858,29 @@ class ExactDN extends Page_Parser {
 						} elseif ( 'div' === $tag_type && $content_width ) {
 							$args['w'] = \apply_filters( 'exactdn_content_bgimage_width', $content_width, $bg_image_url );
 						}
+						if ( false !== \strpos( $element_class, 'wp-block-group' ) && false !== \strpos( $element, 'background-size:auto' ) ) {
+							$skip_autoscale = true;
+						}
 						if ( ( isset( $args['w'] ) && empty( $args['w'] ) ) || ! $bg_autoscale ) {
 							unset( $args['w'] );
 						}
 						$exactdn_bg_image_url = $this->generate_url( $bg_image_url, $args );
 						if ( $bg_image_url !== $exactdn_bg_image_url ) {
 							$new_style = \str_replace( $orig_bg_url, $exactdn_bg_image_url, $new_style );
+
+							$preload_image = $this->is_image_preloaded( $exactdn_bg_image_url, $orig_bg_url );
+							if ( $preload_image ) {
+								if ( $exactdn_bg_image_url !== $preload_image['url'] ) {
+									$this->debug_message( "replacing {$preload_image['url']} with $exactdn_bg_image_url" );
+									$new_preload_tag = $preload_image['tag'];
+									$this->set_attribute( $new_preload_tag, 'href', \esc_url( $exactdn_bg_image_url ), true );
+									if ( $preload_image['tag'] !== $new_preload_tag ) {
+										$content = \str_replace( $preload_image['tag'], $new_preload_tag, $content );
+									}
+								}
+								$element        = $this->skip_lazyload_for_preload( $element );
+								$skip_autoscale = false;
+							}
 						}
 					}
 				}
@@ -1961,6 +1972,78 @@ class ExactDN extends Page_Parser {
 	}
 
 	/**
+	 * Parse page content looking for Slider Revolution 6 slides.
+	 *
+	 * @param string $content The HTML content to parse.
+	 * @return string The filtered HTML content.
+	 */
+	public function filter_sr6_slides( $content ) {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		if ( false === strpos( $content, 'REVOLUTION SLIDER 6' ) ) {
+			return $content;
+		}
+		// Process data-thumb images on rs-slide elements.
+		$elements = $this->get_elements_from_html( $content, 'rs-slide' );
+		if ( $this->is_iterable( $elements ) ) {
+			foreach ( $elements as $eindex => $element ) {
+				$this->debug_message( 'parsing a slide' );
+				$thumb = $this->get_attribute( $element, 'data-thumb' );
+				if ( $thumb ) {
+					$this->debug_message( "parsing a sr6 thumb: $thumb" );
+					if ( $this->validate_image_url( $thumb ) ) {
+						$this->debug_message( 'rewriting slide thumb...' );
+						$this->set_attribute( $element, 'data-thumb', $this->generate_url( $thumb ), true );
+						if ( $element !== $elements[ $eindex ] ) {
+							$content = \str_replace( $elements[ $eindex ], $element, $content );
+						}
+					}
+				}
+			}
+		}
+		// Process data-poster images on rs-layer elements.
+		$elements = $this->get_elements_from_html( $content, 'rs-layer' );
+		if ( $this->is_iterable( $elements ) ) {
+			foreach ( $elements as $eindex => $element ) {
+				$this->debug_message( 'parsing a layer' );
+				$poster = $this->get_attribute( $element, 'data-poster' );
+				if ( $poster ) {
+					$this->debug_message( "parsing a sr6 poster: $poster" );
+					if ( $this->validate_image_url( $poster ) ) {
+						$this->debug_message( 'rewriting layer poster...' );
+						$this->set_attribute( $element, 'data-poster', $this->generate_url( $poster ), true );
+						if ( $element !== $elements[ $eindex ] ) {
+							$content = \str_replace( $elements[ $eindex ], $element, $content );
+						}
+					}
+				}
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 * Parse Slider Revolution 7 image lists and convert them to CDN URLs.
+	 *
+	 * @param array $images The list of images to rewrite.
+	 * @return array The filtered image list.
+	 */
+	public function filter_sr7_image_lists( $images ) {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		if ( ! $this->is_iterable( $images ) ) {
+			return $images;
+		}
+		if ( ! empty( $images ) ) {
+			$this->debug_message( 'we have SR7 images to parse' );
+			foreach ( $images as $index => $image ) {
+				if ( ! empty( $image['src'] ) && $this->validate_image_url( $image['src'] ) ) {
+					$images[ $index ]['src'] = $this->generate_url( $image['src'] );
+				}
+			} // End foreach() -- of more images found in the page.
+		} // End if() -- we found more images in the page.
+		return $images;
+	}
+
+	/**
 	 * Parse page content looking for wp-content/wp-includes URLs to rewrite.
 	 *
 	 * @param string $content The HTML content to parse.
@@ -2004,6 +2087,50 @@ class ExactDN extends Page_Parser {
 			$content = $this->replace_fonts( $content );
 		}
 		return $content;
+	}
+
+	/**
+	 * Check an image URL for preload status.
+	 *
+	 * @param string $exactdn_url The CDN version of an image URL.
+	 * @param string $original_url The pre-CDN version of an image URL. Optional.
+	 * @return array|bool The preload array/details if the URL is being preloaded, false otherwise.
+	 */
+	protected function is_image_preloaded( $exactdn_url, $original_url = '' ) {
+		if ( empty( $original_url ) ) {
+			$original_url = $exactdn_url;
+		}
+		$original_path = $this->parse_url( $original_url, PHP_URL_PATH );
+		foreach ( $this->preload_images as $preload_index => $preload_image ) {
+			if ( ! empty( $preload_image['found'] ) ) {
+				continue;
+			}
+			if ( $original_path === $preload_image['path'] ) {
+				$this->debug_message( "found a preload match for $original_path" );
+				$this->preload_images[ $preload_index ]['found'] = true;
+				return $preload_image;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Prevent an HTML element, like an img or a div with background image(s), from being lazyloaded or autoscaled.
+	 *
+	 * @param string $tag The HTML tag to be modified.
+	 * @return string The modified HTML tag.
+	 */
+	protected function skip_lazyload_for_preload( $tag ) {
+		if ( \defined( 'EIO_LAZY_PRELOAD' ) && EIO_LAZY_PRELOAD ) {
+			if ( false === \strpos( $tag, 'skip-autoscale' ) ) {
+				$this->set_attribute( $tag, 'data-skip-autoscale', '1' );
+			}
+		} else {
+			if ( false === \strpos( $tag, 'skip-lazy' ) ) {
+				$this->set_attribute( $tag, 'data-skip-lazy', '1' );
+			}
+		}
+		return $tag;
 	}
 
 	/**
@@ -2964,6 +3091,9 @@ class ExactDN extends Page_Parser {
 	 */
 	public function maybe_smart_crop( $args, $attachment_id, $meta = false ) {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		if ( empty( $args ) ) {
+			return $args;
+		}
 		if ( ! empty( $args['crop'] ) ) {
 			$this->debug_message( 'already cropped' );
 			return $args;
@@ -3520,6 +3650,112 @@ class ExactDN extends Page_Parser {
 			}
 		}
 		return $directories;
+	}
+
+	/**
+	 * Handle image urls within Slider Revolution 7 objects.
+	 *
+	 * @param array|object $slider A Revolution Slider object, or an array prior to JSON conversion.
+	 * @return array The ExactDNified slider object/array.
+	 */
+	public function sr7_slider_object( $slider ) {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		$this->debug_message( 'RS7 object/array incoming:' );
+		/* $this->debug_message( print_r( $slider, true ) ); */
+		if ( ! is_array( $slider ) ) {
+			if ( is_object( $slider ) ) {
+				if ( ! empty( $slider->params['layout']['bg']['image'] ) && is_string( $slider->params['layout']['bg']['image'] ) && $this->validate_image_url( $slider->params['layout']['bg']['image'] ) ) {
+					$slider->params['layout']['bg']['image'] = $this->generate_url( $slider->params['layout']['bg']['image'] );
+				}
+				if ( ! empty( $slider->params['bg']['image']['src'] ) && is_string( $slider->params['bg']['image']['src'] ) && $this->validate_image_url( $slider->params['bg']['image']['src'] ) ) {
+					$slider->params['bg']['image']['src'] = $this->generate_url( $slider->params['bg']['image']['src'] );
+				}
+				if ( ! empty( $slider->params['imgs'] ) && $this->is_iterable( $slider->params['imgs'] ) ) {
+					foreach ( $slider->params['imgs'] as $img_index => $slider_settings_img ) {
+						if ( \is_string( $slider_settings_img ) && $this->validate_image_url( $slider_settings_img ) ) {
+							$slider->params['imgs'][ $img_index ] = $this->generate_url( $slider_settings_img );
+							continue;
+						}
+						if ( ! empty( $slider_settings_img['src'] ) && $this->validate_image_url( $slider_settings_img['src'] ) ) {
+							$slider->params['imgs'][ $img_index ]['src'] = $this->generate_url( $slider_settings_img['src'] );
+						}
+					}
+				}
+			}
+			return $slider;
+		}
+		if ( ! empty( $slider['settings']['bg']['image']['src'] ) ) {
+			if ( $this->validate_image_url( $slider['settings']['bg']['image']['src'] ) ) {
+				$slider['settings']['bg']['image']['src'] = $this->generate_url( $slider['settings']['bg']['image']['src'] );
+			}
+		}
+		if ( ! empty( $slider['settings']['imgs'] ) && $this->is_iterable( $slider['settings']['imgs'] ) ) {
+			foreach ( $slider['settings']['imgs'] as $img_index => $slider_settings_img ) {
+				if ( \is_string( $slider_settings_img ) && $this->validate_image_url( $slider_settings_img ) ) {
+					$slider['settings']['imgs'][ $img_index ] = $this->generate_url( $slider_settings_img );
+					continue;
+				}
+				if ( ! empty( $slider_settings_img['src'] ) && $this->validate_image_url( $slider_settings_img['src'] ) ) {
+					$slider['settings']['imgs'][ $img_index ]['src'] = $this->generate_url( $slider_settings_img['src'] );
+				}
+			}
+		}
+		if ( ! empty( $slider['slides'] ) && $this->is_iterable( $slider['slides'] ) ) {
+			foreach ( $slider['slides'] as $slide_index => $slide ) {
+				$slider['slides'][ $slide_index ] = $this->sr7_slider_slide( $slide );
+			}
+		}
+		if ( ! empty( $slider['static_slide'] ) ) {
+			$slider['static_slide'] = $this->sr7_slider_slide( $slider['static_slide'] );
+		}
+		return $slider;
+	}
+
+	/**
+	 * Handle image urls within Slider Revolution 7 slides.
+	 *
+	 * @param array $slide A Revolution Slider slide array prior to JSON conversion.
+	 * @return array The ExactDNified slide array.
+	 */
+	public function sr7_slider_slide( $slide ) {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		if ( is_array( $slide ) ) {
+			if ( $this->is_iterable( $slide['layers'] ) ) {
+				foreach ( $slide['layers'] as $layer_index => $slide_layer ) {
+					if ( ! empty( $slide_layer['bg']['image']['src'] ) && $this->validate_image_url( $slide_layer['bg']['image']['src'] ) ) {
+						$slide['layers'][ $layer_index ]['bg']['image']['src'] = $this->generate_url( $slide_layer['bg']['image']['src'] );
+					}
+					if ( ! empty( $slide_layer['bg']['video']['poster']['src'] ) && $this->validate_image_url( $slide_layer['bg']['video']['poster']['src'] ) ) {
+						$slide['layers'][ $layer_index ]['bg']['video']['poster']['src'] = $this->generate_url( $slide_layer['bg']['video']['poster']['src'] );
+					}
+					if ( ! empty( $slide_layer['content']['src'] ) && $this->validate_image_url( $slide_layer['content']['src'] ) ) {
+						$slide['layers'][ $layer_index ]['content']['src'] = $this->generate_url( $slide_layer['content']['src'] );
+					}
+					if ( ! empty( $slide_layer['idle']['backgroundImage'] ) && $this->validate_image_url( $slide_layer['idle']['backgroundImage'] ) ) {
+						$slide['layers'][ $layer_index ]['idle']['backgroundImage'] = $this->generate_url( $slide_layer['idle']['backgroundImage'] );
+					}
+					if ( ! empty( $slide_layer['media']['posterUrl'] ) && $this->validate_image_url( $slide_layer['media']['posterUrl'] ) ) {
+						$slide['layers'][ $layer_index ]['media']['posterUrl'] = $this->generate_url( $slide_layer['media']['posterUrl'] );
+					}
+					if ( ! empty( $slide_layer['media']['imageUrl'] ) && $this->validate_image_url( $slide_layer['media']['imageUrl'] ) ) {
+						$slide['layers'][ $layer_index ]['media']['imageUrl'] = $this->generate_url( $slide_layer['media']['imageUrl'] );
+					}
+					if ( ! empty( $slide_layer['svg']['source'] ) && $this->validate_image_url( $slide_layer['svg']['source'] ) ) {
+						$slide['layers'][ $layer_index ]['svg']['source'] = $this->generate_url( $slide_layer['svg']['source'] );
+					}
+				}
+			}
+			if ( ! empty( $slide['params']['thumb']['customThumbSrc'] ) && $this->validate_image_url( $slide['params']['thumb']['customThumbSrc'] ) ) {
+				$slide['params']['thumb']['customThumbSrc'] = $this->generate_url( $slide['params']['thumb']['customThumbSrc'] );
+			}
+			if ( ! empty( $slide['params']['bg']['image'] ) && $this->validate_image_url( $slide['params']['bg']['image'] ) ) {
+				$slide['params']['bg']['image'] = $this->generate_url( $slide['params']['bg']['image'] );
+			}
+			if ( ! empty( $slide['slide']['thumb']['src'] ) && $this->validate_image_url( $slide['slide']['thumb']['src'] ) ) {
+				$slide['slide']['thumb']['src'] = $this->generate_url( $slide['slide']['thumb']['src'] );
+			}
+		}
+		return $slide;
 	}
 
 	/**

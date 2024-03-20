@@ -2,9 +2,9 @@
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 6.2
-Tested up to: 6.4
+Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 3.6.0
+Stable tag: 3.7.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +56,15 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.7.0 =
+*Release Date - March 20, 2024*
+
+* added: support for upcoming Slider Revolution 7 rendering engine
+* added: update existing image preload URLs
+* added: Lazy Load automatically excludes preloaded images
+* fixed: Easy IO skipping Slider Revolution 6 URLs
+* fixed: Lazy Load incorrectly auto-scales fixed group background images
 
 = 3.6.0 =
 *Release Date - February 14, 2024*
