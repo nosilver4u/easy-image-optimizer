@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 6.2
+Requires at least: 6.3
 Tested up to: 6.5
-Requires PHP: 7.4
-Stable tag: 3.7.0
+Requires PHP: 8.0
+Stable tag: 3.8.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +56,13 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.8.0 =
+*Release Date - April 11, 2024*
+
+* added: Lazy Load can use dominant color placeholders via Easy IO
+* added: ability to filter/parse admin-ajax.php requests via eio_filter_admin_ajax_response filter
+* changed: improved smoothing of LQIP for Lazy Load when using Easy IO
 
 = 3.7.0 =
 *Release Date - March 20, 2024*

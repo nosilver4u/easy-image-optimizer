@@ -228,11 +228,13 @@ class Lazy_Load extends Page_Parser {
 		if ( $this->is_iterable( $this->user_page_exclusions ) ) {
 			foreach ( $this->user_page_exclusions as $page_exclusion ) {
 				if ( '/' === $page_exclusion && '/' === $uri ) {
+					$this->debug_message( "$uri matchs $page_exclusion" );
 					return false;
 				} elseif ( '/' === $page_exclusion ) {
 					continue;
 				}
 				if ( false !== \strpos( $uri, $page_exclusion ) ) {
+					$this->debug_message( "$uri matchs $page_exclusion" );
 					return false;
 				}
 			}
@@ -600,6 +602,9 @@ class Lazy_Load extends Page_Parser {
 		if ( $this->parsing_exactdn && \apply_filters( 'eio_use_lqip', $this->get_option( $this->prefix . 'use_lqip' ), $file ) ) {
 			$placeholder_types[] = 'lqip';
 		}
+		if ( $this->parsing_exactdn && \apply_filters( 'eio_use_dcip', $this->get_option( $this->prefix . 'use_dcip' ), $file ) ) {
+			$placeholder_types[] = 'dcip';
+		}
 		if ( $this->parsing_exactdn && \apply_filters( 'eio_use_piip', true, $file ) ) {
 			$placeholder_types[] = 'epip';
 		}
@@ -616,6 +621,14 @@ class Lazy_Load extends Page_Parser {
 					$this->debug_message( 'using lqip, maybe' );
 					if ( false === \strpos( $file, 'nggid' ) && ! \preg_match( '#\.svg(\?|$)#', $file ) && \strpos( $file, $this->exactdn_domain ) ) {
 						$placeholder_src = add_query_arg( array( 'lazy' => 1 ), $file );
+						$use_native_lazy = true;
+						break 2;
+					}
+					break;
+				case 'dcip':
+					$this->debug_message( 'using dcip, maybe' );
+					if ( false === \strpos( $file, 'nggid' ) && ! \preg_match( '#\.svg(\?|$)#', $file ) && \strpos( $file, $this->exactdn_domain ) ) {
+						$placeholder_src = add_query_arg( array( 'lazy' => 3 ), $file );
 						$use_native_lazy = true;
 						break 2;
 					}
@@ -1153,7 +1166,6 @@ class Lazy_Load extends Page_Parser {
 				$placeholder->clear();
 			}
 			// If that didn't work, and we have a premium service, use the API to generate the slimmest PIP available.
-			/* if ( $this->get_option( 'ewww_image_optimizer_cloud_key' ) && ! defined( 'EWWW_IMAGE_OPTIMIZER_DISABLE_API_PIP' ) ) { */
 			if (
 				! \is_file( $piip_path ) &&
 				( $this->parsing_exactdn || $this->get_option( 'ewww_image_optimizer_cloud_key' ) ) &&

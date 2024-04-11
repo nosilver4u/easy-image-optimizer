@@ -969,6 +969,18 @@ function easyio_options( $network = 'singlesite' ) {
 				<tr>
 					<td>&nbsp;</td>
 					<td>
+						<input type='checkbox' name='easyio_use_dcip' value='true' id='easyio_use_dcip' <?php checked( easyio_get_option( 'easyio_use_dcip' ) ); ?> />
+						<label for='easyio_use_dcip'><strong>DCIP</strong></label>
+						<?php easyio_help_link( 'https://docs.ewww.io/article/75-lazy-load-placeholders', '5c9a7a302c7d3a1544615e47' ); ?>
+						<p>
+							<?php esc_html_e( 'Use dominant-color versions of your images as placeholders. Can improve user experience, but may be slower than blank placeholders.', 'easy-image-optimizer' ); ?>
+						</p>
+					</td>
+				</tr>
+				<?php easyio_debug_message( 'DCIP: ' . ( easyio_get_option( 'easyio_use_dcip' ) ? 'on' : 'off' ) ); ?>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
 						<label for='easyio_ll_exclude'><strong><?php esc_html_e( 'Exclusions', 'easy-image-optimizer' ); ?></strong></label>
 						<?php easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ); ?><br>
 						<textarea id='easyio_ll_exclude' name='easyio_ll_exclude' rows='3' cols='60'><?php echo esc_html( $ll_exclude_paths ); ?></textarea>

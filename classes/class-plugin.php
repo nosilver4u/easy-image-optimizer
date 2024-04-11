@@ -164,6 +164,8 @@ final class Plugin extends Base {
 			\update_site_option( 'easyio_lazy_load', $easyio_lazy_load );
 			$easyio_use_lqip = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
 			\update_site_option( 'easyio_use_lqip', $easyio_use_lqip );
+			$easyio_use_dcip = ( empty( $_POST['easyio_use_dcip'] ) ? false : true );
+			\update_site_option( 'easyio_use_dcip', $easyio_use_dcip );
 			$easyio_ll_exclude = empty( $_POST['easyio_ll_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_exclude'] ) );
 			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $easyio_ll_exclude ) );
 			$easyio_ll_all_things = empty( $_POST['easyio_ll_all_things'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_all_things'] ) );
@@ -195,6 +197,7 @@ final class Plugin extends Base {
 		\register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
+		\register_setting( 'easyio_options', 'easyio_use_dcip', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
 		\register_setting( 'easyio_options', 'easyio_ll_all_things', 'sanitize_textarea_field' );
 	}
@@ -217,6 +220,7 @@ final class Plugin extends Base {
 		\add_option( 'easyio_add_missing_dims', true );
 		\add_option( 'easyio_lazy_load', false );
 		\add_option( 'easyio_use_lqip', false );
+		\add_option( 'easyio_use_dcip', false );
 		\add_option( 'easyio_use_siip', false );
 		\add_option( 'easyio_ll_autoscale', true );
 		\add_option( 'easyio_ll_exclude', '' );

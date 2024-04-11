@@ -1,3 +1,10 @@
+= 3.8.0 =
+*Release Date - April 11, 2024*
+
+* added: Lazy Load can use dominant color placeholders via Easy IO
+* added: ability to filter/parse admin-ajax.php requests via eio_filter_admin_ajax_response filter
+* changed: improved smoothing of LQIP for Lazy Load when using Easy IO
+
 = 3.7.0 =
 *Release Date - March 20, 2024*
 
