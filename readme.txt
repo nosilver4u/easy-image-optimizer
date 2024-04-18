@@ -57,6 +57,12 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 3.8.1 =
+*Release Date - TBD*
+
+* added: Easy IO support for Divi Pixel image masks
+* fixed: Help links broken in Firefox's Strict mode
+
 = 3.8.0 =
 *Release Date - April 11, 2024*
 

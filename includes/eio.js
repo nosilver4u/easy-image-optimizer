@@ -11,8 +11,8 @@ jQuery(document).ready(function($) {
 			console.log(err);
 		}
 	});
-	function HSregister() {
-		if (typeof(Beacon) !== 'undefined' ) {
+	if (typeof(Beacon) !== 'undefined' ) {
+		Beacon( 'on', 'ready', function() {
 			$('.easyio-overrides-nav').click(function() {
 				event.preventDefault();
 				Beacon('article', '59710ce4042863033a1b45a6', { type: 'modal' });
@@ -35,9 +35,8 @@ jQuery(document).ready(function($) {
 				event.preventDefault();
 				Beacon('article', hsid, { type: 'modal' });
 			});
-		}
+		});
 	}
-	HSregister();
 	$('#easyio-general-settings').show();
 	$('li.easyio-general-nav').addClass('easyio-selected');
 	$('#easyio-support-settings').hide();
