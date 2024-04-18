@@ -29,7 +29,7 @@ if ( ! defined( 'PHP_VERSION_ID' ) || PHP_VERSION_ID < 80000 ) {
 	add_action( 'network_admin_notices', 'easyio_unsupported_php' );
 	add_action( 'admin_notices', 'easyio_unsupported_php' );
 } elseif ( false === strpos( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
-	define( 'EASYIO_VERSION', 380.1 );
+	define( 'EASYIO_VERSION', 380.22 );
 
 	/**
 	 * The full path of the plugin file (this file).

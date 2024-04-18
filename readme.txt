@@ -61,6 +61,7 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 *Release Date - TBD*
 
 * added: Easy IO support for Divi Pixel image masks
+* changed: Lazy Load checks for auto-scale exclusions on ancestors of lazyloaded element
 * fixed: Help links broken in Firefox's Strict mode
 
 = 3.8.0 =
