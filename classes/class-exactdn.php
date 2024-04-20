@@ -122,6 +122,14 @@ class ExactDN extends Page_Parser {
 	private $sub_folder = false;
 
 	/**
+	 * A list of domains (comma-separated) that can be delivered via the Easy IO domain.
+	 *
+	 * @access private
+	 * @var string $asset_domains
+	 */
+	private $asset_domains = '';
+
+	/**
 	 * The Easy IO Plan/Tier ID
 	 *
 	 * @access private
@@ -256,6 +264,10 @@ class ExactDN extends Page_Parser {
 		}
 		// Enables scheduled health checks via wp-cron.
 		\add_action( 'easyio_verification_checkin', array( $this, 'health_check' ) );
+
+		if ( empty( $this->asset_domains ) ) {
+			$this->asset_domains = \apply_filters( 'exactdn_asset_domains', $this->get_exactdn_option( 'asset_domains' ) );
+		}
 
 		// Images in post content and galleries.
 		\add_filter( 'the_content', array( $this, 'filter_the_content' ), 999999 );
@@ -413,6 +425,7 @@ class ExactDN extends Page_Parser {
 		$this->allowed_domains[] = $this->exactdn_domain;
 		$this->allowed_domains   = \apply_filters( 'exactdn_allowed_domains', $this->allowed_domains );
 		$this->debug_message( 'allowed domains: ' . \implode( ',', $this->allowed_domains ) );
+		$this->debug_message( 'asset domains: ' . $this->asset_domains );
 		$this->get_allowed_paths();
 		$this->validate_user_exclusions();
 	}
@@ -643,6 +656,10 @@ class ExactDN extends Page_Parser {
 					$this->debug_message( 'exactdn (real-world) verification succeeded' );
 					$this->set_exactdn_option( 'verified', 1, false );
 					$this->set_exactdn_option( 'verify_method', -1, false ); // After initial activation, use simpler API verification.
+					if ( ! empty( $response['asset_domains'] ) && \is_string( $response['asset_domains'] ) ) {
+						$this->set_exactdn_option( 'asset_domains', $response['asset_domains'] );
+						$this->asset_domains = $response['asset_domains'];
+					}
 					\add_action( 'admin_notices', $this->prefix . 'notice_exactdn_activation_success' );
 					return true;
 				}
@@ -689,6 +706,10 @@ class ExactDN extends Page_Parser {
 				if ( ! empty( $response['plan_id'] ) ) {
 					$this->set_exactdn_option( 'plan_id', (int) $response['plan_id'] );
 					$this->plan_id = (int) $response['plan_id'];
+				}
+				if ( ! empty( $response['asset_domains'] ) && \is_string( $response['asset_domains'] ) ) {
+					$this->set_exactdn_option( 'asset_domains', $response['asset_domains'] );
+					$this->asset_domains = $response['asset_domains'];
 				}
 				$this->debug_message( 'exactdn verification via API succeeded' );
 				$this->set_exactdn_option( 'verified', 1, false );
@@ -2091,6 +2112,20 @@ class ExactDN extends Page_Parser {
 				$this->debug_message( 'searching for #(https?:)?//(?:www\.)?' . $escaped_upload_domain . '((?:/[^"\'?&>:/]+?){0,3})/(nextgen-image|' . $this->include_path . '|' . $this->content_path . ')/#i and replacing with $1//' . $this->exactdn_domain . '$2/$3/' );
 				$content = \preg_replace( '#(https?:)?//(?:www\.)?' . $escaped_upload_domain . '((?:/[^"\'?&>:/]+?){0,3})/(nextgen-image|' . $this->include_path . '|' . $this->content_path . ')/#i', '$1//' . $this->exactdn_domain . '$2/$3/', $content );
 			}
+			if ( $this->asset_domains && \apply_filters( 'eio_rewrite_all_the_assets', true ) ) {
+				$asset_domains = \explode( ',', $this->asset_domains );
+				foreach ( $asset_domains as $asset_domain ) {
+					$asset_domain          = \trim( $asset_domain );
+					$escaped_upload_domain = \str_replace( '.', '\.', $asset_domain );
+					if ( $asset_domain === $this->home_domain ) {
+						$this->debug_message( 'searching (assets) for #(https?:)?//(?:www\.)?' . $escaped_upload_domain . '((?:/[^"\'?&>:/]+?){0,3})/(nextgen-image|' . $this->include_path . '|' . $this->content_path . ')/#i and replacing with $1//' . $this->exactdn_domain . '/easyio-assets/' . $asset_domain . '$2/$3/' );
+						$content = \preg_replace( '#(https?:)?//(?:www\.)?' . $escaped_upload_domain . '((?:/[^"\'?&>:/]+?){0,3})/(nextgen-image|' . $this->include_path . '|' . $this->content_path . ')/#i', '$1//' . $this->exactdn_domain . '/easyio-assets/' . $asset_domain . '$2/$3/', $content );
+					} else {
+						$this->debug_message( 'searching (assets) for #(https?:)?//(?:www\.)?' . $escaped_upload_domain . '/#i and replacing with $1//' . $this->exactdn_domain . '/easyio-assets/' . $asset_domain . '/' );
+						$content = \preg_replace( '#(https?:)?//(?:www\.)?' . $escaped_upload_domain . '/#i', '$1//' . $this->exactdn_domain . '/easyio-assets/' . $asset_domain . '/', $content );
+					}
+				}
+			}
 			$content = \str_replace( '?wpcontent-bypass?', $this->content_path, $content );
 			$content = $this->replace_fonts( $content );
 		}
@@ -3204,6 +3239,27 @@ class ExactDN extends Page_Parser {
 	}
 
 	/**
+	 * Make sure the asset domain is on the list of approved domains.
+	 *
+	 * @param string $domain The hostname to validate.
+	 * @return bool True if the hostname is allowed, false otherwise.
+	 */
+	public function allow_asset_domain( $domain ) {
+		if ( empty( $this->asset_domains ) ) {
+			return false;
+		}
+		$domain          = \trim( $domain );
+		$allowed_domains = \explode( ',', $this->asset_domains );
+		foreach ( $allowed_domains as $allowed ) {
+			$allowed = \trim( $allowed );
+			if ( $domain === $allowed ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Ensure image URL is valid for ExactDN.
 	 * Though ExactDN functions address some of the URL issues, we should avoid unnecessary processing if we know early on that the image isn't supported.
 	 *
@@ -4017,8 +4073,13 @@ class ExactDN extends Page_Parser {
 			return $url;
 		}
 
+		$scheme = $this->scheme;
+		if ( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] ) {
+			$scheme = 'https';
+		}
+
 		// Make sure this is an allowed image domain/hostname for ExactDN on this site.
-		if ( ! $this->allow_image_domain( $parsed_url['host'] ) ) {
+		if ( ! $this->allow_image_domain( $parsed_url['host'] ) && ! $this->allow_asset_domain( $parsed_url['host'] ) ) {
 			$this->debug_message( "invalid host for ExactDN: {$parsed_url['host']}" );
 			return $url;
 		}
@@ -4028,11 +4089,6 @@ class ExactDN extends Page_Parser {
 		if ( $this->exactdn_domain === $parsed_url['host'] ) {
 			$this->debug_message( 'url already has exactdn domain' );
 			return $url;
-		}
-
-		$scheme = $this->scheme;
-		if ( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] ) {
-			$scheme = 'https';
 		}
 
 		global $wp_version;
@@ -4074,6 +4130,9 @@ class ExactDN extends Page_Parser {
 		}
 
 		$exactdn_url = $scheme . '://' . $this->exactdn_domain . '/' . \ltrim( $parsed_url['path'], '/' ) . '?' . $parsed_url['query'];
+		if ( $this->allow_asset_domain( $parsed_url['host'] ) ) {
+			$exactdn_url = $scheme . '://' . $this->exactdn_domain . '/easyio-assets/' . $parsed_url['host'] . '/' . \ltrim( $parsed_url['path'], '/' ) . '?' . $parsed_url['query'];
+		}
 		$this->debug_message( "exactdn css/script url: $exactdn_url" );
 		return $this->url_scheme( $exactdn_url, $scheme );
 	}
