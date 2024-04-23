@@ -217,6 +217,7 @@ final class Plugin extends Base {
 		\add_option( 'exactdn_exclude', '' );
 		\add_option( 'exactdn_sub_folder', false );
 		\add_option( 'exactdn_prevent_db_queries', true );
+		\add_option( 'exactdn_asset_domains', '' );
 		\add_option( 'easyio_add_missing_dims', true );
 		\add_option( 'easyio_lazy_load', false );
 		\add_option( 'easyio_use_lqip', false );
