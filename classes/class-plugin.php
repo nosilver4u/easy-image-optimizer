@@ -120,6 +120,13 @@ final class Plugin extends Base {
 			}
 		}
 
+		if ( \method_exists( '\HMWP_Classes_Tools', 'getOption' ) ) {
+			if ( $this->get_option( 'easyio_exactdn' ) && \HMWP_Classes_Tools::getOption( 'hmwp_hide_version' ) && ! \HMWP_Classes_Tools::getOption( 'hmwp_hide_version_random' ) ) {
+				$this->debug_message( 'detected HMWP Hide Version' );
+				\add_action( 'admin_notices', array( $this, 'notice_hmwp_hide_version' ) );
+			}
+		}
+
 		if ( ! \defined( '\WP_CLI' ) || ! WP_CLI ) {
 			\easyio_privacy_policy_content();
 		}
@@ -233,5 +240,19 @@ final class Plugin extends Base {
 		\add_site_option( 'easyio_ll_autoscale', true );
 		\add_site_option( 'exactdn_sub_folder', false );
 		\add_site_option( 'exactdn_prevent_db_queries', true );
+	}
+
+	/**
+	 * Tell the user to disable Hide my WP function that removes query strings.
+	 */
+	public function notice_hmwp_hide_version() {
+		?>
+		<div id='easy-image-optimizer-warning-hmwp-hide-version' class='notice notice-warning'>
+			<p>
+				<?php \esc_html_e( 'Please enable the Random Static Number option in Hide My WP to ensure compatibility with Easy IO or disable the Hide Version option for best performance.', 'ewww-image-optimizer' ); ?>
+				<?php \easyio_help_link( 'https://docs.ewww.io/article/50-exactdn-and-query-strings', '5a3d278a2c7d3a1943677b52' ); ?>
+			</p>
+		</div>
+		<?php
 	}
 }
