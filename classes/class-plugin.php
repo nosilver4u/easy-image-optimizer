@@ -68,7 +68,7 @@ final class Plugin extends Base {
 	 */
 	public function __clone() {
 		// Cloning instances of the class is forbidden.
-		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot clone core object.', 'ewww-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
+		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot clone core object.', 'easy-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
 	}
 
 	/**
@@ -76,7 +76,7 @@ final class Plugin extends Base {
 	 */
 	public function __wakeup() {
 		// Unserializing instances of the class is forbidden.
-		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot unserialize (wakeup) the core object.', 'ewww-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
+		\_doing_it_wrong( __METHOD__, \esc_html__( 'Cannot unserialize (wakeup) the core object.', 'easy-image-optimizer' ), \esc_html( EWWW_IMAGE_OPTIMIZER_VERSION ) );
 	}
 
 	/**
@@ -249,7 +249,7 @@ final class Plugin extends Base {
 		?>
 		<div id='easy-image-optimizer-warning-hmwp-hide-version' class='notice notice-warning'>
 			<p>
-				<?php \esc_html_e( 'Please enable the Random Static Number option in Hide My WP to ensure compatibility with Easy IO or disable the Hide Version option for best performance.', 'ewww-image-optimizer' ); ?>
+				<?php \esc_html_e( 'Please enable the Random Static Number option in Hide My WP to ensure compatibility with Easy IO or disable the Hide Version option for best performance.', 'easy-image-optimizer' ); ?>
 				<?php \easyio_help_link( 'https://docs.ewww.io/article/50-exactdn-and-query-strings', '5a3d278a2c7d3a1943677b52' ); ?>
 			</p>
 		</div>
