@@ -1,3 +1,10 @@
+= 3.9.1 =
+*Release Date - May 29, 2024*
+
+* added: warning when hiding query strings with Hide My WP
+* changed: much better resizing for PNG8 and other paletted PNG images
+* changed: apply async loading to lazyload JS using WP core functionality
+
 = 3.9.0 =
 *Release Date - April 23, 2024*
 

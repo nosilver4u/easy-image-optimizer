@@ -4,7 +4,7 @@ Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
 Requires at least: 6.3
 Tested up to: 6.5
 Requires PHP: 8.0
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -58,9 +58,11 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
 = 3.9.1 =
-*Release Date - TBD*
+*Release Date - May 29, 2024*
 
 * added: warning when hiding query strings with Hide My WP
+* changed: much better resizing for PNG8 and other paletted PNG images
+* changed: apply async loading to lazyload JS using WP core functionality
 
 = 3.9.0 =
 *Release Date - April 23, 2024*
@@ -85,69 +87,6 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 * added: Lazy Load automatically excludes preloaded images
 * fixed: Easy IO skipping Slider Revolution 6 URLs
 * fixed: Lazy Load incorrectly auto-scales fixed group background images
-
-= 3.6.0 =
-*Release Date - February 14, 2024*
-
-* added: Lazy Load for CSS background images in external CSS files or internal CSS sections
-* fixed: Easy IO applying resize parameters to existing (re)sizes
-* security: improve authentication for some plugin actions
-
-= 3.5.5 =
-*Release Date - January 4, 2024*
-
-* fixed: Easy IO incorrectly modifies JS/CSS URLs when using S3 on multisite
-
-= 3.5.4 =
-*Release Date - November 28, 2023*
-
-* fixed: Easy IO strips extra sub-folders in non-image URLs
-* fixed: PHP notice from VC fix
-
-= 3.5.3 =
-*Release Date - November 2, 2023*
-
-* fixed: too much scaling for Visual Composer background images with zoom effect
-
-= 3.5.2 =
-*Release Date - September 21, 2023*
-
-* fixed: Lazy Load compatibility with X/Pro themes and Cornerstone builder
-* security: sanitize and escape a few remaining strings
-
-= 3.5.1 =
-*Release Date - September 5, 2023*
-
-* changed: use updated coding standards
-* changed: sanitize/escape remaining strings on settings page
-* security: randomize filename of debug log
-
-= 3.5.0 =
-*Release Date - July 19, 2023*
-
-* added: Easy IO rewrites poster/thumbnail image URLs for video elements
-* changed: Easy IO + Auto Scale checks images on load and resize events to reduce browser upscaling
-* changed: prevent Easy IO font substitution when OMGF is active
-* fixed: Auto Scale downscales too much for landscape images displayed in portrait containers
-* fixed: Easy IO compatibility with Brizy thumbnail generation endpoint
-
-= 3.4.0 =
-*Release Date - June 28, 2023*
-
-* added: deliver Google Fonts via Easy IO or Bunny Fonts for improved user privacy
-* fixed: incorrect syntax for constants in namespaced code
-
-= 3.3.0 =
-*Release Date - May 9, 2023*
-
-* breaking: namespaced and reorganized several classes, third party integrations should check for compatibility
-* added: Easy IO support for BuddyBoss images, video, and documents
-* added: improved support for Hide My WP Ghost in Lazy Load 
-* changed: improved Auto Scaling when using full-width layout in Elementor
-* changed: style tag search/regex cleaned up to prevent excess markup
-* fixed: content dir functions don't resolve symlinks
-* fixed: Easy IO image URLs leaking into image gallery block via post editor
-* fixed: clearing debug log does not redirect back to settings page in rare cases
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
