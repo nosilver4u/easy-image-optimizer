@@ -812,7 +812,13 @@ function easyio_options( $network = 'singlesite' ) {
 								<span style="font-weight:normal;"><?php echo esc_html( $exactdn_percent . '% (' . easyio_size_format( $exactdn_savings['savings'], 1 ) . ')' ); ?></span>
 							<?php endif; ?>
 						<?php else : ?>
-							<?php easyio_debug_message( 'could not verify: ' . $exactdn->get_exactdn_domain() ); ?>
+							<?php
+							easyio_debug_message( 'could not verify: ' . $exactdn->get_exactdn_domain() );
+							if ( $exactdn->get_exactdn_domain() ) {
+								update_option( 'easyio_exactdn', false );
+								delete_option( 'easyio_exactdn_domain' );
+							}
+							?>
 							<span style="color: red; font-weight: bolder"><a href="https://ewww.io/manage-sites/" target="_blank"><?php esc_html_e( 'Not Verified', 'easy-image-optimizer' ); ?></a></span>
 						<?php endif; ?>
 						<?php if ( function_exists( 'remove_query_strings_link' ) || function_exists( 'rmqrst_loader_src' ) || function_exists( 'qsr_remove_query_strings_1' ) ) : ?>

@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
-Tags: optimize, image, resize, webp, lazy load, convert, compress, scale
-Requires at least: 6.3
-Tested up to: 6.5
-Requires PHP: 8.0
-Stable tag: 3.9.1
+Tags: image, resize, webp, lazy load, compress
+Requires at least: 6.4
+Tested up to: 6.6
+Requires PHP: 8.1
+Stable tag: 3.9.2
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +56,15 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 3.9.2 =
+*Release Date - July 25, 2024*
+
+* changed: skip lazy load for LCP images based on fetchpriority when auto-scaling is disabled
+* changed: improve performance of ewwwio_is_file(), props @rmpel
+* changed: require PHP 8.1 or higher
+* fixed: Lazy Load and Easy IO fail to decode URLs with HTML-encoded characters, which causes esc_url to break the URL
+* fixed: Easy IO fails to update CDN domain if site is re-registered while still active
 
 = 3.9.1 =
 *Release Date - May 29, 2024*
