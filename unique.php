@@ -295,7 +295,7 @@ function easyio_privacy_policy_content() {
 	}
 	$content  = '<p class="privacy-policy-tutorial">';
 	$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'easy-image-optimizer' ) ) . '</p>';
-	$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).' ) ) . '</p>';
+	$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).', 'easy-image-optimizer' ) ) . '</p>';
 	wp_add_privacy_policy_content( 'Easy Image Optimizer', $content );
 }
 

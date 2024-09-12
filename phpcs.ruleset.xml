@@ -27,6 +27,14 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="easy-image-optimizer"/>
+			</property>
+		</properties>
+	</rule>
+
 	<config name="testVersion">8.1-</config>
 	<rule ref="PHPCompatibilityWP">
 		<severity>10</severity>

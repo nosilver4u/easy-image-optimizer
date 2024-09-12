@@ -1,3 +1,9 @@
+= 3.9.3 =
+*Release Date - September 12, 2024*
+* fixed: HTML syntax for noscript fall-back when lazy loading picture elements
+* fixed: is_file wrapper method triggers PHP warning 
+* fixed: some strings not properly i18n 
+
 = 3.9.2 =
 *Release Date - July 25, 2024*
 
