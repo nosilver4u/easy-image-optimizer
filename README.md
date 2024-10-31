@@ -1,6 +1,6 @@
 # Easy Image Optimizer
-**Minimum WordPress:** 6.1
-**Minimum PHP:** 7.4
+**Minimum WordPress:** 6.4
+**Minimum PHP:** 8.1
 
 [![Build Status](https://travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://travis-ci.com/nosilver4u/easy-image-optimizer)
 [![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)

@@ -1,3 +1,9 @@
+= 3.9.4 =
+*Release Date - October 31, 2024*
+
+* fixed: Lazy Load for iframes results in empty src attribute
+* fixed: Lazy Load breaks --background CSS variable
+
 = 3.9.3 =
 *Release Date - September 12, 2024*
 * fixed: HTML syntax for noscript fall-back when lazy loading picture elements
