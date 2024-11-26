@@ -210,6 +210,7 @@ final class Plugin extends Base {
 		\register_setting( 'easyio_options', 'exactdn_exclude', array( $this, 'exclude_paths_sanitize' ) );
 		\register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
+		\register_setting( 'easyio_options', 'easyio_ll_abovethefold', 'intval' );
 		\register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_use_dcip', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
