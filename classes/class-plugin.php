@@ -163,12 +163,18 @@ final class Plugin extends Base {
 			\update_site_option( 'exactdn_all_the_things', $exactdn_all_the_things );
 			$exactdn_lossy = ( empty( $_POST['exactdn_lossy'] ) ? false : true );
 			\update_site_option( 'exactdn_lossy', $exactdn_lossy );
+			$exactdn_hidpi = ( empty( $_POST['exactdn_hidpi'] ) ? false : true );
+			\update_site_option( 'exactdn_hidpi', $exactdn_hidpi );
 			$exactdn_exclude = empty( $_POST['exactdn_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['exactdn_exclude'] ) );
 			\update_site_option( 'exactdn_exclude', $this->exclude_paths_sanitize( $exactdn_exclude ) );
 			$easyio_add_missing_dims = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
 			\update_site_option( 'easyio_add_missing_dims', $easyio_add_missing_dims );
 			$easyio_lazy_load = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
 			\update_site_option( 'easyio_lazy_load', $easyio_lazy_load );
+			$easyio_ll_autoscale = ( empty( $_POST['easyio_ll_autoscale'] ) ? false : true );
+			\update_site_option( 'easyio_ll_autoscale', $easyio_ll_autoscale );
+			$easyio_ll_abovethefold = ! empty( $_POST['easyio_ll_abovethefold'] ) ? (int) $_POST['easyio_ll_abovethefold'] : 0;
+			\update_site_option( 'easyio_ll_abovethefold', $easyio_ll_abovethefold );
 			$easyio_use_lqip = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
 			\update_site_option( 'easyio_use_lqip', $easyio_use_lqip );
 			$easyio_use_dcip = ( empty( $_POST['easyio_use_dcip'] ) ? false : true );
@@ -200,6 +206,7 @@ final class Plugin extends Base {
 		\register_setting( 'easyio_options', 'easyio_enable_help', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
+		\register_setting( 'easyio_options', 'exactdn_hidpi', 'boolval' );
 		\register_setting( 'easyio_options', 'exactdn_exclude', array( $this, 'exclude_paths_sanitize' ) );
 		\register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
@@ -221,6 +228,7 @@ final class Plugin extends Base {
 		\add_option( 'easyio_plan_id', 0 );
 		\add_option( 'exactdn_all_the_things', false );
 		\add_option( 'exactdn_lossy', false );
+		\add_option( 'exactdn_hidpi', false );
 		\add_option( 'exactdn_exclude', '' );
 		\add_option( 'exactdn_sub_folder', false );
 		\add_option( 'exactdn_prevent_db_queries', true );
@@ -231,6 +239,7 @@ final class Plugin extends Base {
 		\add_option( 'easyio_use_dcip', false );
 		\add_option( 'easyio_use_siip', false );
 		\add_option( 'easyio_ll_autoscale', true );
+		\add_option( 'easyio_ll_abovethefold', 0 );
 		\add_option( 'easyio_ll_exclude', '' );
 		\add_option( 'easyio_ll_all_things', '' );
 

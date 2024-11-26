@@ -24,4 +24,5 @@ delete_option( 'easyio_enable_help_notice' );
 if ( ! get_option( 'ewww_image_optimizer_exactdn' ) ) {
 	delete_option( 'exactdn_all_the_things' );
 	delete_option( 'exactdn_lossy' );
+	delete_option( 'exactdn_hidpi' );
 }

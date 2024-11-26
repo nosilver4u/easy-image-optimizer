@@ -963,6 +963,19 @@ function easyio_options( $network = 'singlesite' ) {
 				<tr>
 					<td>&nbsp;</td>
 					<td>
+						<label for='easyio_ll_abovethefold'><strong><?php esc_html_e( 'Above the Fold', 'easy-image-optimizer' ); ?></strong></label>
+						<?php easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ); ?>
+						<input type='number' step='1' min='0' class='small-text' id='easyio_ll_abovethefold' name='easyio_ll_abovethefold' value='<?php	echo defined( 'EIO_LAZY_FOLD' ) ? (int) constant( 'EIO_LAZY_FOLD' ) : (int) easyio_get_option( 'easyio_ll_abovethefold' ); ?>' <?php disabled( defined( 'EIO_LAZY_FOLD' ) ); ?> />
+						<?php esc_html_e( 'Skip this many images from lazy loading so that above the fold images load more quickly.', 'easy-image-optimizer' ); ?>
+						<p class='description'>
+							<?php esc_html_e( 'This will exclude images from auto-scaling, which may decrease performance if those images are not properly sized.', 'easy-image-optimizer' ); ?>
+						</p>
+					</td>
+				</tr>
+				<?php easyio_debug_message( 'LL above the fold: ' . easyio_get_option( 'easyio_ll_abovethefold' ) ); ?>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
 						<input type='checkbox' name='easyio_use_lqip' value='true' id='easyio_use_lqip' <?php checked( easyio_get_option( 'easyio_use_lqip' ) ); ?> />
 						<label for='easyio_use_lqip'><strong>LQIP</strong></label>
 						<?php easyio_help_link( 'https://docs.ewww.io/article/75-lazy-load-placeholders', '5c9a7a302c7d3a1544615e47' ); ?>
