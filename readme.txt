@@ -1,10 +1,10 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: image, resize, webp, lazy load, compress
-Requires at least: 6.4
+Requires at least: 6.5
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 3.9.4
+Stable tag: 4.0.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +56,14 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 4.0.0 =
+*Release Date - November 26, 2024*
+
+* added: Above the Fold setting for Lazy Load (previously EIO_LAZY_FOLD override)
+* changed: gravatar images excluded from Above the Fold/EIO_LAZY_FOLD counts
+* fixed: Easy IO adding images to srcset combined with broken WooCommerce gallery thumbnails causes oversized image sizes to be loaded
+* fixed: Easy IO srcset filler using incorrect width for calculations
 
 = 3.9.4 =
 *Release Date - October 31, 2024*

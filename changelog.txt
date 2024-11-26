@@ -1,3 +1,11 @@
+= 4.0.0 =
+*Release Date - November 26, 2024*
+
+* added: Above the Fold setting for Lazy Load (previously EIO_LAZY_FOLD override)
+* changed: gravatar images excluded from Above the Fold/EIO_LAZY_FOLD counts
+* fixed: Easy IO adding images to srcset combined with broken WooCommerce gallery thumbnails causes oversized image sizes to be loaded
+* fixed: Easy IO srcset filler using incorrect width for calculations
+
 = 3.9.4 =
 *Release Date - October 31, 2024*
 
