@@ -1,3 +1,11 @@
+= 4.1.0 =
+*Release Date - March 26, 2025*
+
+* added: exclude private BuddyBoss media from Easy IO with page:buddyboss exclusion
+* added: ability for 3rd party plugins to hook into Lazy Load HTML parser
+* changed: improved performance of custom *_option functions on multisite
+* fixed: Easy IO rewriting some URLs when full page exclusions are used
+
 = 4.0.0 =
 *Release Date - November 26, 2024*
 

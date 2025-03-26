@@ -4,7 +4,7 @@ Tags: image, resize, webp, lazy load, compress
 Requires at least: 6.5
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 4.0.0
+Stable tag: 4.1.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +56,14 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 4.1.0 =
+*Release Date - March 26, 2025*
+
+* added: exclude private BuddyBoss media from Easy IO with page:buddyboss exclusion
+* added: ability for 3rd party plugins to hook into Lazy Load HTML parser
+* changed: improved performance of custom *_option functions on multisite
+* fixed: Easy IO rewriting some URLs when full page exclusions are used
 
 = 4.0.0 =
 *Release Date - November 26, 2024*
