@@ -1,3 +1,10 @@
+= 4.2.0 =
+*Release Date - July 15, 2025*
+
+* added: Easy IO support for dynamic cropping (crop=1) on WordPress.com sites
+* fixed: PHP warnings related to HTML parsing
+* fixed: PHP warnings when link URLs contain special regex characters
+
 = 4.1.0 =
 *Release Date - March 26, 2025*
 

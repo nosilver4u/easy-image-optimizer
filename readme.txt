@@ -1,10 +1,8 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: image, resize, webp, lazy load, compress
-Requires at least: 6.5
-Tested up to: 6.7
-Requires PHP: 8.1
-Stable tag: 4.1.0
+Tested up to: 6.8
+Stable tag: 4.2.0
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -56,6 +54,13 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 4.2.0 =
+*Release Date - July 15, 2025*
+
+* added: Easy IO support for dynamic cropping (crop=1) on WordPress.com sites
+* fixed: PHP warnings related to HTML parsing
+* fixed: PHP warnings when link URLs contain special regex characters
 
 = 4.1.0 =
 *Release Date - March 26, 2025*
