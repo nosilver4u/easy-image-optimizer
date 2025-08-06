@@ -2,10 +2,12 @@
 **Minimum WordPress:** 6.4
 **Minimum PHP:** 8.1
 
-[![Build Status](https://travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://travis-ci.com/nosilver4u/easy-image-optimizer)
+[![Build Status](https://app.travis-ci.com/nosilver4u/easy-image-optimizer.svg?branch=master)](https://app.travis-ci.com/github/nosilver4u/easy-image-optimizer)
 [![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![WordPress Tested Up To](https://img.shields.io/wordpress/v/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
+[![Required WP Version](https://img.shields.io/wordpress/plugin/wp-version/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
+[![Required PHP Version](https://img.shields.io/wordpress/plugin/required-php/easy-image-optimizer.svg)](https://wordpress.org/plugins/easy-image-optimizer/)
 [![GNU General Public License 3.0](https://img.shields.io/github/license/nosilver4u/easy-image-optimizer.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
