@@ -1,3 +1,8 @@
+= 4.2.1 =
+*Release Date - August 26, 2025*
+
+* fixed: Some preload URLs not updated
+
 = 4.2.0 =
 *Release Date - July 15, 2025*
 

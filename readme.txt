@@ -2,7 +2,7 @@
 Contributors: nosilver4u
 Tags: image, resize, webp, lazy load, compress
 Tested up to: 6.8
-Stable tag: 4.2.0
+Stable tag: 4.2.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 4.2.1 =
+*Release Date - August 26, 2025*
+
+* fixed: Some preload URLs not updated
+
 = 4.2.0 =
 *Release Date - July 15, 2025*
 
@@ -77,58 +82,6 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 * changed: gravatar images excluded from Above the Fold/EIO_LAZY_FOLD counts
 * fixed: Easy IO adding images to srcset combined with broken WooCommerce gallery thumbnails causes oversized image sizes to be loaded
 * fixed: Easy IO srcset filler using incorrect width for calculations
-
-= 3.9.4 =
-*Release Date - October 31, 2024*
-
-* fixed: Lazy Load for iframes results in empty src attribute
-* fixed: Lazy Load breaks --background CSS variable
-
-= 3.9.3 =
-*Release Date - September 12, 2024*
-* fixed: HTML syntax for noscript fall-back when lazy loading picture elements
-* fixed: is_file wrapper method triggers PHP warning
-* fixed: some strings not properly i18n 
-
-= 3.9.2 =
-*Release Date - July 25, 2024*
-
-* changed: skip lazy load for LCP images based on fetchpriority when auto-scaling is disabled
-* changed: improve performance of ewwwio_is_file(), props @rmpel
-* changed: require PHP 8.1 or higher
-* fixed: Lazy Load and Easy IO fail to decode URLs with HTML-encoded characters, which causes esc_url to break the URL
-* fixed: Easy IO fails to update CDN domain if site is re-registered while still active
-
-= 3.9.1 =
-*Release Date - May 29, 2024*
-
-* added: warning when hiding query strings with Hide My WP
-* changed: much better resizing for PNG8 and other paletted PNG images
-* changed: apply async loading to lazyload JS using WP core functionality
-
-= 3.9.0 =
-*Release Date - April 23, 2024*
-
-* added: Easy IO delivery for JS/CSS assets from additional domains
-* added: Easy IO support for Divi Pixel image masks
-* changed: Lazy Load checks for auto-scale exclusions on ancestors of lazyloaded element
-* fixed: Help links broken in Firefox's Strict mode
-
-= 3.8.0 =
-*Release Date - April 11, 2024*
-
-* added: Lazy Load can use dominant color placeholders via Easy IO
-* added: ability to filter/parse admin-ajax.php requests via eio_filter_admin_ajax_response filter
-* changed: improved smoothing of LQIP for Lazy Load when using Easy IO
-
-= 3.7.0 =
-*Release Date - March 20, 2024*
-
-* added: support for upcoming Slider Revolution 7 rendering engine
-* added: update existing image preload URLs
-* added: Lazy Load automatically excludes preloaded images
-* fixed: Easy IO skipping Slider Revolution 6 URLs
-* fixed: Lazy Load incorrectly auto-scales fixed group background images
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
