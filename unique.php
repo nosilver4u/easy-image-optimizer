@@ -154,50 +154,6 @@ function easyio_filter_page_output( $buffer ) {
 }
 
 /**
- * Checks to see if the WebP option from the Cache Enabler plugin is enabled.
- *
- * @return bool True if the WebP option for CE is enabled.
- */
-function easyio_ce_webp_enabled() {
-	if ( class_exists( 'Cache_Enabler' ) ) {
-		$ce_options = Cache_Enabler::$options;
-		if ( $ce_options['webp'] ) {
-			easyio_debug_message( 'Cache Enabler webp option enabled' );
-			return true;
-		}
-	}
-	return false;
-}
-
-/**
- * Checks to see if the WebP rules from WPFC are enabled.
- *
- * @return bool True if the WebP rules from WPFC are found.
- */
-function easyio_wpfc_webp_enabled() {
-	if ( class_exists( 'WpFastestCache' ) ) {
-		$wpfc_abspath = get_home_path() . '.htaccess';
-		easyio_debug_message( "looking for WPFC rules in $wpfc_abspath" );
-		$wpfc_rules = easyio_extract_from_markers( $wpfc_abspath, 'WEBPWpFastestCache' );
-		if ( empty( $wpfc_rules ) ) {
-			$wpfc_abspath = ABSPATH . '.htaccess';
-			easyio_debug_message( "looking for WPFC rules in $wpfc_abspath" );
-			$wpfc_rules = easyio_extract_from_markers( $wpfc_abspath, 'WEBPWpFastestCache' );
-		}
-		if ( ! empty( $wpfc_rules ) ) {
-			easyio_debug_message( 'WPFC webp rules enabled' );
-			if ( easyio_get_option( 'easyio_exactdn' ) ) {
-				easyio_debug_message( 'removing htaccess webp to prevent ExactDN problems' );
-				insert_with_markers( $wpfc_abspath, 'WEBPWpFastestCache', '' );
-				return false;
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
-/**
  * Set default permissions for admin (configuration) and bulk operations.
  *
  * @param string $permissions A valid WP capability level.
@@ -272,6 +228,10 @@ function easyio_upgrade() {
 		if ( easyio_get_option( 'easyio_exactdn_verify_method' ) > 0 ) {
 			delete_option( 'easyio_exactdn_verify_method' );
 			delete_site_option( 'easyio_exactdn_verify_method' );
+		}
+		if ( function_exists( 'swis' ) && easyio_get_option( 'easyio_ll_all_things' ) ) {
+			update_option( 'easyio_ll_external_bg', true );
+			update_option( 'easyio_ll_all_things', '' );
 		}
 		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
 			add_option( 'exactdn_never_been_active', true, '', false );
@@ -725,10 +685,8 @@ function easyio_network_options() {
 
 /**
  * Displays the Easy IO options along with status information, and debugging information.
- *
- * @param string $network Indicates which options should be shown in multisite installations.
  */
-function easyio_options( $network = 'singlesite' ) {
+function easyio_options() {
 	global $content_width;
 	global $exactdn;
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
@@ -744,8 +702,6 @@ function easyio_options( $network = 'singlesite' ) {
 
 	easyio()->hs_beacon->admin_notice( 'singlesite' );
 
-	$output = array();
-
 	$icon_link = plugins_url( '/images/easyio-toon-car.png', __FILE__ );
 	$eio_base  = new EasyIO\Base();
 	$site_url  = $eio_base->content_url();
@@ -755,10 +711,7 @@ function easyio_options( $network = 'singlesite' ) {
 	if ( class_exists( '\Automattic\Jetpack_Boost\Jetpack_Boost' ) ) {
 		if ( get_option( 'jetpack_boost_status_image-cdn' ) ) {
 			easyio_debug_message( 'Jetpack Boost CDN active' );
-			$jetpack_cdn_active = true;
 		}
-	} elseif ( class_exists( 'Jetpack' ) && method_exists( 'Jetpack', 'is_module_active' ) && Jetpack::is_module_active( 'photon' ) ) {
-		$jetpack_cdn_active = true;
 	}
 	?>
 <style>
@@ -1010,9 +963,21 @@ function easyio_options( $network = 'singlesite' ) {
 					</td>
 				</tr>
 				<?php
+				easyio_debug_message( 'external CSS background (automatic): ' . ( easyio_get_option( 'easyio_ll_external_bg' ) ? 'on' : 'off' ) );
+				easyio_debug_message( 'External CSS Background (all things): ' . easyio_get_option( 'easyio_ll_all_things' ) );
 				easyio_debug_message( 'LL exclusions:' );
 				easyio_debug_message( $ll_exclude_paths );
 				?>
+				<?php if ( function_exists( 'swis' ) ) : ?>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<input type='checkbox' name='easyio_ll_external_bg' value='true' id='easyio_ll_external_bg' <?php checked( easyio_get_option( 'easyio_ll_external_bg' ) && function_exists( 'swis' ) ); ?> />
+						<label for='easyio_ll_external_bg'><strong><?php esc_html_e( 'External Background Images', 'easy-image-optimizer' ); ?></strong></label>
+						<?php easyio_help_link( 'https://docs.ewww.io/article/74-lazy-load', '5c6c36ed042863543ccd2d9b' ); ?><br>
+					</td>
+				</tr>
+				<?php else : ?>
 				<tr>
 					<td>&nbsp;</td>
 					<td>
@@ -1023,10 +988,11 @@ function easyio_options( $network = 'singlesite' ) {
 							<?php esc_html_e( 'Specify class/id values of elements with CSS background images (comma-separated).', 'easy-image-optimizer' ); ?>
 							<?php esc_html_e( 'Can match any text within the target element, like elementor-widget-container or et_pb_column.', 'easy-image-optimizer' ); ?>
 							<br>*<?php esc_html_e( 'Background images directly attached via inline style attributes will be lazy loaded by default.', 'easy-image-optimizer' ); ?>
+							<br><a href='https://ewww.io/swis/'><?php esc_html_e( 'Install SWIS Performance for automatic detection of all background images.', 'easy-image-optimizer' ); ?></a>
 						</p>
 					</td>
 				</tr>
-				<?php easyio_debug_message( 'External CSS Background (all things): ' . easyio_get_option( 'easyio_ll_all_things' ) ); ?>
+				<?php endif; ?>
 			<?php endif; ?>
 			<?php easyio_debug_message( 'remove metadata: ' . ( easyio_get_option( 'easyio_metadata_remove' ) ? 'on' : 'off' ) ); ?>
 			</table>

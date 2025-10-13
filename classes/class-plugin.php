@@ -49,6 +49,9 @@ final class Plugin extends Base {
 			// For classes we need everywhere, front-end and back-end. Others are only included on admin_init (below).
 			self::$instance->requires();
 			self::$instance->load_children();
+
+			// Load plugin components that need to be available early.
+			\add_action( 'plugins_loaded', array( self::$instance, 'plugins_loaded' ) );
 			// Initializes the plugin for admin interactions, like saving network settings and scheduling cron jobs.
 			\add_action( 'admin_init', array( self::$instance, 'admin_init' ) );
 
@@ -94,6 +97,18 @@ final class Plugin extends Base {
 	 */
 	public function load_children() {
 		/* self::$instance->class = new Class(); */
+	}
+
+	/**
+	 * Run things that need to go early, on plugins_loaded.
+	 */
+	public function plugins_loaded() {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+
+		if ( $this->get_option( 'easyio_lazy_load' ) && $this->get_option( 'easyio_ll_external_bg' ) ) {
+			$this->debug_message( 'requesting external parsing of CSS for background images via SWIS' );
+			add_filter( 'eio_lazify_external_css', '__return_true' );
+		}
 	}
 
 	/**
@@ -181,6 +196,8 @@ final class Plugin extends Base {
 			\update_site_option( 'easyio_use_dcip', $easyio_use_dcip );
 			$easyio_ll_exclude = empty( $_POST['easyio_ll_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_exclude'] ) );
 			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $easyio_ll_exclude ) );
+			$easyio_ll_external_bg = empty( $_POST['easyio_ll_external_bg'] ) ? false : true;
+			\update_site_option( 'easyio_ll_external_bg', $easyio_ll_external_bg );
 			$easyio_ll_all_things = empty( $_POST['easyio_ll_all_things'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_all_things'] ) );
 			\update_site_option( 'easyio_ll_all_things', $easyio_ll_all_things );
 			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
@@ -213,8 +230,9 @@ final class Plugin extends Base {
 		\register_setting( 'easyio_options', 'easyio_ll_abovethefold', 'intval' );
 		\register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_use_dcip', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
+		\register_setting( 'easyio_options', 'easyio_ll_external_bg', 'boolval' );
 		\register_setting( 'easyio_options', 'easyio_ll_all_things', 'sanitize_textarea_field' );
+		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
 	}
 
 	/**
@@ -241,8 +259,9 @@ final class Plugin extends Base {
 		\add_option( 'easyio_use_siip', false );
 		\add_option( 'easyio_ll_autoscale', true );
 		\add_option( 'easyio_ll_abovethefold', 0 );
-		\add_option( 'easyio_ll_exclude', '' );
+		\add_option( 'easyio_ll_external_bg', false );
 		\add_option( 'easyio_ll_all_things', '' );
+		\add_option( 'easyio_ll_exclude', '' );
 
 		// Set network defaults.
 		\add_site_option( 'easyio_metadata_remove', true );

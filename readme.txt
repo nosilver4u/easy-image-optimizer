@@ -55,6 +55,14 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 4.3.0 =
+*Release Date - TBD*
+
+* added: Lazy Load support for background images in external CSS files
+* changed: Lazy Load checks parent element for skip-lazy class
+* changed: Lazy Load auto-sizing honors High DPI setting
+* fixed: Lazy Load for iframes breaks WP Remote Users Sync plugin
+
 = 4.2.1 =
 *Release Date - August 26, 2025*
 

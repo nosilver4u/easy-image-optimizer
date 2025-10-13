@@ -102,6 +102,20 @@ class Lazy_Load extends Page_Parser {
 	public $request_uri = '';
 
 	/**
+	 * DOM Document for parsing HTML.
+	 *
+	 * @var \DOMDocument $doc
+	 */
+	private $doc;
+
+	/**
+	 * List of img nodes from the DOMDocument.
+	 *
+	 * @var \DOMNodeList $img_nodes
+	 */
+	private $img_nodes;
+
+	/**
 	 * Register (once) actions and filters for Lazy Load.
 	 */
 	public function __construct() {
@@ -197,6 +211,10 @@ class Lazy_Load extends Page_Parser {
 			// Load the minified, combined version of the lazy load script.
 			\add_action( 'wp_enqueue_scripts', array( $this, 'min_script' ), 1 );
 		}
+
+		// Allow other plugins to get the background image exclusions via filter.
+		\add_filter( 'eio_get_lazy_bg_image_exclusions', array( $this, 'get_bgimage_exclusions' ), 10 );
+
 		$this->inline_script_attrs = (array) \apply_filters( 'ewwwio_inline_script_attrs', $this->inline_script_attrs );
 		$this->validate_user_exclusions();
 		$this->validate_css_element_inclusions();
@@ -397,6 +415,12 @@ class Lazy_Load extends Page_Parser {
 		// Clean the buffer of incompatible sections.
 		$search_buffer = \preg_replace( '/<div id="footer_photostream".*?\/div>/s', '', $buffer );
 		$search_buffer = \preg_replace( '/<(picture|noscript|script).*?\/\1>/s', '', $search_buffer );
+
+		$this->doc = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$this->doc->loadHTML( $buffer );
+		libxml_clear_errors();
+		$this->img_nodes = $this->doc->getElementsByTagName( 'img' );
 
 		$images = $this->get_images_from_html( $search_buffer, false );
 		if ( ! empty( $images[0] ) && $this->is_iterable( $images[0] ) ) {
@@ -1017,6 +1041,23 @@ class Lazy_Load extends Page_Parser {
 	}
 
 	/**
+	 * Normalize HTML for comparison.
+	 *
+	 * @param string $html The HTML to normalize.
+	 * @return string The normalized HTML.
+	 */
+	public function normalize_html( $html ) {
+		$html = str_replace( '&amp;', '&', $html );
+		$html = str_replace( '&#038;', '&', $html );
+		$html = str_replace( '%2C', ',', $html );
+		$html = str_replace( ' />', '>', $html );
+		$html = str_replace( "'", '"', $html );
+		$html = preg_replace( '/\s\s+/', ' ', $html );
+		$html = preg_replace( '/\s*=\s*/', '=', $html );
+		return $html;
+	}
+
+	/**
 	 * Checks if the tag is allowed to be lazy loaded.
 	 *
 	 * @param string $image The image (img) tag.
@@ -1055,7 +1096,7 @@ class Lazy_Load extends Page_Parser {
 				return false;
 			}
 		}
-
+		// Check for exclusions.
 		$exclusions = \apply_filters(
 			'eio_lazy_exclusions',
 			\array_merge(
@@ -1088,8 +1129,7 @@ class Lazy_Load extends Page_Parser {
 					'wpcf7_captcha/',
 				),
 				$this->user_exclusions
-			),
-			$image
+			)
 		);
 		foreach ( $exclusions as $exclusion ) {
 			if ( false !== \strpos( $image, $exclusion ) ) {
@@ -1105,17 +1145,43 @@ class Lazy_Load extends Page_Parser {
 				return false;
 			}
 		}
+
+		foreach ( $this->img_nodes as $img_node ) {
+			$img_html = $this->doc->saveHTML( $img_node );
+			if ( defined( 'EIO_IMGNODE_DEBUG' ) && EIO_IMGNODE_DEBUG ) {
+				$this->debug_message( 'comparing to node value: ' . $this->normalize_html( $img_html ) . ' to ' . $this->normalize_html( $image ) );
+			}
+			// Normalize the HTML before comparing to avoid issues with different quote styles or spacing.
+			if ( $this->normalize_html( $img_html ) === $this->normalize_html( $image ) ) {
+				$parent = $img_node->parentNode;
+				if ( $parent && 'body' !== $parent->nodeName && $parent->hasAttributes() ) {
+					$class = trim( $parent->getAttribute( 'class' ) );
+					$this->debug_message( "Parent class: $class" );
+					if ( str_contains( $class, 'skip-lazy' ) ) {
+						$this->debug_message( "Skipping lazy load due to 'skip-lazy' class on parent" );
+						return false;
+					}
+					if ( $parent->hasAttribute( 'data-skip-lazy' ) ) {
+						$this->debug_message( "Skipping lazy load due to 'data-skip-lazy' attribute on parent" );
+						return false;
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 
 	/**
-	 * Checks if a tag with a background image is allowed to be lazy loaded.
+	 * Gets the exclusion list for lazy loading background images.
 	 *
-	 * @param string $tag The tag.
-	 * @return bool True if the tag is allowed, false otherwise.
+	 * @param array $exclusions The current list of exclusions. Optional.
+	 * @return array The modified list of exclusions.
 	 */
-	public function validate_bgimage_tag( $tag ) {
-		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+	public function get_bgimage_exclusions( $exclusions = array() ) {
+		if ( ! \is_array( $exclusions ) ) {
+			$exclusions = array();
+		}
 		$exclusions = \apply_filters(
 			'eio_lazy_bg_image_exclusions',
 			\array_merge(
@@ -1126,11 +1192,24 @@ class Lazy_Load extends Page_Parser {
 					'lazyload',
 					'skip-lazy',
 					'avia-bg-style-fixed',
+					'trustindex',
 				),
-				$this->user_exclusions
-			),
-			$tag
+				$this->user_exclusions,
+				$exclusions
+			)
 		);
+		return $exclusions;
+	}
+
+	/**
+	 * Checks if a tag with a background image is allowed to be lazy loaded.
+	 *
+	 * @param string $tag The tag.
+	 * @return bool True if the tag is allowed, false otherwise.
+	 */
+	public function validate_bgimage_tag( $tag ) {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		$exclusions = $this->get_bgimage_exclusions( array() );
 		foreach ( $exclusions as $exclusion ) {
 			if ( false !== \strpos( $tag, $exclusion ) ) {
 				return false;
@@ -1151,12 +1230,15 @@ class Lazy_Load extends Page_Parser {
 			'eio_lazy_iframe_exclusions',
 			\array_merge(
 				array(
+					'about:blank',
 					'data-no-lazy=',
+					'display:none',
+					'display: none',
+					'googletagmanager',
 					'lazyload',
 					'skip-lazy',
+					'wprus/',
 					'vimeo',
-					'about:blank',
-					'googletagmanager',
 				),
 				$this->user_exclusions
 			),
@@ -1381,6 +1463,7 @@ class Lazy_Load extends Page_Parser {
 					array(
 						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
 						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
+						'bg_min_dpr'     => ( \defined( 'EIO_LL_BG_MIN_DPR' ) && EIO_LL_BG_MIN_DPR ? EIO_LL_BG_MIN_DPR : 1.1 ),
 						'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
 						'use_dpr'        => (int) $this->get_option( 'exactdn_hidpi' ),
 					)
@@ -1422,6 +1505,7 @@ class Lazy_Load extends Page_Parser {
 					array(
 						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
 						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
+						'bg_min_dpr'     => ( \defined( 'EIO_LL_BG_MIN_DPR' ) && EIO_LL_BG_MIN_DPR ? EIO_LL_BG_MIN_DPR : 1.1 ),
 						'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
 						'use_dpr'        => (int) $this->get_option( 'exactdn_hidpi' ),
 					)
