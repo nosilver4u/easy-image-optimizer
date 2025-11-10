@@ -14,13 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Hooks
  */
 
-// Activation routine for Easy IO/ExactDN.
-add_action( 'admin_action_easyio_activate', 'easyio_activate' );
-// De-activation routine for Easy IO/ExactDN.
-add_action( 'admin_action_easyio_deactivate', 'easyio_deactivate' );
-// Filters to set default permissions, admins can override these if they wish.
-add_filter( 'easyio_admin_permissions', 'easyio_admin_permissions', 8 );
-add_filter( 'easyio_superadmin_permissions', 'easyio_superadmin_permissions', 8 );
 // Add a link to the plugins page so the user can go straight to the settings page.
 $easyio_plugin_slug = plugin_basename( EASYIO_PLUGIN_FILE );
 add_filter( "plugin_action_links_$easyio_plugin_slug", 'easyio_settings_link' );
@@ -48,54 +41,6 @@ register_deactivation_hook( EASYIO_PLUGIN_FILE, 'easyio_network_deactivate' );
 add_action( 'shutdown', 'easyio_debug_log' );
 // Disable core WebP generation since we already do that.
 add_filter( 'wp_upload_image_mime_transforms', '__return_empty_array' );
-
-/**
- * Attempt to activate the site with ExactDN/Easy IO.
- */
-function easyio_activate() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	check_admin_referer( 'easy-image-optimizer-settings' );
-	$permissions = apply_filters( 'easyio_admin_permissions', '' );
-	if ( false === current_user_can( $permissions ) ) {
-		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
-	}
-	update_option( 'easyio_exactdn', true );
-	update_option( 'exactdn_all_the_things', true );
-	update_option( 'exactdn_lossy', true );
-	update_option( 'easyio_lazy_load', true );
-	if ( easyio_get_option( 'ewww_image_optimizer_exactdn' ) ) {
-		update_option( 'ewww_image_optimizer_exactdn', false );
-	}
-	if ( easyio_get_option( 'ewww_image_optimizer_lazy_load' ) ) {
-		update_option( 'ewww_image_optimizer_lazy_load', false );
-	}
-	if ( easyio_get_option( 'ewww_image_optimizer_webp_for_cdn' ) ) {
-		update_option( 'ewww_image_optimizer_webp_for_cdn', false );
-	}
-	$sendback = wp_get_referer();
-	wp_safe_redirect( esc_url_raw( $sendback ) );
-	exit( 0 );
-}
-
-/**
- * De-activate the site with ExactDN/Easy IO.
- */
-function easyio_deactivate() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	check_admin_referer( 'easy-image-optimizer-settings' );
-	$permissions = apply_filters( 'easyio_admin_permissions', '' );
-	if ( false === current_user_can( $permissions ) ) {
-		wp_die( esc_html__( 'You do not have permission to activate the Easy Image Optimizer service.', 'easy-image-optimizer' ) );
-	}
-	update_option( 'easyio_exactdn', false );
-	update_option( 'easyio_lazy_load', false );
-	global $exactdn;
-	if ( isset( $exactdn ) && is_object( $exactdn ) ) {
-		$exactdn->cron_setup( false );
-	}
-	wp_safe_redirect( wp_get_referer() );
-	exit( 0 );
-}
 
 /**
  * Setup page parsing classes after theme functions.php is loaded and plugins have run init routines.
@@ -151,112 +96,6 @@ function easyio_buffer_start() {
 function easyio_filter_page_output( $buffer ) {
 	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
 	return apply_filters( 'easyio_filter_page_output', $buffer );
-}
-
-/**
- * Set default permissions for admin (configuration) and bulk operations.
- *
- * @param string $permissions A valid WP capability level.
- * @return string Either the original value, unchanged, or the default capability level.
- */
-function easyio_admin_permissions( $permissions ) {
-	if ( empty( $permissions ) ) {
-		return 'activate_plugins';
-	}
-	return $permissions;
-}
-
-/**
- * Set default permissions for multisite/network admin (configuration) operations.
- *
- * @param string $permissions A valid WP capability level.
- * @return string Either the original value, unchanged, or the default capability level.
- */
-function easyio_superadmin_permissions( $permissions ) {
-	if ( empty( $permissions ) ) {
-		return 'manage_network_options';
-	}
-	return $permissions;
-}
-
-if ( ! function_exists( 'str_ends_with' ) ) {
-	/**
-	 * Polyfill for `str_ends_with()` function added in WP 5.9 or PHP 8.0.
-	 *
-	 * Performs a case-sensitive check indicating if
-	 * the haystack ends with needle.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @param string $haystack The string to search in.
-	 * @param string $needle   The substring to search for in the `$haystack`.
-	 * @return bool True if `$haystack` ends with `$needle`, otherwise false.
-	 */
-	function str_ends_with( $haystack, $needle ) {
-		if ( '' === $haystack && '' !== $needle ) {
-			return false;
-		}
-
-		$len = strlen( $needle );
-
-		return 0 === substr_compare( $haystack, $needle, -$len, $len );
-	}
-}
-
-/**
- * Runs early for checks that need to happen on init before anything else.
- */
-function easyio_init() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	// Nothing doing currently!
-}
-
-/**
- * Plugin upgrade function
- *
- * @global object $wpdb
- */
-function easyio_upgrade() {
-	easyio_debug_message( '<b>' . __FUNCTION__ . '()</b>' );
-	if ( get_option( 'easyio_version' ) < EASYIO_VERSION ) {
-		if ( wp_doing_ajax() ) {
-			return;
-		}
-		easyio()->set_defaults();
-		// This will get re-enabled if things are too slow.
-		update_option( 'exactdn_prevent_db_queries', true );
-		if ( easyio_get_option( 'easyio_exactdn_verify_method' ) > 0 ) {
-			delete_option( 'easyio_exactdn_verify_method' );
-			delete_site_option( 'easyio_exactdn_verify_method' );
-		}
-		if ( function_exists( 'swis' ) && easyio_get_option( 'easyio_ll_all_things' ) ) {
-			update_option( 'easyio_ll_external_bg', true );
-			update_option( 'easyio_ll_all_things', '' );
-		}
-		if ( ! get_option( 'easyio_version' ) && ! easyio_get_option( 'easyio_exactdn' ) ) {
-			add_option( 'exactdn_never_been_active', true, '', false );
-		}
-		if ( is_file( EASYIO_CONTENT_DIR . 'debug.log' ) && is_writable( EASYIO_CONTENT_DIR . 'debug.log' ) ) {
-			unlink( EASYIO_CONTENT_DIR . 'debug.log' );
-		}
-		update_option( 'easyio_version', EASYIO_VERSION );
-		easyio_debug_log();
-	}
-}
-
-/**
- * Adds suggested privacy policy content for site admins.
- *
- * Note that this is just a suggestion, it should be customized for your site.
- */
-function easyio_privacy_policy_content() {
-	if ( ! function_exists( 'wp_add_privacy_policy_content' ) || ! function_exists( 'wp_kses_post' ) ) {
-		return;
-	}
-	$content  = '<p class="privacy-policy-tutorial">';
-	$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'easy-image-optimizer' ) ) . '</p>';
-	$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).', 'easy-image-optimizer' ) ) . '</p>';
-	wp_add_privacy_policy_content( 'Easy Image Optimizer', $content );
 }
 
 /**
@@ -420,20 +259,15 @@ function easyio_network_deactivate( $network_wide ) {
  * Adds a global settings page to the network admin settings menu.
  */
 function easyio_network_admin_menu() {
-	if ( ! function_exists( 'is_plugin_active_for_network' ) && is_multisite() ) {
-		// Need to include the plugin library for the is_plugin_active function.
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	}
-	if ( is_multisite() && is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) ) {
-		$permissions = apply_filters( 'easyio_superadmin_permissions', '' );
+	if ( is_multisite() && is_network_admin() ) {
 		// Add options page to the settings menu.
-		$easyio_network_options_page = add_submenu_page(
-			'settings.php',                 // Slug of parent.
-			'Easy Image Optimizer',         // Page Title.
-			'Easy Image Optimizer',         // Menu title.
-			$permissions,                   // Capability.
-			'easy-image-optimizer-options', // Slug.
-			'easyio_network_options'        // Function to call.
+		add_submenu_page(
+			'settings.php',                                       // Slug of parent.
+			'Easy Image Optimizer',                               // Page Title.
+			'Easy Image Optimizer',                               // Menu title.
+			apply_filters( 'easyio_superadmin_permissions', '' ), // Capability.
+			'easy-image-optimizer-options',                       // Slug.
+			'easyio_network_options'                              // Function to call.
 		);
 	}
 }
@@ -443,7 +277,7 @@ function easyio_network_admin_menu() {
  */
 function easyio_admin_menu() {
 	// Add options page to the settings menu.
-	$easyio_options_page = add_options_page(
+	add_options_page(
 		'Easy Image Optimizer',                                        // Page title.
 		'Easy Image Optimizer',                                        // Menu title.
 		apply_filters( 'easyio_admin_permissions', 'manage_options' ), // Capability.
@@ -844,7 +678,16 @@ function easyio_options() {
 						</a>
 					</td>
 				</tr>
-				<?php easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) ); ?>
+				<tr>
+					<th scope='row'>&nbsp;</th>
+					<td>
+						<p class='description'>
+							<a href='https://ewww.io/manage-sites/' target='_blank'>
+								<?php esc_html_e( 'Manage Premium Compression and WebP/AVIF Conversion in the site settings at ewww.io.', 'easy-image-optimizer' ); ?>
+							</a>
+						</p>
+					</td>
+				</tr>
 				<tr>
 					<th scope='row'>
 						<label for='exactdn_all_the_things'><?php esc_html_e( 'Include All Resources', 'easy-image-optimizer' ); ?></label>
@@ -855,19 +698,9 @@ function easyio_options() {
 						<?php esc_html_e( 'Replace URLs for all resources in wp-includes/ and wp-content/, including JavaScript, CSS, fonts, etc.', 'easy-image-optimizer' ); ?>
 					</td>
 				</tr>
-				<?php easyio_debug_message( 'ExactDN all the things: ' . ( easyio_get_option( 'exactdn_all_the_things' ) ? 'on' : 'off' ) ); ?>
-				<tr>
-					<th scope='row'>
-						<label for='exactdn_lossy'><?php esc_html_e( 'Premium Compression', 'easy-image-optimizer' ); ?></label>
-						<?php easyio_help_link( 'https://docs.ewww.io/article/47-getting-more-from-exactdn', '59de6631042863379ddc953c' ); ?>
-					</th>
-					<td>
-						<input type='checkbox' name='exactdn_lossy' value='true' id='exactdn_lossy' <?php checked( easyio_get_option( 'exactdn_lossy' ) ); ?> />
-						<?php esc_html_e( 'Enable high quality premium compression and WebP/AVIF conversion for all images. Disable to use lossless mode instead.', 'easy-image-optimizer' ); ?>
-					</td>
-				</tr>
 				<?php
-				easyio_debug_message( 'ExactDN lossy: ' . intval( easyio_get_option( 'exactdn_lossy' ) ) );
+				easyio_debug_message( 'ExactDN enabled: ' . ( easyio_get_option( 'easyio_exactdn' ) ? 'on' : 'off' ) );
+				easyio_debug_message( 'ExactDN all the things: ' . ( easyio_get_option( 'exactdn_all_the_things' ) ? 'on' : 'off' ) );
 				easyio_debug_message( 'ExactDN resize existing: ' . ( easyio_get_option( 'exactdn_resize_existing' ) ? 'on' : 'off' ) );
 				easyio_debug_message( 'ExactDN attachment queries: ' . ( easyio_get_option( 'exactdn_prevent_db_queries' ) ? 'off' : 'on' ) );
 				easyio_debug_message( 'Easy IO exclusions:' );

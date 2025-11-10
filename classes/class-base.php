@@ -326,7 +326,7 @@ class Base {
 			$potential_logs = \scandir( $this->content_dir );
 			if ( $this->is_iterable( $potential_logs ) ) {
 				foreach ( $potential_logs as $potential_log ) {
-					if ( $this->str_ends_with( $potential_log, '.log' ) && false !== strpos( $potential_log, strtolower( __NAMESPACE__ ) . '-debug-' ) && is_file( $this->content_dir . $potential_log ) ) {
+					if ( \str_ends_with( $potential_log, '.log' ) && false !== strpos( $potential_log, strtolower( __NAMESPACE__ ) . '-debug-' ) && is_file( $this->content_dir . $potential_log ) ) {
 						return $this->content_dir . $potential_log;
 					}
 				}
@@ -1345,24 +1345,6 @@ class Base {
 		if ( \ob_get_length() ) {
 			\ob_end_clean();
 		}
-	}
-
-	/**
-	 * Performs a case-sensitive check indicating if
-	 * the haystack ends with needle.
-	 *
-	 * @param string $haystack The string to search in.
-	 * @param string $needle   The substring to search for in the `$haystack`.
-	 * @return bool True if `$haystack` ends with `$needle`, otherwise false.
-	 */
-	public function str_ends_with( $haystack, $needle ) {
-		if ( '' === $haystack && '' !== $needle ) {
-			return false;
-		}
-
-		$len = \strlen( $needle );
-
-		return 0 === \substr_compare( $haystack, $needle, -$len, $len );
 	}
 
 	/**

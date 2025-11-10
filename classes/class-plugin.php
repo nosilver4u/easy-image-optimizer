@@ -27,6 +27,13 @@ final class Plugin extends Base {
 	private static $instance;
 
 	/**
+	 * Settings object.
+	 *
+	 * @var object|\EasyIO\Settings $settings
+	 */
+	public $settings;
+
+	/**
 	 * Helpscout Beacon object.
 	 *
 	 * @var object|\EasyIO\HS_Beacon $hs_beacon
@@ -50,14 +57,24 @@ final class Plugin extends Base {
 			self::$instance->requires();
 			self::$instance->load_children();
 
+			if ( ! self::$instance->php_supported() ) {
+				return self::$instance;
+			}
+			if ( ! self::$instance->wp_supported() ) {
+				return self::$instance;
+			}
+
 			// Load plugin components that need to be available early.
 			\add_action( 'plugins_loaded', array( self::$instance, 'plugins_loaded' ) );
 			// Initializes the plugin for admin interactions, like saving network settings and scheduling cron jobs.
 			\add_action( 'admin_init', array( self::$instance, 'admin_init' ) );
 
-			// TODO: check PHP and WP compat here.
 			// TODO: setup anything that needs to run on init/plugins_loaded.
 			// TODO: add any custom option/setting hooks here (actions that need to be taken when certain settings are saved/updated).
+
+			// Filters to set default permissions, admins can override these if they wish.
+			add_filter( 'easyio_admin_permissions', array( self::$instance, 'admin_permissions' ), 8 );
+			add_filter( 'easyio_superadmin_permissions', array( self::$instance, 'superadmin_permissions' ), 8 );
 		}
 
 		return self::$instance;
@@ -88,6 +105,8 @@ final class Plugin extends Base {
 	 * @access private
 	 */
 	private function requires() {
+		// Sets up the settings page and various option-related hooks/functions.
+		require_once EASYIO_PLUGIN_PATH . 'classes/class-settings.php';
 		// EasyIO\HS_Beacon class for integrated help/docs.
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-hs-beacon.php';
 	}
@@ -96,7 +115,50 @@ final class Plugin extends Base {
 	 * Setup mandatory child classes.
 	 */
 	public function load_children() {
-		/* self::$instance->class = new Class(); */
+		self::$instance->settings = new Settings();
+	}
+
+	/**
+	 * Make sure we are on a supported version of PHP.
+	 *
+	 * @access private
+	 */
+	private function php_supported() {
+		if ( defined( 'PHP_VERSION_ID' ) && PHP_VERSION_ID >= 80100 ) {
+			return true;
+		}
+		\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
+		\add_action( 'admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
+		return false;
+	}
+
+	/**
+	 * Make sure we are on a supported version of WordPress.
+	 *
+	 * @access private
+	 */
+	private function wp_supported() {
+		global $wp_version;
+		if ( \version_compare( $wp_version, '6.6' ) >= 0 ) {
+			return true;
+		}
+		\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_wp_notice' ) );
+		\add_action( 'admin_notices', array( self::$instance, 'unsupported_wp_notice' ) );
+		return false;
+	}
+
+	/**
+	 * Display a notice that the PHP version is too old.
+	 */
+	public function unsupported_php_notice() {
+		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 8.1 or greater. Newer versions of PHP are faster and more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) . '</a></p></div>';
+	}
+
+	/**
+	 * Display a notice that the WP version is too old.
+	 */
+	public function unsupported_wp_notice() {
+		echo '<div id="swis-warning-wp" class="notice notice-error"><p>' . esc_html__( 'Easy Image Optimizer requires WordPress 6.6 or greater, please update your website.', 'easy-image-optimizer' ) . '</p></div>';
 	}
 
 	/**
@@ -116,8 +178,6 @@ final class Plugin extends Base {
 	 */
 	public function admin_init() {
 		$this->hs_beacon = new HS_Beacon();
-		\easyio_upgrade();
-		$this->register_settings();
 
 		if ( ! \class_exists( __NAMESPACE__ . '\ExactDN' ) || ! $this->get_option( 'easyio_exactdn' ) ) {
 			add_action( 'network_admin_notices', 'easyio_notice_inactive' );
@@ -143,132 +203,49 @@ final class Plugin extends Base {
 		}
 
 		if ( ! \defined( '\WP_CLI' ) || ! WP_CLI ) {
-			\easyio_privacy_policy_content();
+			$this->privacy_policy_content();
 		}
 	}
 
 	/**
-	 * Save the multi-site settings, if this is the WP admin, and they've been POSTed.
+	 * Adds suggested privacy policy content for site admins.
+	 *
+	 * Note that this is just a suggestion, it should be customized for your site.
 	 */
-	public function save_network_settings() {
-		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
-		// NOTE: we don't actually have a network settings screen, so...
-		if ( ! \function_exists( 'is_plugin_active_for_network' ) && \is_multisite() ) {
-			// Need to include the plugin library for the is_plugin_active function.
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	private function privacy_policy_content() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) || ! function_exists( 'wp_kses_post' ) ) {
+			return;
 		}
-			// Set the common network settings if they have been POSTed.
-		if (
-			\is_multisite() &&
-			\is_plugin_active_for_network( EASYIO_PLUGIN_FILE_REL ) &&
-			! empty( $_REQUEST['_wpnonce'] ) &&
-			isset( $_POST['option_page'] ) &&
-			false !== \strpos( sanitize_text_field( wp_unslash( $_POST['option_page'] ) ), 'easyio_options' ) &&
-			\wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'easyio_options-options' ) &&
-			\current_user_can( 'manage_network_options' ) &&
-			! \get_site_option( 'easyio_allow_multisite_override' ) &&
-			false === \strpos( wp_get_referer(), 'options-general' )
-		) {
-			$this->debug_message( 'network-wide settings, no override' );
-			$easyio_debug = ( empty( $_POST['easyio_debug'] ) ? false : true );
-			\update_site_option( 'easyio_debug', $easyio_debug );
-			$easyio_metadata_remove = ( empty( $_POST['easyio_metadata_remove'] ) ? false : true );
-			\update_site_option( 'easyio_metadata_remove', $easyio_metadata_remove );
-			$exactdn_all_the_things = ( empty( $_POST['exactdn_all_the_things'] ) ? false : true );
-			\update_site_option( 'exactdn_all_the_things', $exactdn_all_the_things );
-			$exactdn_lossy = ( empty( $_POST['exactdn_lossy'] ) ? false : true );
-			\update_site_option( 'exactdn_lossy', $exactdn_lossy );
-			$exactdn_hidpi = ( empty( $_POST['exactdn_hidpi'] ) ? false : true );
-			\update_site_option( 'exactdn_hidpi', $exactdn_hidpi );
-			$exactdn_exclude = empty( $_POST['exactdn_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['exactdn_exclude'] ) );
-			\update_site_option( 'exactdn_exclude', $this->exclude_paths_sanitize( $exactdn_exclude ) );
-			$easyio_add_missing_dims = ( empty( $_POST['easyio_add_missing_dims'] ) ? false : true );
-			\update_site_option( 'easyio_add_missing_dims', $easyio_add_missing_dims );
-			$easyio_lazy_load = ( empty( $_POST['easyio_lazy_load'] ) ? false : true );
-			\update_site_option( 'easyio_lazy_load', $easyio_lazy_load );
-			$easyio_ll_autoscale = ( empty( $_POST['easyio_ll_autoscale'] ) ? false : true );
-			\update_site_option( 'easyio_ll_autoscale', $easyio_ll_autoscale );
-			$easyio_ll_abovethefold = ! empty( $_POST['easyio_ll_abovethefold'] ) ? (int) $_POST['easyio_ll_abovethefold'] : 0;
-			\update_site_option( 'easyio_ll_abovethefold', $easyio_ll_abovethefold );
-			$easyio_use_lqip = ( empty( $_POST['easyio_use_lqip'] ) ? false : true );
-			\update_site_option( 'easyio_use_lqip', $easyio_use_lqip );
-			$easyio_use_dcip = ( empty( $_POST['easyio_use_dcip'] ) ? false : true );
-			\update_site_option( 'easyio_use_dcip', $easyio_use_dcip );
-			$easyio_ll_exclude = empty( $_POST['easyio_ll_exclude'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_exclude'] ) );
-			\update_site_option( 'easyio_ll_exclude', $this->exclude_paths_sanitize( $easyio_ll_exclude ) );
-			$easyio_ll_external_bg = empty( $_POST['easyio_ll_external_bg'] ) ? false : true;
-			\update_site_option( 'easyio_ll_external_bg', $easyio_ll_external_bg );
-			$easyio_ll_all_things = empty( $_POST['easyio_ll_all_things'] ) ? '' : sanitize_textarea_field( wp_unslash( $_POST['easyio_ll_all_things'] ) );
-			\update_site_option( 'easyio_ll_all_things', $easyio_ll_all_things );
-			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			\update_site_option( 'easyio_allow_multisite_override', $easyio_allow_multisite_override );
-			$easyio_enable_help = empty( $_POST['easyio_enable_help'] ) ? false : true;
-			\update_site_option( 'easyio_enable_help', $easyio_enable_help );
-			\add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
-		} elseif ( isset( $_POST['easyio_allow_multisite_override_active'] ) && \current_user_can( 'manage_network_options' ) && ! empty( $_REQUEST['_wpnonce'] ) && \wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'easyio_options-options' ) ) {
-			$this->debug_message( 'network-wide settings, single-site overriding' );
-			$easyio_allow_multisite_override = empty( $_POST['easyio_allow_multisite_override'] ) ? false : true;
-			\update_site_option( 'easyio_allow_multisite_override', $easyio_allow_multisite_override );
-			\add_action( 'network_admin_notices', 'easyio_network_settings_saved' );
-		} // End if().
+		$content  = '<p class="privacy-policy-tutorial">';
+		$content .= wp_kses_post( __( 'Normally, this plugin does not process any information about your visitors. However, if you accept user-submitted images and display them on your site, you can use this language to keep your visitors informed.', 'easy-image-optimizer' ) ) . '</p>';
+		$content .= '<p>' . wp_kses_post( __( 'User-submitted images that are displayed on this site will be transmitted and stored on a global network of third-party servers (a CDN).', 'easy-image-optimizer' ) ) . '</p>';
+		wp_add_privacy_policy_content( 'Easy Image Optimizer', $content );
 	}
 
 	/**
-	 * Register all our options and sanitation functions.
+	 * Set default permissions for admin (configuration) and bulk operations.
+	 *
+	 * @param string $permissions A valid WP capability level.
+	 * @return string Either the original value, unchanged, or the default capability level.
 	 */
-	public function register_settings() {
-		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
-		// Register all the common Easy IO settings.
-		\register_setting( 'easyio_options', 'easyio_debug', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_enable_help', 'boolval' );
-		\register_setting( 'easyio_options', 'exactdn_all_the_things', 'boolval' );
-		\register_setting( 'easyio_options', 'exactdn_lossy', 'boolval' );
-		\register_setting( 'easyio_options', 'exactdn_hidpi', 'boolval' );
-		\register_setting( 'easyio_options', 'exactdn_exclude', array( $this, 'exclude_paths_sanitize' ) );
-		\register_setting( 'easyio_options', 'easyio_add_missing_dims', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_lazy_load', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_ll_abovethefold', 'intval' );
-		\register_setting( 'easyio_options', 'easyio_use_lqip', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_use_dcip', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_ll_external_bg', 'boolval' );
-		\register_setting( 'easyio_options', 'easyio_ll_all_things', 'sanitize_textarea_field' );
-		\register_setting( 'easyio_options', 'easyio_ll_exclude', array( $this, 'exclude_paths_sanitize' ) );
+	public function admin_permissions( $permissions ) {
+		if ( empty( $permissions ) ) {
+			return 'activate_plugins';
+		}
+		return $permissions;
 	}
 
 	/**
-	 * Set some default option values.
+	 * Set default permissions for multisite/network admin (configuration) operations.
+	 *
+	 * @param string $permissions A valid WP capability level.
+	 * @return string Either the original value, unchanged, or the default capability level.
 	 */
-	public function set_defaults() {
-		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
-		// Set defaults for all options that need to be autoloaded.
-		\add_option( 'easyio_debug', false );
-		\add_option( 'easyio_metadata_remove', true );
-		\add_option( 'easyio_exactdn', false );
-		\add_option( 'easyio_plan_id', 0 );
-		\add_option( 'exactdn_all_the_things', false );
-		\add_option( 'exactdn_lossy', false );
-		\add_option( 'exactdn_hidpi', false );
-		\add_option( 'exactdn_exclude', '' );
-		\add_option( 'exactdn_sub_folder', false );
-		\add_option( 'exactdn_prevent_db_queries', true );
-		\add_option( 'exactdn_asset_domains', '' );
-		\add_option( 'easyio_add_missing_dims', false );
-		\add_option( 'easyio_lazy_load', false );
-		\add_option( 'easyio_use_lqip', false );
-		\add_option( 'easyio_use_dcip', false );
-		\add_option( 'easyio_use_siip', false );
-		\add_option( 'easyio_ll_autoscale', true );
-		\add_option( 'easyio_ll_abovethefold', 0 );
-		\add_option( 'easyio_ll_external_bg', false );
-		\add_option( 'easyio_ll_all_things', '' );
-		\add_option( 'easyio_ll_exclude', '' );
-
-		// Set network defaults.
-		\add_site_option( 'easyio_metadata_remove', true );
-		\add_site_option( 'easyio_add_missing_dims', true );
-		\add_site_option( 'easyio_ll_autoscale', true );
-		\add_site_option( 'exactdn_sub_folder', false );
-		\add_site_option( 'exactdn_prevent_db_queries', true );
+	public function superadmin_permissions( $permissions ) {
+		if ( empty( $permissions ) ) {
+			return 'manage_network_options';
+		}
+		return $permissions;
 	}
 
 	/**
