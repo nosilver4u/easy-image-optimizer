@@ -13,7 +13,7 @@ Plugin Name: Easy Image Optimizer
 Plugin URI: https://wordpress.org/plugins/easy-image-optimizer/
 Description: Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
 Author: Exactly WWW
-Version: 4.2.1
+Version: 4.2.1.6
 Requires at least: 6.6
 Requires PHP: 8.1
 Author URI: https://ewww.io/
@@ -24,8 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( false === strpos( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
-	define( 'EASYIO_VERSION', 421.5 );
+if ( ! class_exists( 'EasyIO\Plugin' ) && ! str_contains( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
+	define( 'EASYIO_VERSION', 421.61 );
 
 	/**
 	 * The full path of the plugin file (this file).
@@ -53,7 +53,7 @@ if ( false === strpos( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
 			$easyio_content_dir = trailingslashit( WP_CONTENT_DIR ) . trailingslashit( 'easyio' );
 			if ( ! is_writable( WP_CONTENT_DIR ) || ! empty( $_ENV['PANTHEON_ENVIRONMENT'] ) ) {
 				$upload_dir = wp_get_upload_dir();
-				if ( false === strpos( $upload_dir['basedir'], '://' ) && is_writable( $upload_dir['basedir'] ) ) {
+				if ( ! str_contains( $upload_dir['basedir'], '://' ) && is_writable( $upload_dir['basedir'] ) ) {
 					$easyio_content_dir = trailingslashit( $upload_dir['basedir'] ) . trailingslashit( 'easyio' );
 				}
 			}
@@ -61,10 +61,6 @@ if ( false === strpos( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
 		}
 	}
 
-	/**
-	 * All the 'unique' functions for the core Easy IO plugin.
-	 */
-	require_once EASYIO_PLUGIN_PATH . 'unique.php';
 	/**
 	 * All the base functions for our plugins.
 	 */

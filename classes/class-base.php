@@ -1348,6 +1348,20 @@ class Base {
 	}
 
 	/**
+	 * Wrapper around size_format to remove the decimal from sizes in bytes.
+	 *
+	 * @param int $size A filesize in bytes.
+	 * @param int $precision Number of places after the decimal separator.
+	 * @return string Human-readable filesize.
+	 */
+	public function size_format( $size, $precision = 1 ) {
+			// Convert it to human readable format.
+			$size_str = \size_format( $size, $precision );
+			// Remove spaces and extra decimals when measurement is in bytes.
+			return \preg_replace( '/\.0+ B ?/', ' B', $size_str );
+	}
+
+	/**
 	 * Trims the given 'needle' from the end of the 'haystack'.
 	 *
 	 * @param string $haystack The string to be modified if it contains needle.

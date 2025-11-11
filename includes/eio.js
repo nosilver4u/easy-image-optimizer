@@ -37,9 +37,6 @@ jQuery(document).ready(function($) {
 			});
 		});
 	}
-	$('#easyio-general-settings').show();
-	$('li.easyio-general-nav').addClass('easyio-selected');
-	$('#easyio-support-settings').hide();
 	$('.easyio-general-nav').click(function() {
 		$('.easyio-tab-nav li').removeClass('easyio-selected');
 		$('li.easyio-general-nav').addClass('easyio-selected');
@@ -58,7 +55,55 @@ jQuery(document).ready(function($) {
 		$('#easyio-support-settings').show();
 		$('#easyio-hidden-submit').show();
 	});
-	return false;
+	$('a#easyio-activate').on( 'click', function() {
+		$('a#easyio-activate').hide();
+		//$('#ewwwio-easy-deregister').hide();
+		$('#easyio-activation-processing').show();
+		activateExactDNSite();
+		return false;
+	});
+	function activateExactDNSite() {
+		var easyio_post_action = 'easyio_activate';
+		var easyio_post_data = {
+			action: easyio_post_action,
+			_wpnonce: easyio_vars._wpnonce,
+		};
+		$.post(ajaxurl, easyio_post_data, function(response) {
+			try {
+				var easyio_response = JSON.parse(response);
+			} catch (err) {
+				$('#easyio-activation-processing').hide();
+				$('#easyio-activation-result').html(easyio_vars.invalid_response);
+				$('#easyio-activation-result').addClass('error');
+				$('#easyio-activation-result').show();
+				console.log( response );
+				return false;
+			}
+			if ( easyio_response.error ) {
+				$('#easyio-activation-processing').hide();
+				$('a#easyio-activate').show();
+				$('#easyio-activation-result').html(easyio_response.error);
+				$('#easyio-activation-result').addClass('error');
+				$('#easyio-activation-result').show();
+			} else if ( ! easyio_response.success ) {
+				$('#easyio-activation-processing').hide();
+				$('#easyio-activation-result').html(easyio_vars.invalid_response);
+				$('#easyio-activation-result').addClass('error');
+				$('#easyio-activation-result').show();
+				console.log( response );
+			} else {
+				$('#easyio-activation-processing').hide();
+				$('#easyio-status').html('<h1>Easy Image Optimizer</h1>' + easyio_response.success);
+				$('#exactdn_all_the_things').prop('checked', true);
+				$('#easyio_lazy_load').prop('checked', true);
+				$('#easyio_add_missing_dims').prop('disabled', false);
+				$('.easyio-settings-table').show();
+				$('#easyio-hidden-submit').show();
+				$('table.easyio-inactive').hide();
+			}
+		});
+		return false;
+	}
 });
 function selectText(containerid) {
 	var debug_node = document.getElementById(containerid);
