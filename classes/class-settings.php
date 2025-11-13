@@ -31,6 +31,8 @@ final class Settings extends Base {
 		\add_action( 'admin_action_easyio_deactivate', array( $this, 'deactivate_service' ) );
 		// AJAX action hook to activate Easy IO.
 		\add_action( 'wp_ajax_easyio_activate', array( $this, 'ajax_activate_service' ) );
+		// AJAX action hook to fetch Easy IO stats.
+		add_action( 'wp_ajax_easyio_get_site_stats', array( $this, 'get_site_stats_ajax' ) );
 
 		// Adds the Easy IO pages to the admin menu.
 		\add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -215,7 +217,7 @@ final class Settings extends Base {
 			die(
 				\wp_json_encode(
 					array(
-						'success' => '<span style="color: #3eadc9; font-weight: bolder;">' . \esc_html__( 'Verified', 'easy-image-optimizer' ) . '</span><br><span style="font-weight:normal;line-height:1.8em;">' . \esc_html( $exactdn->get_exactdn_domain() ) . '</span>',
+						'success' => '<h3 style="color: #3eadc9;">' . \esc_html__( 'Verified', 'easy-image-optimizer' ) . '</h3><span style="font-weight:normal;line-height:1.8em;">' . \esc_html( $exactdn->get_exactdn_domain() ) . '</span>',
 					)
 				)
 			);
@@ -327,13 +329,17 @@ final class Settings extends Base {
 			\delete_option( 'easyio_exactdn_verified' );
 			$exactdn->setup();
 		}
+		\wp_enqueue_style( 'easyio-settings-style', \plugins_url( '/includes/easyio-settings.css', EASYIO_PLUGIN_FILE ), array(), EASYIO_VERSION );
+		\wp_enqueue_script( 'easyio-chart-script', \plugins_url( '/includes/chart.min.js', EASYIO_PLUGIN_FILE ), array(), EASYIO_VERSION, true );
 		\wp_enqueue_script( 'easyio-settings-script', \plugins_url( '/includes/eio.js', EASYIO_PLUGIN_FILE ), array( 'jquery' ), EASYIO_VERSION );
 		\wp_localize_script(
 			'easyio-settings-script',
 			'easyio_vars',
 			array(
-				'_wpnonce'         => \wp_create_nonce( 'easy-image-optimizer-settings' ),
-				'invalid_response' => \esc_html__( 'Received an invalid response from your website, please check for errors in the Developer Tools console of your browser.', 'easy-image-optimizer' ),
+				'_wpnonce'                  => \wp_create_nonce( 'easy-image-optimizer-settings' ),
+				'loading_image_url'         => \plugins_url( '/images/spinner.gif', EASYIO_PLUGIN_FILE ),
+				'invalid_response'          => \esc_html__( 'Received an invalid response from your website, please check for errors in the Developer Tools console of your browser.', 'easy-image-optimizer' ),
+				'easyio_extra_stats_failed' => \esc_html__( 'Additional stats unavailable, please try again later.', 'easy-image-optimizer' ),
 			)
 		);
 	}
@@ -353,6 +359,108 @@ final class Settings extends Base {
 	}
 
 	/**
+	 * Get the image savings HTML.
+	 */
+	protected function get_image_savings() {
+		$this->debug_message( '<b>' . __FUNCTION__ . '()</b>' );
+
+		$exactdn_savings = 0;
+		if ( ! class_exists( '\EasyIO\ExactDN' ) || ! $this->get_option( 'easyio_exactdn' ) ) {
+			return;
+		}
+		global $exactdn;
+		if ( isset( $exactdn ) && is_object( $exactdn ) ) {
+			$exactdn_savings = $exactdn->savings();
+		}
+
+		$site_id = ! empty( $exactdn_savings['site_id'] ) ? $exactdn_savings['site_id'] : 0;
+
+		?>
+		<?php if ( ! empty( $exactdn_savings ) && ! empty( $exactdn_savings['original'] ) && ! empty( $exactdn_savings['savings'] ) ) : ?>
+				<h3>
+					<?php \esc_html_e( 'Image Savings', 'easy-image-optimizer' ); ?>
+					<?php $this->help_link( 'https://docs.ewww.io/article/96-easy-io-is-it-working', '5f871dd2c9e77c0016217c4e' ); ?>
+				</h3>
+				<div id='easyio-savings-container' class='easyio-bar-container'>
+					<div id='easyio-savings-fill' data-score='<?php echo esc_attr( intval( $exactdn_savings['savings'] / $exactdn_savings['original'] * 100 ) ); ?>' class='easyio-bar-fill'></div>
+				</div>
+				<div id='easyio-savings-flex' class='easyio-bar-caption'>
+					<p class='easyio-bar-score'><?php echo \esc_html( $this->size_format( $exactdn_savings['savings'], 2 ) ); ?></p>
+				</div>
+		<?php else : ?>
+				<h3>
+					<?php \esc_html_e( 'Image Savings', 'easy-image-optimizer' ); ?>
+					<?php $this->help_link( 'https://docs.ewww.io/article/96-easy-io-is-it-working', '5f871dd2c9e77c0016217c4e' ); ?>
+				</h3>
+				<div id='easyio-savings-container' class='easyio-bar-container'>
+					<div id='easyio-savings-fill' data-score='0' class='easyio-bar-fill'></div>
+				</div>
+				<div id='easyio-savings-flex' class='easyio-bar-caption'>
+					<p class='easyio-bar-score' style='font-size: 0.8rem;'><?php \esc_html_e( 'Not available yet', 'easy-image-optimizer' ); ?></p>
+				</div>
+		<?php endif; ?>
+		<?php if ( ! empty( $exactdn_savings['bandwidth'] ) && ! empty( $exactdn_savings['quota'] ) ) : ?>
+				<h3>
+					<?php \esc_html_e( 'Bandwidth Used', 'easy-image-optimizer' ); ?>
+				</h3>
+				<div id='easyio-bandwidth-container' class='easyio-bar-container'>
+					<div id='easyio-bandwidth-fill' data-score='<?php echo \esc_attr( \min( 100, \max( 1, intval( $exactdn_savings['bandwidth'] / $exactdn_savings['quota'] * 100 ) ) ) ); ?>' class='easyio-bar-fill'></div>
+				</div>
+				<div id='easyio-bandwidth-flex' class='easyio-bar-caption'>
+					<p class='easyio-bar-score'><a href='#' id='easyio-show-stats' data-site-id='<?php echo (int) $site_id; ?>'><?php echo \esc_html( $this->size_format( $exactdn_savings['bandwidth'], 2 ) ); ?></a></p>
+				</div>
+		<?php else : ?>
+				<h3>
+					<?php \esc_html_e( 'Bandwidth Used', 'easy-image-optimizer' ); ?>
+				</h3>
+				<div id='easyio-bandwidth-container' class='easyio-bar-container'>
+					<div id='easyio-bandwidth-fill' data-score='0' class='easyio-bar-fill'></div>
+				</div>
+				<div id='easyio-bandwidth-flex' class='easyio-bar-caption'>
+					<p class='easyio-bar-score' style='font-size: 0.8rem'><?php \esc_html_e( 'Not available yet', 'easy-image-optimizer' ); ?></p>
+				</div>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Retrieves the Easy IO stats via AJAX.
+	 */
+	public function get_site_stats_ajax() {
+		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
+		if ( ! \current_user_can( \apply_filters( 'easyio_admin_permissions', '' ) ) ) {
+			// Display error message if insufficient permissions.
+			$this->ob_clean();
+			\wp_die( \wp_json_encode( array( 'error' => \esc_html__( 'Access denied.', 'easy-image-optimizer' ) ) ) );
+		}
+		if ( empty( $_REQUEST['_wpnonce'] ) || ! \wp_verify_nonce( \sanitize_key( $_REQUEST['_wpnonce'] ), 'easy-image-optimizer-settings' ) ) {
+			die( \wp_json_encode( array( 'error' => \esc_html__( 'Access token has expired, please reload the page.', 'easy-image-optimizer' ) ) ) );
+		}
+		if ( empty( $_REQUEST['site_id'] ) ) {
+			die( \wp_json_encode( array( 'error' => \esc_html__( 'Site ID unknown.', 'easy-image-optimizer' ) ) ) );
+		}
+		$site_id = (int) $_REQUEST['site_id'];
+		$url     = "https://masterdb.exactlywww.com/stats/easyio-zone.php?site_id=$site_id&format=json";
+		if ( ! empty( $_POST['require_extra'] ) ) {
+			$url .= '&require_extra=1';
+		}
+
+		$result = \wp_remote_get(
+			$url,
+			array(
+				'timeout' => 55,
+			)
+		);
+		if ( ! \is_wp_error( $result ) && ! empty( $result['body'] ) ) {
+			$response = \json_decode( $result['body'], true );
+			die( \wp_json_encode( $response ) );
+		}
+		if ( \is_wp_error( $result ) ) {
+			die( \wp_json_encode( array( 'error' => $result->get_error_message() ) ) );
+		}
+	}
+
+	/**
 	 * Displays the Easy IO options along with status information, and debugging information.
 	 */
 	public function display_settings() {
@@ -362,64 +470,35 @@ final class Settings extends Base {
 
 		\easyio()->hs_beacon->admin_notice( 'singlesite' );
 
-		$icon_link         = \plugins_url( '/images/easyio-toon-car.png', EASYIO_PLUGIN_FILE );
+		$icon_link         = \plugins_url( '/images/easyio-toon-car-with-text.png', EASYIO_PLUGIN_FILE );
 		$loading_image_url = \plugins_url( '/images/spinner.gif', EASYIO_PLUGIN_FILE );
 		$site_url          = $this->content_url();
 
 		$eio_exclude_paths = $this->get_option( 'exactdn_exclude' ) ? \esc_html( \implode( "\n", $this->get_option( 'exactdn_exclude' ) ) ) : '';
 		$ll_exclude_paths  = $this->get_option( 'easyio_ll_exclude' ) ? \esc_html( \implode( "\n", $this->get_option( 'easyio_ll_exclude' ) ) ) : '';
 		?>
-	<style>
-		#easyio-header-flex { border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); display: flex; flex-direction:row; margin: 0; padding: 0; background-color: white; }
-		#easyio-header-wrapper { padding: 10px 0; width: 100%; clear: right; }
-		#easyio-logo { padding: 15px 40px 15px 40px; }
-		#easyio-status { padding-bottom: 10px; }
-		.easyio-tab span { font-size: 15px; font-weight: 700; color: #555; text-decoration: none; line-height: 36px; padding: 0 10px; }
-		.easyio-tab span:hover { color: #464646; }
-		.easyio-tab { margin: 0 0 0 5px; padding: 0px; border-width: 1px 1px 1px; border-style: solid solid none; border-image: none; border-color: #ccc; display: inline-block; background-color: #e4e4e4; cursor: pointer }
-		.easyio-tab:hover { background-color: #fff }
-		.easyio-selected { background-color: #f1f1f1; margin-bottom: -1px; border-bottom: 1px solid #f1f1f1 }
-		.easyio-selected span { color: #000; }
-		.easyio-selected:hover { background-color: #f1f1f1; }
-		.easyio-tab-nav { list-style: none; margin: 10px 0 0; padding-left: 5px; border-bottom: 1px solid #ccc; }
-		#easyio-inactive { display: none; }
-		.easyio-help-beacon-single, .easyio-help-beacon-multi { margin: 3px; }
-		#easyio-activation-result { display: none; background-color: white; border: 1px solid #ccd0d4; border-left: 4px solid #3eadc9; margin: 10px 10px 15px 0; padding: 12px; }
-		#easyio-activation-result.error { border-left-color: #dc3232; }
-		#easyio-activation-processing { display: none; }
-	</style>
 	<div class='wrap'>
 		<h1 style="display: none;">Easy Image Optimizer</h1>
 		<div id="easyio-header-wrapper">
 			<div id='easyio-header-flex'>
 				<div id='easyio-logo'>
-					<img width='128' height='80' src='<?php echo \esc_url( $icon_link ); ?>' />
+					<img width='156' height='125' src='<?php echo \esc_url( $icon_link ); ?>' />
 				</div>
 				<div id='easyio-status'>
-					<h1>Easy Image Optimizer</h1>
 					<?php if ( \class_exists( '\EasyIO\ExactDN' ) && $this->get_option( 'easyio_exactdn' ) ) : ?>
 						<?php if ( \class_exists( '\Jetpack' ) && \method_exists( 'Jetpack', 'is_module_active' ) && \Jetpack::is_module_active( 'photon' ) ) : ?>
-							<span style="color: red; font-weight: bolder;">
+							<h3 style="color: red;">
 								<?php \esc_html_e( 'Inactive, please disable the Site Accelerator option in the Jetpack settings.', 'easy-image-optimizer' ); ?>
-							</span>
+							</h3>
 						<?php elseif ( \class_exists( '\Automattic\Jetpack_Boost\Jetpack_Boost' ) && \get_option( 'jetpack_boost_status_image-cdn' ) ) : ?>
-							<span style="color: red; font-weight: bolder;">
+							<h3 style="color: red;">
 								<?php \esc_html_e( 'Inactive, please disable the Image CDN option in the Jetpack Boost settings.', 'easy-image-optimizer' ); ?>
-							</span>
+							</h3>
 						<?php else : ?>
-							<?php
-							if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) :
-								$exactdn_savings = $exactdn->savings();
-								?>
-								<span style="color: #3eadc9; font-weight: bolder;"><?php \esc_html_e( 'Verified', 'easy-image-optimizer' ); ?></span><br>
+							<?php if ( $exactdn->get_exactdn_domain() && $exactdn->verify_domain( $exactdn->get_exactdn_domain() ) ) : ?>
+								<h3 style="color: #3eadc9;"><?php \esc_html_e( 'Verified', 'easy-image-optimizer' ); ?></h3>
 								<span style="font-weight:normal;line-height:1.8em;"><?php echo \esc_html( $exactdn->get_exactdn_domain() ); ?></span>
-								<?php
-								if ( ! empty( $exactdn_savings ) && ! empty( $exactdn_savings['original'] ) && ! empty( $exactdn_savings['savings'] ) ) :
-									$exactdn_percent = \round( $exactdn_savings['savings'] / $exactdn_savings['original'], 3 ) * 100;
-									?>
-									<br><?php \esc_html_e( 'Image Savings:', 'easy-image-optimizer' ); ?>
-									<span style="font-weight:normal;"><?php echo \esc_html( $exactdn_percent . '% (' . $this->size_format( $exactdn_savings['savings'], 1 ) . ')' ); ?></span>
-								<?php endif; ?>
+								<?php $this->get_image_savings(); ?>
 							<?php else : ?>
 								<?php
 								$this->debug_message( 'could not verify: ' . $exactdn->get_exactdn_domain() );
@@ -428,7 +507,7 @@ final class Settings extends Base {
 									\delete_option( 'easyio_exactdn_domain' );
 								}
 								?>
-								<span style="color: red; font-weight: bolder"><a href="https://ewww.io/manage-sites/" target="_blank"><?php \esc_html_e( 'Not Verified', 'easy-image-optimizer' ); ?></a></span>
+								<h3 style="color: red;"><a href="https://ewww.io/manage-sites/" target="_blank"><?php \esc_html_e( 'Not Verified', 'easy-image-optimizer' ); ?></a></h3>
 							<?php endif; ?>
 							<?php if ( \function_exists( 'remove_query_strings_link' ) || \function_exists( 'rmqrst_loader_src' ) || \function_exists( 'qsr_remove_query_strings_1' ) ) : ?>
 								<p>
@@ -444,7 +523,7 @@ final class Settings extends Base {
 						\delete_option( 'easyio_exactdn_verified' );
 						\delete_option( 'easyio_exactdn_validation' );
 						?>
-						<span style="color: #747474; font-weight: bolder;"><?php \esc_html_e( 'Inactive', 'easy-image-optimizer' ); ?></span>
+						<h3 style="color: #747474;"><?php \esc_html_e( 'Inactive', 'easy-image-optimizer' ); ?></h3>
 					<?php endif; ?>
 				</div><!-- end easyio-status -->
 			</div><!-- end easyio-header-flex -->

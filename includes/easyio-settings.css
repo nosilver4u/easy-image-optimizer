@@ -1,0 +1,204 @@
+#easyio-header-flex {
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+	display: flex;
+	flex-direction: row;
+	margin: 0;
+	padding: 0;
+	background-color: white;
+}
+
+#easyio-header-wrapper {
+	padding: 10px 0;
+	width: 100%;
+	clear: right;
+}
+
+#easyio-logo {
+	align-items: center;
+	display: flex;
+	padding: 10px 40px 10px 40px;
+}
+
+#easyio-status {
+	padding-bottom: 15px;
+	min-width: 270px;
+}
+
+#easyio-status h3 {
+	margin: 15px 0 0;
+	font-size: 13px;
+}
+
+.easyio-tab span {
+	font-size: 15px;
+	font-weight: 700;
+	color: #555;
+	text-decoration: none;
+	line-height: 36px;
+	padding: 0 10px;
+}
+
+.easyio-tab span:hover {
+	color: #464646;
+}
+
+.easyio-tab {
+	margin: 0 0 0 5px;
+	padding: 0px;
+	border-width: 1px 1px 1px;
+	border-style: solid solid none;
+	border-image: none;
+	border-color: #ccc;
+	display: inline-block;
+	background-color: #e4e4e4;
+	cursor: pointer
+}
+
+.easyio-tab:hover {
+	background-color: #fff
+}
+
+.easyio-selected {
+	background-color: #f1f1f1;
+	margin-bottom: -1px;
+	border-bottom: 1px solid #f1f1f1
+}
+
+.easyio-selected span {
+	color: #000;
+}
+
+.easyio-selected:hover {
+	background-color: #f1f1f1;
+}
+
+.easyio-tab-nav {
+	list-style: none;
+	margin: 10px 0 0;
+	padding-left: 5px;
+	border-bottom: 1px solid #ccc;
+}
+
+#easyio-inactive {
+	display: none;
+}
+
+.easyio-help-beacon-single,
+.easyio-help-beacon-multi {
+	margin: 3px;
+}
+
+#easyio-activation-result {
+	display: none;
+	background-color: white;
+	border: 1px solid #ccd0d4;
+	border-left: 4px solid #3eadc9;
+	margin: 10px 10px 15px 0;
+	padding: 12px;
+}
+
+#easyio-activation-result.error {
+	border-left-color: #dc3232;
+}
+
+#easyio-activation-processing {
+	display: none;
+}
+
+/* Easy IO stats bars */
+.easyio-bar-container {
+	background-color: #e6e6e6;
+	border-radius: 6px;
+	margin: 8px 0;
+	height: 12px;
+	width: 100%;
+	overflow: hidden;
+}
+
+.easyio-bar-fill {
+	margin: 0;
+	height: 100%;
+	width: 0;
+}
+
+#easyio-savings-container .easyio-bar-fill {
+	background-color: #1d3c71;
+}
+
+#easyio-bandwidth-container .easyio-bar-fill {
+	background-color: #1abc9c;
+}
+
+.easyio-bar-caption p {
+	text-align: center;
+	margin: 0;
+}
+
+.easyio-bar-score {
+	font-size: 1.0rem;
+	font-weight: bold;
+	line-height: 1.0;
+}
+
+#easyio-savings-flex .easyio-bar-score {
+	color: #1d3c71;
+}
+
+#easyio-bandwidth-flex .easyio-bar-score, #easyio-bandwidth-flex a {
+	color: #1abc9c;
+}
+
+/* Easy IO stats modal */
+.exactdn-stats-modal {
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: scroll;
+	margin: auto;
+	padding: 0px; 
+	background: #fff;
+	z-index: 99999;
+}
+
+.exactdn-stats-modal-charts {
+	padding: 30px;
+}
+
+.exactdn-stats-modal-close {
+	position: fixed;
+	top: 25px;
+	right: 40px;
+	z-index: 999;
+	cursor: pointer;
+}
+
+.exactdn-stats-modal-close svg {
+	cursor: pointer;
+	fill: #111226;
+	height: 16px;
+	vertical-align: -0.125em;
+}
+
+.exactdn-stats-modal {  
+        color: #111226;
+}
+
+.exactdn-stats-modal p {
+	font-weight: 400;
+	line-height: 1.5;
+	font-size: 16px;
+}
+
+.exactdn-stats-modal h2 {
+	font-size: 28px;
+	padding: 20px 0 10px;
+}
+
+.exactdn-body-unscroll {
+	overflow: hidden;
+}

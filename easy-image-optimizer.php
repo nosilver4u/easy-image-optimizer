@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'EasyIO\Plugin' ) && ! str_contains( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
-	define( 'EASYIO_VERSION', 421.61 );
+	define( 'EASYIO_VERSION', 421.613 );
 
 	/**
 	 * The full path of the plugin file (this file).
