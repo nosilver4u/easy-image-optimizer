@@ -59,10 +59,12 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 *Release Date - TBD*
 
 * added: Lazy Load support for background images in external CSS files
+* added: View CDN bandwidth usage on settings page
 * changed: Lazy Load checks parent element for skip-lazy class
 * changed: Lazy Load auto-sizing honors High DPI setting
 * changed: Easy IO fills in 450px wide image when responsive (srcset) images have a gap
 * improved: Lazy Load performance when searching for img elements
+* improved: Lazy Load placeholder generation is faster and works better with Safari
 * fixed: Lazy Load for iframes breaks WP Remote Users Sync plugin
 
 = 4.2.1 =
