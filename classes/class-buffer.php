@@ -21,7 +21,7 @@ class Buffer {
 	 * Register hook function to startup buffer.
 	 */
 	public function __construct() {
-		\add_action( 'template_redirect', array( $this, 'buffer_start' ) );
+		\add_action( 'template_redirect', array( $this, 'buffer_start' ), 9 );
 	}
 
 	/**
