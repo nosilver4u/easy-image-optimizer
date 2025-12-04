@@ -2,7 +2,7 @@
 Contributors: nosilver4u
 Tags: image, resize, webp, lazy load, compress
 Tested up to: 6.9
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv3
 
 Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
@@ -54,6 +54,12 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 4.3.1 =
+*Release Date - December 4, 2025*
+
+* fixed: Lazy Load auto-sizing makes images too small when screen size changes
+* fixed: failure to decode CSS background images contained in encoded quotes (&apos;)
 
 = 4.3.0 =
 *Release Date - November 18, 2025*

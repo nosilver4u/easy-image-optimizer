@@ -13,8 +13,8 @@ Plugin Name: Easy Image Optimizer
 Plugin URI: https://wordpress.org/plugins/easy-image-optimizer/
 Description: Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
 Author: Exactly WWW
-Version: 4.3.0
-Requires at least: 6.6
+Version: 4.3.1
+Requires at least: 6.7
 Requires PHP: 8.1
 Author URI: https://ewww.io/
 License: GPLv3
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'EasyIO\Plugin' ) && ! str_contains( add_query_arg( '', '' ), 'easyio_disable=1' ) ) {
-	define( 'EASYIO_VERSION', 430 );
+	define( 'EASYIO_VERSION', 431 );
 
 	/**
 	 * The full path of the plugin file (this file).
