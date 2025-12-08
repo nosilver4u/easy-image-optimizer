@@ -320,15 +320,24 @@ final class Settings extends Base {
 		}
 		\delete_option( 'easyio_exactdn_checkin' );
 		global $exactdn;
-		if ( \is_object( $exactdn ) && ! empty( $exactdn->domain_mismatch ) ) {
-			$this->debug_message( 'detected domain mismatch, clearing options and re-running setup' );
-			\delete_option( 'easyio_exactdn_domain' );
-			\delete_option( 'easyio_exactdn_local_domain' );
-			\delete_option( 'easyio_exactdn_plan_id' );
-			\delete_option( 'easyio_exactdn_failures' );
-			\delete_option( 'easyio_exactdn_verified' );
-			$exactdn->setup();
+		if ( $this->get_option( 'easyio_exactdn' ) && \is_object( $exactdn ) ) {
+			if ( method_exists( $exactdn, 'admin_notices' ) ) {
+				remove_all_actions( 'exactdn_as3cf_cname_active' );
+				remove_all_actions( 'exactdn_domain_mismatch' );
+				$exactdn->admin_notices();
+			}
+			if ( ! empty( $exactdn->domain_mismatch ) ) {
+				$this->debug_message( 'detected domain mismatch, clearing options and re-running setup' );
+				\delete_option( 'easyio_exactdn_domain' );
+				\delete_option( 'easyio_exactdn_local_domain' );
+				\delete_option( 'easyio_exactdn_plan_id' );
+				\delete_option( 'easyio_exactdn_failures' );
+				\delete_option( 'easyio_exactdn_verified' );
+				$exactdn->setup();
+			}
 		}
+		\remove_all_actions( 'admin_notices' );
+		\remove_all_actions( 'network_admin_notices' );
 		\wp_enqueue_style( 'easyio-settings-style', \plugins_url( '/includes/easyio-settings.css', EASYIO_PLUGIN_FILE ), array(), EASYIO_VERSION );
 		\wp_enqueue_script( 'easyio-chart-script', \plugins_url( '/includes/chart.min.js', EASYIO_PLUGIN_FILE ), array(), EASYIO_VERSION, true );
 		\wp_enqueue_script( 'easyio-settings-script', \plugins_url( '/includes/eio.js', EASYIO_PLUGIN_FILE ), array( 'jquery' ), EASYIO_VERSION );
