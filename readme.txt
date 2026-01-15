@@ -58,9 +58,9 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 = 4.3.2 =
 *Release Date - TBD*
 
-* fixed: PHP notice for boolean to array conversion
 * fixed: Lazy Load setting does not detect presence of Easy IO plugin
 * fixed: Easy IO domain not reset after site URL is updated
+* fixed: PHP warnings and notices
 
 = 4.3.1 =
 *Release Date - December 4, 2025*
