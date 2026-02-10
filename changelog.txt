@@ -1,3 +1,10 @@
+= 4.3.2 =
+*Release Date - February 10, 2026*
+
+* fixed: Easy IO domain not reset after site URL is updated
+* fixed: PHP 8.5 compatibility
+* fixed: PHP warnings and notices
+
 = 4.3.1 =
 *Release Date - December 4, 2025*
 

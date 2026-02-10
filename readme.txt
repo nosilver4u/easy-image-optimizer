@@ -1,18 +1,18 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
-Tags: image, resize, webp, lazy load, compress
+Tags: image, resize, webp, lazy load, optimize
 Tested up to: 6.9
-Stable tag: 4.3.1
+Stable tag: 4.3.2
 License: GPLv3
 
-Easily speed up your website to better connect with your visitors. Properly compress and size/scale images. Includes lazy load and WebP auto-convert.
+Easily speed up your website to increase conversions. Properly compress and size/scale images. Includes lazy load and WebP/AVIF auto-convert.
 
 == Description ==
 
-Want to get more visitors and customers? Easy Image Optimizer allows you to quickly and easily speed up your website so that you can connect with more people.
-One-click activation enables you to optimize your images by efficiently encoding and properly sizing images. It also includes lazy loading to defer offscreen images and automatic WebP conversion for even more speed.
+Want to get more visitors and customers? Easy Image Optimizer helps you quickly and easily speed up your website so you can focus on doing what you love.
+One-click activation enables you to optimize your images by efficiently encoding and properly sizing images. It also includes lazy loading to defer offscreen images and automatic WebP/AVIF conversion for even more speed.
 
-Easy Image Optimizer will optimize your site automatically by replacing all your image URLs with cloud-based URLs to deliver your content as fast as possible.
+Easy Image Optimizer will optimize your site automatically by replacing all your image URLs with CDN-based URLs to deliver your content as fast as possible.
 Beyond image optimization, it will also speed up the delivery of your CSS, JS (JavaScript), and font resources, by minifying them and delivering them through a speedy CDN (Content Delivery Network).
 
 = Support =
@@ -56,10 +56,10 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
 = 4.3.2 =
-*Release Date - TBD*
+*Release Date - February 10, 2026*
 
-* fixed: Lazy Load setting does not detect presence of Easy IO plugin
 * fixed: Easy IO domain not reset after site URL is updated
+* fixed: PHP 8.5 compatibility
 * fixed: PHP warnings and notices
 
 = 4.3.1 =
