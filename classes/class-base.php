@@ -929,7 +929,7 @@ class Base {
 
 	/**
 	 * Make sure this is really and truly a "front-end request", excluding page builders and such.
-	 * NOTE: this is not currently used anywhere, each module has it's own list.
+	 * NOTE: this is currently used by Image_Detective only. Otherwise, each module still has it's own list.
 	 *
 	 * @return bool True for front-end requests, false for admin/builder requests.
 	 */
@@ -939,18 +939,32 @@ class Base {
 		}
 		$uri = \add_query_arg( '', '' );
 		if (
-			\strpos( $uri, 'cornerstone=' ) !== false ||
-			\strpos( $uri, 'cornerstone-endpoint' ) !== false ||
-			\strpos( $uri, 'ct_builder=' ) !== false ||
-			\did_action( 'cornerstone_boot_app' ) || \did_action( 'cs_before_preview_frame' ) ||
-			'/print/' === substr( $uri, -7 ) ||
-			\strpos( $uri, 'elementor-preview=' ) !== false ||
-			\strpos( $uri, 'et_fb=' ) !== false ||
-			\strpos( $uri, 'is-editor-iframe=' ) !== false ||
-			\strpos( $uri, 'vc_editable=' ) !== false ||
-			\strpos( $uri, 'tatsu=' ) !== false ||
+			\str_contains( $uri, 'bricks=run' ) ||
+			\str_contains( $uri, '?brizy-edit' ) ||
+			\str_contains( $uri, '&builder=true' ) ||
+			\str_contains( $uri, 'cornerstone=' ) ||
+			\str_contains( $uri, 'cornerstone-endpoint' ) ||
+			\str_contains( $uri, 'ct_builder=' ) ||
+			\str_contains( $uri, 'ct_render_shortcode=' ) ||
+			\did_action( 'cornerstone_boot_app' ) ||
+			\did_action( 'cs_before_preview_frame' ) ||
+			\did_action( 'cs_element_rendering' ) ||
+			\did_action( 'cornerstone_before_boot_app' ) ||
+			\apply_filters( 'cs_is_preview_render', false ) ||
+			\str_contains( $uri, 'elementor-preview=' ) ||
+			\str_contains( $uri, 'et_fb=' ) ||
+			\str_contains( $uri, 'fb-edit=' ) ||
+			\str_contains( $uri, '?fl_builder' ) ||
+			\str_contains( $uri, '?giveDonationFormInIframe' ) ||
+			\str_contains( $uri, 'is-editor-iframe=' ) ||
+			\str_contains( $uri, 'action=oxy_render' ) ||
+			\str_contains( $uri, 'tatsu=' ) ||
+			\str_contains( $uri, 'tve=true' ) ||
 			( ! empty( $_POST['action'] ) && 'tatsu_get_concepts' === \sanitize_text_field( \wp_unslash( $_POST['action'] ) ) ) || // phpcs:ignore WordPress.Security.NonceVerification
-			\strpos( $uri, 'wp-login.php' ) !== false ||
+			\str_contains( $uri, 'vc_editable=' ) ||
+			\str_contains( $uri, 'wp-login.php' ) ||
+			'/print/' === \substr( $uri, -7 ) ||
+			( \function_exists( '\affwp_is_affiliate_portal' ) && \affwp_is_affiliate_portal() ) ||
 			\is_embed() ||
 			\is_feed() ||
 			\is_preview() ||
@@ -1078,6 +1092,21 @@ class Base {
 		if ( ! \is_object( $this->filesystem ) ) {
 			$this->filesystem = new \WP_Filesystem_Direct( '' );
 		}
+	}
+
+	/**
+	 * Get elapsed time in microseconds.
+	 *
+	 * @param array $started The start time, as returned by hrtime().
+	 * @return int Elapsed time in microseconds.
+	 */
+	public function get_elapsed_time( $started ) {
+		if ( ! \is_array( $started ) || 2 !== count( $started ) ) {
+			return 0;
+		}
+		$current_time = \hrtime();
+		$elapsed_time = ( $current_time[0] - $started[0] ) * 1000000 + ( $current_time[1] - $started[1] ) / 1000;
+		return (int) $elapsed_time;
 	}
 
 	/**
@@ -1592,26 +1621,27 @@ class Base {
 		}
 		if ( 0 === \strpos( $url, WP_CONTENT_URL ) ) {
 			$path = \str_replace( WP_CONTENT_URL, WP_CONTENT_DIR, $url );
-			$this->debug_message( "trying $path based on " . WP_CONTENT_URL );
+			$this->debug_message( "trying $path based on WP_CONTENT_URL " . WP_CONTENT_URL );
 		} elseif ( 0 === \strpos( $url, $this->relative_home_url ) ) {
 			$path = \str_replace( $this->relative_home_url, ABSPATH, $url );
-			$this->debug_message( "trying $path based on " . $this->relative_home_url );
+			$this->debug_message( "trying $path based on relative home URL and ABSPATH" . $this->relative_home_url );
 		} elseif ( 0 === \strpos( $url, $this->home_url ) ) {
 			$path = \str_replace( $this->home_url, ABSPATH, $url );
-			$this->debug_message( "trying $path based on " . $this->home_url );
+			$this->debug_message( "trying $path based on home_url and ABSPATH" . $this->home_url );
 		} else {
 			$this->debug_message( 'not a valid local image' );
 			return false;
 		}
 		$path_parts = \explode( '?', $path );
 		if ( $this->is_file( $path_parts[0] . $extension ) ) {
-			$this->debug_message( 'local file found' );
+			$this->debug_message( 'local file found (appended)' );
 			return $path_parts[0];
 		}
 		if ( ! empty( $extension ) ) {
 			$path_info     = pathinfo( $path_parts[0] );
 			$replaced_path = $path_info['dirname'] . '/' . $path_info['filename'] . $extension;
 			if ( $this->is_file( $replaced_path ) ) {
+				$this->debug_message( 'local file found (replaced)' );
 				return $path_parts[0];
 			}
 		}
@@ -1624,13 +1654,14 @@ class Base {
 				$this->debug_message( "trying $path from HMWP" );
 				$path_parts = \explode( '?', $path );
 				if ( $this->is_file( $path_parts[0] . $extension ) ) {
-					$this->debug_message( 'local file found' );
+					$this->debug_message( 'local file found (appended)' );
 					return $path_parts[0];
 				}
 				if ( ! empty( $extension ) ) {
 					$path_info     = pathinfo( $path_parts[0] );
 					$replaced_path = $path_info['dirname'] . '/' . $path_info['filename'] . $extension;
 					if ( $this->is_file( $replaced_path ) ) {
+						$this->debug_message( 'local file found (replaced)' );
 						return $path_parts[0];
 					}
 				}
@@ -1782,6 +1813,35 @@ class Base {
 				}
 			}
 		}
+
+		/**
+		 * Allow third-party offload plugins to mark the site as serving media from S3-compatible storage.
+		 *
+		 * Built-in detection covers WP Offload Media, S3 Uploads, and WP Stateless. Other offloaders
+		 * (e.g. Advanced Media Offloader) can hook this filter to opt in.
+		 *
+		 * @param bool|string $s3_active False when no S3 offload is active, otherwise the S3/CDN host
+		 *                               that should be matched against asset URLs.
+		 */
+		$this->s3_active = \apply_filters( 'eio_s3_active', $this->s3_active );
+
+		/**
+		 * Allow third-party offload plugins to declare an S3 object prefix.
+		 *
+		 * The prefix is stripped from URLs when mapping CDN URLs back to local paths.
+		 *
+		 * @param string $s3_object_prefix The object prefix, or an empty string when none is used.
+		 */
+		$this->s3_object_prefix = \apply_filters( 'eio_s3_object_prefix', $this->s3_object_prefix );
+
+		/**
+		 * Allow third-party offload plugins to declare that offloaded URLs contain a numeric
+		 * object versioning segment (8 or 14 digits) that must be stripped before resolving
+		 * URLs to local paths.
+		 *
+		 * @param bool $s3_object_version True when offloaded URLs contain a versioning segment.
+		 */
+		$this->s3_object_version = \apply_filters( 'eio_s3_object_versioning_enabled', $this->s3_object_version );
 
 		// NOTE: we don't want this for Easy IO as they might be using SWIS to deliver
 		// JS/CSS from a different CDN domain, and that will break with Easy IO!

@@ -1,3 +1,9 @@
+= 4.3.3 =
+*Release Date - May 6, 2026*
+
+* added: filters for plugins that offload media to cloud storage to integrate with S3 detection, props @alessandrocarrera
+* fixed: performance regression when Lazy Load checks parent elements for skip-lazy exceptions
+
 = 4.3.2 =
 *Release Date - February 10, 2026*
 

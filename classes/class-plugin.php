@@ -156,12 +156,12 @@ final class Plugin extends Base {
 	 * @access private
 	 */
 	private function php_supported() {
-		if ( defined( 'PHP_VERSION_ID' ) && PHP_VERSION_ID >= 80100 ) {
-			return true;
+		if ( defined( 'PHP_VERSION_ID' ) && \PHP_VERSION_ID < 80100 ) {
+			\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
+			\add_action( 'admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
+			return false;
 		}
-		\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
-		\add_action( 'admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
-		return false;
+		return true;
 	}
 
 	/**
@@ -171,7 +171,7 @@ final class Plugin extends Base {
 	 */
 	private function wp_supported() {
 		global $wp_version;
-		if ( \version_compare( $wp_version, '6.6' ) >= 0 ) {
+		if ( \version_compare( $wp_version, '6.7' ) >= 0 ) {
 			return true;
 		}
 		\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_wp_notice' ) );

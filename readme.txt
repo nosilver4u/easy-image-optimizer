@@ -1,8 +1,8 @@
 === Easy Image Optimizer ===
 Contributors: nosilver4u
 Tags: image, resize, webp, lazy load, optimize
-Tested up to: 6.9
-Stable tag: 4.3.2
+Tested up to: 7.0
+Stable tag: 4.3.3
 License: GPLv3
 
 Easily speed up your website to increase conversions. Properly compress and size/scale images. Includes lazy load and WebP/AVIF auto-convert.
@@ -54,6 +54,12 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 == Changelog ==
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
+
+= 4.3.3 =
+*Release Date - May 6, 2026*
+
+* added: filters for plugins that offload media to cloud storage to integrate with S3 detection, props @alessandrocarrera
+* fixed: performance regression when Lazy Load checks parent elements for skip-lazy exceptions
 
 = 4.3.2 =
 *Release Date - February 10, 2026*
