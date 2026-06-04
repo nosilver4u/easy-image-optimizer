@@ -117,27 +117,57 @@ final class Settings extends Base {
 	public function set_defaults() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		// Set defaults for all options that need to be autoloaded.
-		\add_option( 'easyio_debug', false );
-		\add_option( 'easyio_metadata_remove', true );
-		\add_option( 'easyio_exactdn', false );
-		\add_option( 'easyio_plan_id', 0 );
-		\add_option( 'exactdn_all_the_things', false );
-		\add_option( 'exactdn_lossy', false );
-		\add_option( 'exactdn_hidpi', false );
-		\add_option( 'exactdn_exclude', '' );
-		\add_option( 'exactdn_sub_folder', false );
-		\add_option( 'exactdn_prevent_db_queries', true );
-		\add_option( 'exactdn_asset_domains', '' );
-		\add_option( 'easyio_add_missing_dims', false );
-		\add_option( 'easyio_lazy_load', false );
-		\add_option( 'easyio_use_lqip', false );
-		\add_option( 'easyio_use_dcip', false );
-		\add_option( 'easyio_use_siip', false );
-		\add_option( 'easyio_ll_autoscale', true );
-		\add_option( 'easyio_ll_abovethefold', 0 );
-		\add_option( 'easyio_ll_external_bg', false );
-		\add_option( 'easyio_ll_all_things', '' );
-		\add_option( 'easyio_ll_exclude', '' );
+		\add_option( 'easyio_debug', false, '', true );
+		\add_option( 'easyio_metadata_remove', true, '', true );
+		\add_option( 'easyio_exactdn', false, '', true );
+		\add_option( 'easyio_plan_id', 0, '', true );
+		\add_option( 'easyio_exactdn_asset_domains', '', '', true );
+		\add_option( 'exactdn_all_the_things', false, '', true );
+		\add_option( 'exactdn_lossy', false, '', true );
+		\add_option( 'exactdn_hidpi', false, '', true );
+		\add_option( 'exactdn_exclude', '', '', true );
+		\add_option( 'exactdn_sub_folder', false, '', true );
+		\add_option( 'exactdn_prevent_db_queries', true, '', true );
+		\add_option( 'easyio_sharpen', false, '', true );
+		\add_option( 'easyio_add_missing_dims', false, '', true );
+		\add_option( 'easyio_lazy_load', false, '', true );
+		\add_option( 'easyio_use_lqip', false, '', true );
+		\add_option( 'easyio_use_dcip', false, '', true );
+		\add_option( 'easyio_use_siip', false, '', true );
+		\add_option( 'easyio_ll_autoscale', true, '', true );
+		\add_option( 'easyio_ll_abovethefold', 0, '', true );
+		\add_option( 'easyio_ll_external_bg', false, '', true );
+		\add_option( 'easyio_ll_all_things', '', '', true );
+		\add_option( 'easyio_ll_exclude', '', '', true );
+		\add_option( 'easyio_ll_manual_page_settings', false, '', true );
+
+		// Make sure everything front-end gets autoloaded.
+		$autoload_options = array(
+			'easyio_debug'                   => true,
+			'easyio_metadata_remove'         => true,
+			'easyio_exactdn'                 => true,
+			'easyio_plan_id'                 => true,
+			'easyio_exactdn_asset_domains'   => true,
+			'exactdn_all_the_things'         => true,
+			'exactdn_lossy'                  => true,
+			'exactdn_hidpi'                  => true,
+			'exactdn_exclude'                => true,
+			'exactdn_sub_folder'             => true,
+			'exactdn_prevent_db_queries'     => true,
+			'easyio_sharpen'                 => true,
+			'easyio_add_missing_dims'        => true,
+			'easyio_lazy_load'               => true,
+			'easyio_use_lqip'                => true,
+			'easyio_use_dcip'                => true,
+			'easyio_use_siip'                => true,
+			'easyio_ll_autoscale'            => true,
+			'easyio_ll_abovethefold'         => true,
+			'easyio_ll_external_bg'          => true,
+			'easyio_ll_all_things'           => true,
+			'easyio_ll_exclude'              => true,
+			'easyio_ll_manual_page_settings' => true,
+		);
+		\wp_set_option_autoload_values( $autoload_options );
 
 		// Set network defaults.
 		\add_site_option( 'easyio_metadata_remove', true );

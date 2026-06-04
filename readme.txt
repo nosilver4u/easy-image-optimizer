@@ -55,6 +55,11 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 4.3.5 =
+*Release Date - TBD*
+
+* fixed: not all front-end options autoloaded
+
 = 4.3.4 =
 *Release Date - June 4, 2026*
 
