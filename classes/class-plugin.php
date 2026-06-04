@@ -171,7 +171,7 @@ final class Plugin extends Base {
 	 */
 	private function wp_supported() {
 		global $wp_version;
-		if ( \version_compare( $wp_version, '6.7' ) >= 0 ) {
+		if ( \version_compare( $wp_version, '6.8' ) >= 0 ) {
 			return true;
 		}
 		\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_wp_notice' ) );
@@ -190,7 +190,7 @@ final class Plugin extends Base {
 	 * Display a notice that the WP version is too old.
 	 */
 	public function unsupported_wp_notice() {
-		echo '<div id="swis-warning-wp" class="notice notice-error"><p>' . esc_html__( 'Easy Image Optimizer requires WordPress 6.6 or greater, please update your website.', 'easy-image-optimizer' ) . '</p></div>';
+		echo '<div id="swis-warning-wp" class="notice notice-error"><p>' . esc_html__( 'Easy Image Optimizer requires WordPress 6.8 or greater, please update your website.', 'easy-image-optimizer' ) . '</p></div>';
 	}
 
 	/**

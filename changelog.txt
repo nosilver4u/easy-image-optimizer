@@ -1,3 +1,8 @@
+= 4.3.4 =
+*Release Date - June 4, 2026*
+
+* fixed: JS/CSS URLs created by WP Rocket are not delivered via Easy IO CDN
+
 = 4.3.3 =
 *Release Date - May 6, 2026*
 

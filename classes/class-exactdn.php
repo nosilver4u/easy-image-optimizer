@@ -267,8 +267,8 @@ class ExactDN extends Page_Parser {
 		/**
 		 * Allow pre-empting the parsers by page.
 		 *
-		 * @param bool Whether to skip parsing the page.
-		 * @param string The URI/path of the page.
+		 * @param bool false Whether to skip parsing the page.
+		 * @param string $this->request_uri The URI/path of the page.
 		 */
 		if ( \apply_filters( 'exactdn_skip_page', false, $this->request_uri ) ) {
 			return;
@@ -442,6 +442,8 @@ class ExactDN extends Page_Parser {
 		if ( $this->get_option( 'exactdn_all_the_things' ) ) {
 			\add_filter( 'style_loader_src', array( $this, 'parse_enqueue' ), 9999 );
 			\add_filter( 'script_loader_src', array( $this, 'parse_enqueue' ), 9999 );
+			\add_filter( 'rocket_css_url', array( $this, 'parse_enqueue' ) );
+			\add_filter( 'rocket_js_url', array( $this, 'parse_enqueue' ) );
 		}
 		if ( ! $this->get_option( 'exactdn_prevent_db_queries' ) ) {
 			$this->set_option( 'exactdn_prevent_db_queries', true );
@@ -455,6 +457,8 @@ class ExactDN extends Page_Parser {
 
 		// Configure Autoptimize with our CDN domain.
 		\add_filter( 'autoptimize_filter_cssjs_multidomain', array( $this, 'add_cdn_domain' ) );
+		// Inform WP Rocket of the CDN domain also.
+		\add_filter( 'rocket_cdn_hosts', array( $this, 'add_cdn_domain' ) );
 
 		\add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 
@@ -599,7 +603,7 @@ class ExactDN extends Page_Parser {
 		}
 		$site_url = $this->content_url();
 
-		$url = 'http://optimize.exactlywww.com/exactdn/activate.php';
+		$url = 'http://api.exactlywww.net/exactdn/activate.php';
 		$ssl = \wp_http_supports( array( 'ssl' ) );
 		if ( $ssl ) {
 			$url = \set_url_scheme( $url, 'https' );
@@ -691,7 +695,7 @@ class ExactDN extends Page_Parser {
 		global $exactdn_activate_error;
 		$exactdn_activate_error = 'zone not verified';
 		// Primary check sends the test URL to the API for full verification.
-		$api_url = 'http://optimize.exactlywww.com/exactdn/verify.php';
+		$api_url = 'http://api.exactlywww.net/exactdn/verify.php';
 		$ssl     = \wp_http_supports( array( 'ssl' ) );
 		if ( $ssl ) {
 			$api_url = \set_url_scheme( $api_url, 'https' );
@@ -1226,6 +1230,7 @@ class ExactDN extends Page_Parser {
 				if ( empty( $args ) ) {
 					$srcset_fill = false;
 				}
+				$placeholder_src_orig = '';
 				// Support Lazy Load plugins.
 				// Don't modify $tag yet as we need unmodified version later.
 				$lazy_load_src = \trim( $this->get_attribute( $images['img_tag'][ $index ], 'data-lazy-src' ) );
@@ -1614,6 +1619,7 @@ class ExactDN extends Page_Parser {
 
 					$args    = array();
 					$new_tag = $tag;
+					$new_src = '';
 					$width   = $this->get_attribute( $images['img_tag'][ $index ], 'width' );
 					$height  = $this->get_attribute( $images['img_tag'][ $index ], 'height' );
 					// Making sure the width/height are numeric.
@@ -3016,7 +3022,7 @@ class ExactDN extends Page_Parser {
 		 *
 		 * @param array|bool $multipliers Array of multipliers to use or false to bypass.
 		 */
-		$multipliers = \apply_filters( 'exactdn_srcset_multipliers', array( .2, .4, .6, .8, 1, 450 ) );
+		$multipliers = \apply_filters( 'exactdn_srcset_multipliers', array( .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 450 ) );
 
 		if ( empty( $url ) || empty( $multipliers ) ) {
 			// No URL, or no multipliers, bail!
@@ -3334,10 +3340,10 @@ class ExactDN extends Page_Parser {
 	/**
 	 * Check if this is a REST API request that we should handle (or not).
 	 *
-	 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
-	 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
-	 * @param WP_REST_Request  $request  Request used to generate the response.
-	 * @return WP_HTTP_Response The result, unaltered.
+	 * @param \WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
+	 * @param \WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+	 * @param \WP_REST_Request  $request  Request used to generate the response.
+	 * @return \WP_HTTP_Response The result, unaltered.
 	 */
 	public function parse_restapi_maybe( $response, $handler, $request ) {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
@@ -4290,21 +4296,22 @@ class ExactDN extends Page_Parser {
 		global $wp_version;
 		// If a resource doesn't have a version string, we add one to help with cache-busting.
 		if (
-			false !== \strpos( $url, $this->content_path . '/themes/' ) &&
+			\str_contains( $url, $this->content_path . '/themes/' ) &&
 			( empty( $parsed_url['query'] ) || 'ver=' . $wp_version === $parsed_url['query'] )
 		) {
 			$modified = $this->function_exists( '\filemtime' ) ? \filemtime( \get_template_directory() ) : '';
 			if ( empty( $modified ) ) {
 				$modified = $this->version;
 			}
+			$modified = "m=$modified";
 			/**
 			 * Allows a custom version string for resources that are missing one.
 			 *
-			 * @param string Defaults to the modified time of the theme folder, and falls back to the plugin version.
+			 * @param string $modified Defaults to the modified time of the theme folder, and falls back to the plugin version.
 			 */
-			$parsed_url['query'] = \apply_filters( 'exactdn_version_string', "m=$modified" );
+			$parsed_url['query'] = \apply_filters( 'exactdn_version_string', $modified );
 		} elseif (
-			false !== \strpos( $url, $this->content_path . '/plugins/' ) &&
+			\str_contains( $url, $this->content_path . '/plugins/' ) &&
 			( empty( $parsed_url['query'] ) || 'ver=' . $wp_version === $parsed_url['query'] )
 		) {
 			$parsed_url['query'] = '';
@@ -4314,12 +4321,13 @@ class ExactDN extends Page_Parser {
 				if ( empty( $modified ) ) {
 					$modified = $this->version;
 				}
+				$modified = "m=$modified";
 				/**
 				 * Allows a custom version string for resources that are missing one.
 				 *
-				 * @param string Defaults to the modified time of the folder, and falls back to the plugin version.
+				 * @param string $modified Defaults to the modified time of the folder, and falls back to the plugin version.
 				 */
-				$parsed_url['query'] = \apply_filters( 'exactdn_version_string', "m=$modified" );
+				$parsed_url['query'] = \apply_filters( 'exactdn_version_string', $modified );
 			}
 		} elseif ( empty( $parsed_url['query'] ) ) {
 			$parsed_url['query'] = \apply_filters( 'exactdn_version_string', 'm=' . $this->version );
@@ -4584,9 +4592,9 @@ class ExactDN extends Page_Parser {
 	}
 
 	/**
-	 * Adds the ExactDN domain to the list of 'local' domains for Autoptimize.
+	 * Adds the ExactDN domain to the list of 'local' domains for other plugins.
 	 *
-	 * @param array $domains A list of domains considered 'local' by Autoptimize.
+	 * @param array $domains A list of domains considered 'local'.
 	 * @return array The same list, with the ExactDN domain appended.
 	 */
 	public function add_cdn_domain( $domains ) {
@@ -4605,7 +4613,7 @@ class ExactDN extends Page_Parser {
 	 */
 	public function savings() {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
-		$url = 'http://optimize.exactlywww.com/exactdn/savings.php';
+		$url = 'http://api.exactlywww.net/exactdn/savings.php';
 		$ssl = \wp_http_supports( array( 'ssl' ) );
 		if ( $ssl ) {
 			$url = \set_url_scheme( $url, 'https' );
