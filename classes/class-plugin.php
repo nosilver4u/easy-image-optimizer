@@ -137,6 +137,8 @@ final class Plugin extends Base {
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-buffer.php';
 		// Page Parsing class for working with HTML content.
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-page-parser.php';
+		// Page Settings trait for storing/retrieving page-specific image settings.
+		require_once EASYIO_PLUGIN_PATH . 'classes/trait-page-settings.php';
 		// Lazy Load class for parsing image urls and deferring off-screen images.
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-lazy-load.php';
 		// EasyIO\HS_Beacon class for integrated help/docs.
