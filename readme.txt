@@ -58,7 +58,7 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 = 4.3.5 =
 *Release Date - TBD*
 
-* fixed: not all front-end options autoloaded
+* fixed: some front-end options not autoloaded
 
 = 4.3.4 =
 *Release Date - June 4, 2026*
