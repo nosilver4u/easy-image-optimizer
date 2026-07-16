@@ -1,3 +1,9 @@
+= 4.3.5 =
+*Release Date - July 16, 2026*
+
+* fixed: some front-end options not autoloaded
+* security: prevent authenticated XSS
+
 = 4.3.4 =
 *Release Date - June 4, 2026*
 

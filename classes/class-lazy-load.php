@@ -153,13 +153,6 @@ class Lazy_Load extends Page_Parser {
 	private $forbidden_blocks = array();
 
 	/**
-	 * Request URI.
-	 *
-	 * @var string $request_uri
-	 */
-	public $request_uri = '';
-
-	/**
 	 * DOM Document for parsing HTML.
 	 *
 	 * @var \DOMDocument $doc
@@ -181,22 +174,15 @@ class Lazy_Load extends Page_Parser {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		$this->content_url();
 
-		$this->request_uri = \add_query_arg( '', '' );
-		if ( \str_contains( $this->request_uri, 'page=ewww-image-optimizer-options' ) ) {
-			$this->debug_message( 'request uri is EWWW IO settings' );
-		} else {
-			$this->debug_message( "request uri is {$this->request_uri}" );
-		}
-
 		\add_filter( 'eio_do_lazyload', array( $this, 'should_process_page' ), 10, 2 );
 
 		/**
 		 * Allow pre-empting Lazy Load by page.
 		 *
 		 * @param bool true Whether to parse the page for images to lazy load, default true.
-		 * @param string $this->request_uri The URI of the page.
+		 * @param string parent::$request_uri The URI of the page.
 		 */
-		if ( ! \apply_filters( 'eio_do_lazyload', true, $this->request_uri ) ) {
+		if ( ! \apply_filters( 'eio_do_lazyload', true, parent::$request_uri ) ) {
 			return;
 		}
 
@@ -315,7 +301,7 @@ class Lazy_Load extends Page_Parser {
 			return false;
 		}
 		if ( empty( $uri ) ) {
-			$uri = $this->request_uri;
+			$uri = parent::$request_uri;
 		}
 		if ( $this->is_iterable( $this->user_page_exclusions ) ) {
 			foreach ( $this->user_page_exclusions as $page_exclusion ) {
@@ -487,7 +473,7 @@ class Lazy_Load extends Page_Parser {
 				return;
 			}
 		}
-		$request_uri = $this->parse_url( $this->request_uri, PHP_URL_PATH );
+		$request_uri = $this->parse_url( parent::$request_uri, PHP_URL_PATH );
 		if ( empty( $request_uri ) ) {
 			$request_uri = '/';
 		}
@@ -531,7 +517,7 @@ class Lazy_Load extends Page_Parser {
 		if ( ! $this->should_process_page() ) {
 			return $buffer;
 		}
-		if ( ! \apply_filters( 'eio_do_lazyload', true, $this->request_uri ) ) {
+		if ( ! \apply_filters( 'eio_do_lazyload', true, parent::$request_uri ) ) {
 			return $buffer;
 		}
 
@@ -1618,7 +1604,7 @@ class Lazy_Load extends Page_Parser {
 		if ( ! $this->should_process_page() ) {
 			return;
 		}
-		if ( ! \apply_filters( 'eio_do_lazyload', true, $this->request_uri ) ) {
+		if ( ! \apply_filters( 'eio_do_lazyload', true, parent::$request_uri ) ) {
 			return;
 		}
 		echo '<noscript><style>.lazyload[data-src]{display:none !important;}</style></noscript>';
@@ -1634,7 +1620,7 @@ class Lazy_Load extends Page_Parser {
 		if ( ! $this->should_process_page() ) {
 			return;
 		}
-		if ( ! \apply_filters( 'eio_do_lazyload', true, $this->request_uri ) ) {
+		if ( ! \apply_filters( 'eio_do_lazyload', true, parent::$request_uri ) ) {
 			return;
 		}
 		$in_footer = array(
@@ -1658,9 +1644,10 @@ class Lazy_Load extends Page_Parser {
 			'var eio_lazy_vars = ' .
 				\wp_json_encode(
 					array(
-						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
-						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
 						'bg_min_dpr'     => ( \defined( 'EIO_LL_BG_MIN_DPR' ) && EIO_LL_BG_MIN_DPR ? EIO_LL_BG_MIN_DPR : 1.1 ),
+						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
+						'safe_domains'   => \apply_filters( 'eio_lazy_safe_domains', $this->allowed_domains ),
+						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
 						'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
 						'use_dpr'        => (int) $this->get_option( 'exactdn_hidpi' ),
 					)
@@ -1679,7 +1666,7 @@ class Lazy_Load extends Page_Parser {
 		if ( ! $this->should_process_page() ) {
 			return;
 		}
-		if ( ! \apply_filters( 'eio_do_lazyload', true, $this->request_uri ) ) {
+		if ( ! \apply_filters( 'eio_do_lazyload', true, parent::$request_uri ) ) {
 			return;
 		}
 		$in_footer = array(
@@ -1700,9 +1687,10 @@ class Lazy_Load extends Page_Parser {
 			'var eio_lazy_vars = ' .
 				\wp_json_encode(
 					array(
-						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
-						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
 						'bg_min_dpr'     => ( \defined( 'EIO_LL_BG_MIN_DPR' ) && EIO_LL_BG_MIN_DPR ? EIO_LL_BG_MIN_DPR : 1.1 ),
+						'exactdn_domain' => ( $this->parsing_exactdn ? $this->exactdn_domain : '' ),
+						'safe_domains'   => \apply_filters( 'eio_lazy_safe_domains', $this->allowed_domains ),
+						'skip_autoscale' => ( \defined( 'EIO_LL_AUTOSCALE' ) && ! EIO_LL_AUTOSCALE ? 1 : 0 ),
 						'threshold'      => (int) $threshold > 50 ? (int) $threshold : 0,
 						'use_dpr'        => (int) $this->get_option( 'exactdn_hidpi' ),
 					)
