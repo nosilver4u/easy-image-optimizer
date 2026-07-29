@@ -988,8 +988,8 @@ final class Settings extends Base {
 		if ( ! \current_user_can( \apply_filters( 'easyio_admin_permissions', 'manage_options' ) ) ) {
 			\wp_die( \esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
 		}
-		if ( \is_file( $this->debug_log_path() ) ) {
-			\unlink( $this->debug_log_path() );
+		if ( $this->is_file( $this->debug_log_path() ) ) {
+			$this->delete_file( $this->debug_log_path() );
 		}
 		$sendback = \wp_get_referer();
 		if ( empty( $sendback ) ) {
@@ -1008,7 +1008,7 @@ final class Settings extends Base {
 			\wp_die( \esc_html__( 'Access denied.', 'easy-image-optimizer' ) );
 		}
 		$debug_log = $this->debug_log_path();
-		if ( \is_file( $debug_log ) ) {
+		if ( $this->is_file( $debug_log ) ) {
 			$this->ob_clean();
 			\header( 'Content-Description: File Transfer' );
 			\header( 'Content-Type: text/plain;charset=UTF-8' );
