@@ -1,3 +1,9 @@
+= 4.3.7 =
+*Release Date - August 20, 2026*
+
+* fixed: Easy IO modifies URLs in REST API endpoints used by media uploader in WP 7.1
+* fixed: Auto-scaling sometimes makes images too large (or too small) when CSS width is set to `auto`
+
 = 4.3.6 =
 *Release Date - July 29, 2026*
 
