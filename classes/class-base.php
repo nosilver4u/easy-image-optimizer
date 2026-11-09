@@ -266,7 +266,7 @@ class Base {
 		$this->relative_home_url = \preg_replace( '/https?:/', '', $this->home_url );
 		$this->home_domain       = $this->parse_url( $this->home_url, PHP_URL_HOST );
 		if ( empty( self::$request_uri ) ) {
-			self::$request_uri = \add_query_arg( '', '' );
+			self::$request_uri = ! empty( $_SERVER['REQUEST_URI'] ) ? \sanitize_url( \wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		}
 
 		if ( 'EWWW' === __NAMESPACE__ ) {
@@ -284,16 +284,18 @@ class Base {
 			return;
 		}
 
-		// Check to see if we're in the wp-admin to enable debugging temporarily.
+		// Check to see if we're on a page that needs to enable debugging temporarily.
 		// Done after the above, because this means we are constructing the Plugin() object
 		// which is the very first object initialized.
 		if (
 			! self::$temp_debug &&
-			is_admin() &&
-			! wp_doing_ajax() &&
+			(
+				\str_contains( self::$request_uri, 'page=ewww-image-optimizer-options' ) ||
+				\str_contains( self::$request_uri, 'page=ewww-image-optimizer-bulk' )
+			) &&
 			! $this->get_option( $this->prefix . 'debug' )
 		) {
-				self::$temp_debug = true;
+			self::$temp_debug = true;
 		}
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		$this->debug_message( "plugin (resource) content_url: $this->content_url" );
@@ -301,11 +303,6 @@ class Base {
 		$this->debug_message( "home url: $this->home_url" );
 		$this->debug_message( "relative home url: $this->relative_home_url" );
 		$this->debug_message( "home domain: $this->home_domain" );
-		if ( ! \str_contains( self::$request_uri, 'page=ewww-image-optimizer-options' ) ) {
-			$this->debug_message( 'request uri is ' . self::$request_uri );
-		} else {
-			$this->debug_message( 'request uri is EWWW IO settings' );
-		}
 	}
 
 	/**
@@ -376,6 +373,11 @@ class Base {
 			$memory_limit = $this->memory_limit();
 			\clearstatcache();
 			$timestamp = \gmdate( 'Y-m-d H:i:s' ) . "\n";
+			if ( ! \str_contains( self::$request_uri, 'page=ewww-image-optimizer-options' ) ) {
+				$request_uri_info = 'request uri is ' . self::$request_uri . "\n";
+			} else {
+				$request_uri_info = 'request uri is EWWW IO settings' . "\n";
+			}
 			if ( ! \file_exists( $debug_log ) ) {
 				$this->touch( $debug_log );
 			} else {
@@ -388,7 +390,7 @@ class Base {
 			}
 			if ( \filesize( $debug_log ) + \strlen( self::$debug_data ) + 4000000 + \memory_get_usage( true ) <= $memory_limit && $this->is_writable( $debug_log ) ) {
 				self::$debug_data = \str_replace( '<br>', "\n", self::$debug_data );
-				\file_put_contents( $debug_log, $timestamp . self::$debug_data, FILE_APPEND );
+				\file_put_contents( $debug_log, $timestamp . $request_uri_info . self::$debug_data, FILE_APPEND );
 			}
 		}
 		self::$debug_data = '';
@@ -1021,6 +1023,7 @@ class Base {
 		$this->debug_message( '<b>' . __METHOD__ . '()</b>' );
 		if (
 			\strpos( $image, 'base64,R0lGOD' ) ||
+			\str_contains( $image, 'data:image/png;base64' ) ||
 			\strpos( $image, 'lazy-load/images/1x1' ) ||
 			\strpos( $image, '/assets/images/lazy' ) ||
 			\strpos( $image, '/assets/images/dummy.png' ) ||
@@ -1126,6 +1129,37 @@ class Base {
 	public function is_writable( $file ) {
 		$this->get_filesystem();
 		return $this->filesystem->is_writable( $file );
+	}
+
+	/**
+	 * Check if writing to a location is permitted.
+	 *
+	 * @param string $file The path to check.
+	 * @return bool True if it is, false if it ain't.
+	 */
+	public function is_write_permitted( $file ) {
+		$unlimited   = false;
+		$permissions = \apply_filters( 'ewww_image_optimizer_superadmin_permissions', '' );
+		if ( is_multisite() && current_user_can( $permissions ) ) {
+			$unlimited = true;
+		} elseif ( ! is_multisite() ) {
+			$unlimited = true;
+		}
+		if ( ! $unlimited ) {
+			// Retrieve the location of the WordPress upload folder.
+			$upload_dir = wp_get_upload_dir();
+			// Retrieve the path of the upload folder from the array.
+			$upload_path = trailingslashit( $upload_dir['basedir'] );
+			$blog_id     = get_current_blog_id();
+			if ( 1 === (int) $blog_id && \str_contains( $file, $upload_path . 'sites' ) ) {
+				// Blog #1 is not allowed to write to the /sites/ folder, since that is used by all the other blogs.
+				return false;
+			} elseif ( $blog_id > 1 && ! \str_contains( $file, $upload_path . 'sites/' . $blog_id ) ) {
+				// All other blogs are not allowed to write outside of their own /sites/#/ folder.
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -1242,13 +1276,13 @@ class Base {
 		$upload_dir  = \realpath( $upload_dir['basedir'] );
 		$content_dir = \realpath( WP_CONTENT_DIR );
 
-		if ( false !== \strpos( $file, $upload_dir ) ) {
+		if ( $upload_dir && \str_contains( $file, $upload_dir ) ) {
 			return \wp_delete_file_from_directory( $file, $upload_dir );
 		}
-		if ( false !== \strpos( $file, $content_dir ) ) {
+		if ( $content_dir && \str_contains( $file, $content_dir ) ) {
 			return \wp_delete_file_from_directory( $file, $content_dir );
 		}
-		if ( false !== \strpos( $file, $wp_dir ) ) {
+		if ( $wp_dir && \str_contains( $file, $wp_dir ) ) {
 			return \wp_delete_file_from_directory( $file, $wp_dir );
 		}
 		return \wp_delete_file( $file );

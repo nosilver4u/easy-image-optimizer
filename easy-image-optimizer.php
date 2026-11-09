@@ -15,7 +15,7 @@ Description: Easily speed up your website to better connect with your visitors. 
 Author: Exactly WWW
 Version: 4.3.8
 Requires at least: 6.9
-Requires PHP: 8.1
+Requires PHP: 8.2
 Author URI: https://ewww.io/
 License: GPLv3
 */

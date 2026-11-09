@@ -137,6 +137,8 @@ final class Plugin extends Base {
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-buffer.php';
 		// Page Parsing class for working with HTML content.
 		require_once EASYIO_PLUGIN_PATH . 'classes/class-page-parser.php';
+		// HTML_Tag class for working with HTML tags.
+		require_once EASYIO_PLUGIN_PATH . 'classes/class-html-tag.php';
 		// Page Settings trait for storing/retrieving page-specific image settings.
 		require_once EASYIO_PLUGIN_PATH . 'classes/trait-page-settings.php';
 		// Lazy Load class for parsing image urls and deferring off-screen images.
@@ -158,7 +160,7 @@ final class Plugin extends Base {
 	 * @access private
 	 */
 	private function php_supported() {
-		if ( defined( 'PHP_VERSION_ID' ) && \PHP_VERSION_ID < 80100 ) {
+		if ( defined( 'PHP_VERSION_ID' ) && \PHP_VERSION_ID < 80200 ) {
 			\add_action( 'network_admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
 			\add_action( 'admin_notices', array( self::$instance, 'unsupported_php_notice' ) );
 			return false;
@@ -185,7 +187,7 @@ final class Plugin extends Base {
 	 * Display a notice that the PHP version is too old.
 	 */
 	public function unsupported_php_notice() {
-		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 8.1 or greater. Newer versions of PHP are faster and more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) . '</a></p></div>';
+		echo '<div id="easyio-warning-php" class="error"><p><a href="https://docs.ewww.io/article/55-upgrading-php" target="_blank" data-beacon-article="5ab2baa6042863478ea7c2ae">' . esc_html__( 'Easy Image Optimizer requires PHP 8.2 or greater. Newer versions of PHP are faster and more secure. If you are unsure how to upgrade to a supported version, ask your webhost for instructions.', 'easy-image-optimizer' ) . '</a></p></div>';
 	}
 
 	/**

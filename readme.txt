@@ -55,6 +55,18 @@ Don't panic, just disable the plugin and [contact us](https://ewww.io/contact-us
 
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/easy-image-optimizer/
 
+= 4.4.0 =
+*Release Date - TBD*
+
+* added: eio_lazy_noscript filter to modify/suppress noscript fall-back elements
+* changed: Add Missing Dimensions no longer fills in height/width if only one dimension is missing
+* fixed: Easy IO skips manually generated srcset attributes with relative URLs
+* fixed: Easy IO only rewrites first background image in a CSS property when parsing internal style elements
+* fixed: regression in Easy IO handling of style attributes causes HTML entities to be double-encoded
+* security: HTML attribute parsing is now stricter and more secure
+* security: further hardening of stored XSS fix, reported by Charles Vosburgh and Intrudify
+* removed: support for PHP 8.1
+
 = 4.3.8 =
 *Release Date - September 1, 2026*
 
